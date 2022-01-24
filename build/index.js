@@ -1,6 +1,6 @@
 (function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.SolrFacetedSearch = f()}})(function(){var define,module,exports;return (function(){function r(e,n,t){function o(i,f){if(!n[i]){if(!e[i]){var c="function"==typeof require&&require;if(!f&&c)return c(i,!0);if(u)return u(i,!0);var a=new Error("Cannot find module '"+i+"'");throw a.code="MODULE_NOT_FOUND",a}var p=n[i]={exports:{}};e[i][0].call(p.exports,function(r){var n=e[i][1][r];return o(n||r)},p,p.exports,r,e,n,t)}return n[i].exports}for(var u="function"==typeof require&&require,i=0;i<t.length;i++)o(t[i]);return o}return r})()({1:[function(_dereq_,module,exports){
 /*!
-  Copyright (c) 2016 Jed Watson.
+  Copyright (c) 2018 Jed Watson.
   Licensed under the MIT License (MIT), see
   http://jedwatson.github.io/classnames
 */
@@ -11,7 +11,7 @@
 
 	var hasOwn = {}.hasOwnProperty;
 
-	function classNames () {
+	function classNames() {
 		var classes = [];
 
 		for (var i = 0; i < arguments.length; i++) {
@@ -23,12 +23,21 @@
 			if (argType === 'string' || argType === 'number') {
 				classes.push(arg);
 			} else if (Array.isArray(arg)) {
-				classes.push(classNames.apply(null, arg));
-			} else if (argType === 'object') {
-				for (var key in arg) {
-					if (hasOwn.call(arg, key) && arg[key]) {
-						classes.push(key);
+				if (arg.length) {
+					var inner = classNames.apply(null, arg);
+					if (inner) {
+						classes.push(inner);
 					}
+				}
+			} else if (argType === 'object') {
+				if (arg.toString === Object.prototype.toString) {
+					for (var key in arg) {
+						if (hasOwn.call(arg, key) && arg[key]) {
+							classes.push(key);
+						}
+					}
+				} else {
+					classes.push(arg.toString());
 				}
 			}
 		}
@@ -37,6 +46,7 @@
 	}
 
 	if (typeof module !== 'undefined' && module.exports) {
+		classNames.default = classNames;
 		module.exports = classNames;
 	} else if (typeof define === 'function' && typeof define.amd === 'object' && define.amd) {
 		// register as 'classnames', consistent with npm package name
@@ -49,213 +59,7 @@
 }());
 
 },{}],2:[function(_dereq_,module,exports){
-"use strict";
-
-/**
- * Copyright (c) 2013-present, Facebook, Inc.
- *
- * This source code is licensed under the MIT license found in the
- * LICENSE file in the root directory of this source tree.
- *
- * 
- */
-
-function makeEmptyFunction(arg) {
-  return function () {
-    return arg;
-  };
-}
-
-/**
- * This function accepts and discards inputs; it has no side effects. This is
- * primarily useful idiomatically for overridable function endpoints which
- * always need to be callable, since JS lacks a null-call idiom ala Cocoa.
- */
-var emptyFunction = function emptyFunction() {};
-
-emptyFunction.thatReturns = makeEmptyFunction;
-emptyFunction.thatReturnsFalse = makeEmptyFunction(false);
-emptyFunction.thatReturnsTrue = makeEmptyFunction(true);
-emptyFunction.thatReturnsNull = makeEmptyFunction(null);
-emptyFunction.thatReturnsThis = function () {
-  return this;
-};
-emptyFunction.thatReturnsArgument = function (arg) {
-  return arg;
-};
-
-module.exports = emptyFunction;
-},{}],3:[function(_dereq_,module,exports){
-(function (process){
-/**
- * Copyright (c) 2013-present, Facebook, Inc.
- *
- * This source code is licensed under the MIT license found in the
- * LICENSE file in the root directory of this source tree.
- *
- */
-
-'use strict';
-
-/**
- * Use invariant() to assert state which your program assumes to be true.
- *
- * Provide sprintf-style format (only %s is supported) and arguments
- * to provide information about what broke and what you were
- * expecting.
- *
- * The invariant message will be stripped in production, but the invariant
- * will remain to ensure logic does not differ in production.
- */
-
-var validateFormat = function validateFormat(format) {};
-
-if (process.env.NODE_ENV !== 'production') {
-  validateFormat = function validateFormat(format) {
-    if (format === undefined) {
-      throw new Error('invariant requires an error message argument');
-    }
-  };
-}
-
-function invariant(condition, format, a, b, c, d, e, f) {
-  validateFormat(format);
-
-  if (!condition) {
-    var error;
-    if (format === undefined) {
-      error = new Error('Minified exception occurred; use the non-minified dev environment ' + 'for the full error message and additional helpful warnings.');
-    } else {
-      var args = [a, b, c, d, e, f];
-      var argIndex = 0;
-      error = new Error(format.replace(/%s/g, function () {
-        return args[argIndex++];
-      }));
-      error.name = 'Invariant Violation';
-    }
-
-    error.framesToPop = 1; // we don't care about invariant's own frame
-    throw error;
-  }
-}
-
-module.exports = invariant;
-}).call(this,_dereq_('_process'))
-},{"_process":16}],4:[function(_dereq_,module,exports){
-(function (process){
-/**
- * Copyright (c) 2014-present, Facebook, Inc.
- *
- * This source code is licensed under the MIT license found in the
- * LICENSE file in the root directory of this source tree.
- *
- */
-
-'use strict';
-
-var emptyFunction = _dereq_('./emptyFunction');
-
-/**
- * Similar to invariant but only logs a warning if the condition is not met.
- * This can be used to log issues in development environments in critical
- * paths. Removing the logging code for production environments will keep the
- * same logic and follow the same code paths.
- */
-
-var warning = emptyFunction;
-
-if (process.env.NODE_ENV !== 'production') {
-  var printWarning = function printWarning(format) {
-    for (var _len = arguments.length, args = Array(_len > 1 ? _len - 1 : 0), _key = 1; _key < _len; _key++) {
-      args[_key - 1] = arguments[_key];
-    }
-
-    var argIndex = 0;
-    var message = 'Warning: ' + format.replace(/%s/g, function () {
-      return args[argIndex++];
-    });
-    if (typeof console !== 'undefined') {
-      console.error(message);
-    }
-    try {
-      // --- Welcome to debugging React ---
-      // This error was thrown as a convenience so that you can use this stack
-      // to find the callsite that caused this warning to fire.
-      throw new Error(message);
-    } catch (x) {}
-  };
-
-  warning = function warning(condition, format) {
-    if (format === undefined) {
-      throw new Error('`warning(condition, format, ...args)` requires a warning ' + 'message argument');
-    }
-
-    if (format.indexOf('Failed Composite propType: ') === 0) {
-      return; // Ignore CompositeComponent proptype check.
-    }
-
-    if (!condition) {
-      for (var _len2 = arguments.length, args = Array(_len2 > 2 ? _len2 - 2 : 0), _key2 = 2; _key2 < _len2; _key2++) {
-        args[_key2 - 2] = arguments[_key2];
-      }
-
-      printWarning.apply(undefined, [format].concat(args));
-    }
-  };
-}
-
-module.exports = warning;
-}).call(this,_dereq_('_process'))
-},{"./emptyFunction":2,"_process":16}],5:[function(_dereq_,module,exports){
-var isFunction = _dereq_('is-function')
-
-module.exports = forEach
-
-var toString = Object.prototype.toString
-var hasOwnProperty = Object.prototype.hasOwnProperty
-
-function forEach(list, iterator, context) {
-    if (!isFunction(iterator)) {
-        throw new TypeError('iterator must be a function')
-    }
-
-    if (arguments.length < 3) {
-        context = this
-    }
-    
-    if (toString.call(list) === '[object Array]')
-        forEachArray(list, iterator, context)
-    else if (typeof list === 'string')
-        forEachString(list, iterator, context)
-    else
-        forEachObject(list, iterator, context)
-}
-
-function forEachArray(array, iterator, context) {
-    for (var i = 0, len = array.length; i < len; i++) {
-        if (hasOwnProperty.call(array, i)) {
-            iterator.call(context, array[i], i, array)
-        }
-    }
-}
-
-function forEachString(string, iterator, context) {
-    for (var i = 0, len = string.length; i < len; i++) {
-        // no such thing as a sparse string.
-        iterator.call(context, string.charAt(i), i, string)
-    }
-}
-
-function forEachObject(object, iterator, context) {
-    for (var k in object) {
-        if (hasOwnProperty.call(object, k)) {
-            iterator.call(context, object[k], k, object)
-        }
-    }
-}
-
-},{"is-function":7}],6:[function(_dereq_,module,exports){
-(function (global){
+(function (global){(function (){
 var win;
 
 if (typeof window !== "undefined") {
@@ -270,13 +74,16 @@ if (typeof window !== "undefined") {
 
 module.exports = win;
 
-}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],7:[function(_dereq_,module,exports){
+}).call(this)}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
+},{}],3:[function(_dereq_,module,exports){
 module.exports = isFunction
 
 var toString = Object.prototype.toString
 
 function isFunction (fn) {
+  if (!fn) {
+    return false
+  }
   var string = toString.call(fn)
   return string === '[object Function]' ||
     (typeof fn === 'function' && string !== '[object RegExp]') ||
@@ -288,7 +95,7 @@ function isFunction (fn) {
       fn === window.prompt))
 };
 
-},{}],8:[function(_dereq_,module,exports){
+},{}],4:[function(_dereq_,module,exports){
 /*
 object-assign
 (c) Sindre Sorhus
@@ -380,9 +187,10 @@ module.exports = shouldUseNative() ? Object.assign : function (target, source) {
 	return to;
 };
 
-},{}],9:[function(_dereq_,module,exports){
-var trim = _dereq_('trim')
-  , forEach = _dereq_('for-each')
+},{}],5:[function(_dereq_,module,exports){
+var trim = function(string) {
+  return string.replace(/^\s+|\s+$/g, '');
+}
   , isArray = function(arg) {
       return Object.prototype.toString.call(arg) === '[object Array]';
     }
@@ -393,757 +201,27 @@ module.exports = function (headers) {
 
   var result = {}
 
-  forEach(
-      trim(headers).split('\n')
-    , function (row) {
-        var index = row.indexOf(':')
-          , key = trim(row.slice(0, index)).toLowerCase()
-          , value = trim(row.slice(index + 1))
+  var headersArr = trim(headers).split('\n')
 
-        if (typeof(result[key]) === 'undefined') {
-          result[key] = value
-        } else if (isArray(result[key])) {
-          result[key].push(value)
-        } else {
-          result[key] = [ result[key], value ]
-        }
-      }
-  )
+  for (var i = 0; i < headersArr.length; i++) {
+    var row = headersArr[i]
+    var index = row.indexOf(':')
+    , key = trim(row.slice(0, index)).toLowerCase()
+    , value = trim(row.slice(index + 1))
+
+    if (typeof(result[key]) === 'undefined') {
+      result[key] = value
+    } else if (isArray(result[key])) {
+      result[key].push(value)
+    } else {
+      result[key] = [ result[key], value ]
+    }
+  }
 
   return result
 }
-},{"for-each":5,"trim":15}],10:[function(_dereq_,module,exports){
-(function (process){
-/**
- * Copyright (c) 2013-present, Facebook, Inc.
- *
- * This source code is licensed under the MIT license found in the
- * LICENSE file in the root directory of this source tree.
- */
 
-'use strict';
-
-if (process.env.NODE_ENV !== 'production') {
-  var invariant = _dereq_('fbjs/lib/invariant');
-  var warning = _dereq_('fbjs/lib/warning');
-  var ReactPropTypesSecret = _dereq_('./lib/ReactPropTypesSecret');
-  var loggedTypeFailures = {};
-}
-
-/**
- * Assert that the values match with the type specs.
- * Error messages are memorized and will only be shown once.
- *
- * @param {object} typeSpecs Map of name to a ReactPropType
- * @param {object} values Runtime values that need to be type-checked
- * @param {string} location e.g. "prop", "context", "child context"
- * @param {string} componentName Name of the component for error messages.
- * @param {?Function} getStack Returns the component stack.
- * @private
- */
-function checkPropTypes(typeSpecs, values, location, componentName, getStack) {
-  if (process.env.NODE_ENV !== 'production') {
-    for (var typeSpecName in typeSpecs) {
-      if (typeSpecs.hasOwnProperty(typeSpecName)) {
-        var error;
-        // Prop type validation may throw. In case they do, we don't want to
-        // fail the render phase where it didn't fail before. So we log it.
-        // After these have been cleaned up, we'll let them throw.
-        try {
-          // This is intentionally an invariant that gets caught. It's the same
-          // behavior as without this statement except with a better message.
-          invariant(typeof typeSpecs[typeSpecName] === 'function', '%s: %s type `%s` is invalid; it must be a function, usually from ' + 'the `prop-types` package, but received `%s`.', componentName || 'React class', location, typeSpecName, typeof typeSpecs[typeSpecName]);
-          error = typeSpecs[typeSpecName](values, typeSpecName, componentName, location, null, ReactPropTypesSecret);
-        } catch (ex) {
-          error = ex;
-        }
-        warning(!error || error instanceof Error, '%s: type specification of %s `%s` is invalid; the type checker ' + 'function must return `null` or an `Error` but returned a %s. ' + 'You may have forgotten to pass an argument to the type checker ' + 'creator (arrayOf, instanceOf, objectOf, oneOf, oneOfType, and ' + 'shape all require an argument).', componentName || 'React class', location, typeSpecName, typeof error);
-        if (error instanceof Error && !(error.message in loggedTypeFailures)) {
-          // Only monitor this failure once because there tends to be a lot of the
-          // same error.
-          loggedTypeFailures[error.message] = true;
-
-          var stack = getStack ? getStack() : '';
-
-          warning(false, 'Failed %s type: %s%s', location, error.message, stack != null ? stack : '');
-        }
-      }
-    }
-  }
-}
-
-module.exports = checkPropTypes;
-
-}).call(this,_dereq_('_process'))
-},{"./lib/ReactPropTypesSecret":14,"_process":16,"fbjs/lib/invariant":3,"fbjs/lib/warning":4}],11:[function(_dereq_,module,exports){
-/**
- * Copyright (c) 2013-present, Facebook, Inc.
- *
- * This source code is licensed under the MIT license found in the
- * LICENSE file in the root directory of this source tree.
- */
-
-'use strict';
-
-var emptyFunction = _dereq_('fbjs/lib/emptyFunction');
-var invariant = _dereq_('fbjs/lib/invariant');
-var ReactPropTypesSecret = _dereq_('./lib/ReactPropTypesSecret');
-
-module.exports = function() {
-  function shim(props, propName, componentName, location, propFullName, secret) {
-    if (secret === ReactPropTypesSecret) {
-      // It is still safe when called from React.
-      return;
-    }
-    invariant(
-      false,
-      'Calling PropTypes validators directly is not supported by the `prop-types` package. ' +
-      'Use PropTypes.checkPropTypes() to call them. ' +
-      'Read more at http://fb.me/use-check-prop-types'
-    );
-  };
-  shim.isRequired = shim;
-  function getShim() {
-    return shim;
-  };
-  // Important!
-  // Keep this list in sync with production version in `./factoryWithTypeCheckers.js`.
-  var ReactPropTypes = {
-    array: shim,
-    bool: shim,
-    func: shim,
-    number: shim,
-    object: shim,
-    string: shim,
-    symbol: shim,
-
-    any: shim,
-    arrayOf: getShim,
-    element: shim,
-    instanceOf: getShim,
-    node: shim,
-    objectOf: getShim,
-    oneOf: getShim,
-    oneOfType: getShim,
-    shape: getShim,
-    exact: getShim
-  };
-
-  ReactPropTypes.checkPropTypes = emptyFunction;
-  ReactPropTypes.PropTypes = ReactPropTypes;
-
-  return ReactPropTypes;
-};
-
-},{"./lib/ReactPropTypesSecret":14,"fbjs/lib/emptyFunction":2,"fbjs/lib/invariant":3}],12:[function(_dereq_,module,exports){
-(function (process){
-/**
- * Copyright (c) 2013-present, Facebook, Inc.
- *
- * This source code is licensed under the MIT license found in the
- * LICENSE file in the root directory of this source tree.
- */
-
-'use strict';
-
-var emptyFunction = _dereq_('fbjs/lib/emptyFunction');
-var invariant = _dereq_('fbjs/lib/invariant');
-var warning = _dereq_('fbjs/lib/warning');
-var assign = _dereq_('object-assign');
-
-var ReactPropTypesSecret = _dereq_('./lib/ReactPropTypesSecret');
-var checkPropTypes = _dereq_('./checkPropTypes');
-
-module.exports = function(isValidElement, throwOnDirectAccess) {
-  /* global Symbol */
-  var ITERATOR_SYMBOL = typeof Symbol === 'function' && Symbol.iterator;
-  var FAUX_ITERATOR_SYMBOL = '@@iterator'; // Before Symbol spec.
-
-  /**
-   * Returns the iterator method function contained on the iterable object.
-   *
-   * Be sure to invoke the function with the iterable as context:
-   *
-   *     var iteratorFn = getIteratorFn(myIterable);
-   *     if (iteratorFn) {
-   *       var iterator = iteratorFn.call(myIterable);
-   *       ...
-   *     }
-   *
-   * @param {?object} maybeIterable
-   * @return {?function}
-   */
-  function getIteratorFn(maybeIterable) {
-    var iteratorFn = maybeIterable && (ITERATOR_SYMBOL && maybeIterable[ITERATOR_SYMBOL] || maybeIterable[FAUX_ITERATOR_SYMBOL]);
-    if (typeof iteratorFn === 'function') {
-      return iteratorFn;
-    }
-  }
-
-  /**
-   * Collection of methods that allow declaration and validation of props that are
-   * supplied to React components. Example usage:
-   *
-   *   var Props = require('ReactPropTypes');
-   *   var MyArticle = React.createClass({
-   *     propTypes: {
-   *       // An optional string prop named "description".
-   *       description: Props.string,
-   *
-   *       // A required enum prop named "category".
-   *       category: Props.oneOf(['News','Photos']).isRequired,
-   *
-   *       // A prop named "dialog" that requires an instance of Dialog.
-   *       dialog: Props.instanceOf(Dialog).isRequired
-   *     },
-   *     render: function() { ... }
-   *   });
-   *
-   * A more formal specification of how these methods are used:
-   *
-   *   type := array|bool|func|object|number|string|oneOf([...])|instanceOf(...)
-   *   decl := ReactPropTypes.{type}(.isRequired)?
-   *
-   * Each and every declaration produces a function with the same signature. This
-   * allows the creation of custom validation functions. For example:
-   *
-   *  var MyLink = React.createClass({
-   *    propTypes: {
-   *      // An optional string or URI prop named "href".
-   *      href: function(props, propName, componentName) {
-   *        var propValue = props[propName];
-   *        if (propValue != null && typeof propValue !== 'string' &&
-   *            !(propValue instanceof URI)) {
-   *          return new Error(
-   *            'Expected a string or an URI for ' + propName + ' in ' +
-   *            componentName
-   *          );
-   *        }
-   *      }
-   *    },
-   *    render: function() {...}
-   *  });
-   *
-   * @internal
-   */
-
-  var ANONYMOUS = '<<anonymous>>';
-
-  // Important!
-  // Keep this list in sync with production version in `./factoryWithThrowingShims.js`.
-  var ReactPropTypes = {
-    array: createPrimitiveTypeChecker('array'),
-    bool: createPrimitiveTypeChecker('boolean'),
-    func: createPrimitiveTypeChecker('function'),
-    number: createPrimitiveTypeChecker('number'),
-    object: createPrimitiveTypeChecker('object'),
-    string: createPrimitiveTypeChecker('string'),
-    symbol: createPrimitiveTypeChecker('symbol'),
-
-    any: createAnyTypeChecker(),
-    arrayOf: createArrayOfTypeChecker,
-    element: createElementTypeChecker(),
-    instanceOf: createInstanceTypeChecker,
-    node: createNodeChecker(),
-    objectOf: createObjectOfTypeChecker,
-    oneOf: createEnumTypeChecker,
-    oneOfType: createUnionTypeChecker,
-    shape: createShapeTypeChecker,
-    exact: createStrictShapeTypeChecker,
-  };
-
-  /**
-   * inlined Object.is polyfill to avoid requiring consumers ship their own
-   * https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/is
-   */
-  /*eslint-disable no-self-compare*/
-  function is(x, y) {
-    // SameValue algorithm
-    if (x === y) {
-      // Steps 1-5, 7-10
-      // Steps 6.b-6.e: +0 != -0
-      return x !== 0 || 1 / x === 1 / y;
-    } else {
-      // Step 6.a: NaN == NaN
-      return x !== x && y !== y;
-    }
-  }
-  /*eslint-enable no-self-compare*/
-
-  /**
-   * We use an Error-like object for backward compatibility as people may call
-   * PropTypes directly and inspect their output. However, we don't use real
-   * Errors anymore. We don't inspect their stack anyway, and creating them
-   * is prohibitively expensive if they are created too often, such as what
-   * happens in oneOfType() for any type before the one that matched.
-   */
-  function PropTypeError(message) {
-    this.message = message;
-    this.stack = '';
-  }
-  // Make `instanceof Error` still work for returned errors.
-  PropTypeError.prototype = Error.prototype;
-
-  function createChainableTypeChecker(validate) {
-    if (process.env.NODE_ENV !== 'production') {
-      var manualPropTypeCallCache = {};
-      var manualPropTypeWarningCount = 0;
-    }
-    function checkType(isRequired, props, propName, componentName, location, propFullName, secret) {
-      componentName = componentName || ANONYMOUS;
-      propFullName = propFullName || propName;
-
-      if (secret !== ReactPropTypesSecret) {
-        if (throwOnDirectAccess) {
-          // New behavior only for users of `prop-types` package
-          invariant(
-            false,
-            'Calling PropTypes validators directly is not supported by the `prop-types` package. ' +
-            'Use `PropTypes.checkPropTypes()` to call them. ' +
-            'Read more at http://fb.me/use-check-prop-types'
-          );
-        } else if (process.env.NODE_ENV !== 'production' && typeof console !== 'undefined') {
-          // Old behavior for people using React.PropTypes
-          var cacheKey = componentName + ':' + propName;
-          if (
-            !manualPropTypeCallCache[cacheKey] &&
-            // Avoid spamming the console because they are often not actionable except for lib authors
-            manualPropTypeWarningCount < 3
-          ) {
-            warning(
-              false,
-              'You are manually calling a React.PropTypes validation ' +
-              'function for the `%s` prop on `%s`. This is deprecated ' +
-              'and will throw in the standalone `prop-types` package. ' +
-              'You may be seeing this warning due to a third-party PropTypes ' +
-              'library. See https://fb.me/react-warning-dont-call-proptypes ' + 'for details.',
-              propFullName,
-              componentName
-            );
-            manualPropTypeCallCache[cacheKey] = true;
-            manualPropTypeWarningCount++;
-          }
-        }
-      }
-      if (props[propName] == null) {
-        if (isRequired) {
-          if (props[propName] === null) {
-            return new PropTypeError('The ' + location + ' `' + propFullName + '` is marked as required ' + ('in `' + componentName + '`, but its value is `null`.'));
-          }
-          return new PropTypeError('The ' + location + ' `' + propFullName + '` is marked as required in ' + ('`' + componentName + '`, but its value is `undefined`.'));
-        }
-        return null;
-      } else {
-        return validate(props, propName, componentName, location, propFullName);
-      }
-    }
-
-    var chainedCheckType = checkType.bind(null, false);
-    chainedCheckType.isRequired = checkType.bind(null, true);
-
-    return chainedCheckType;
-  }
-
-  function createPrimitiveTypeChecker(expectedType) {
-    function validate(props, propName, componentName, location, propFullName, secret) {
-      var propValue = props[propName];
-      var propType = getPropType(propValue);
-      if (propType !== expectedType) {
-        // `propValue` being instance of, say, date/regexp, pass the 'object'
-        // check, but we can offer a more precise error message here rather than
-        // 'of type `object`'.
-        var preciseType = getPreciseType(propValue);
-
-        return new PropTypeError('Invalid ' + location + ' `' + propFullName + '` of type ' + ('`' + preciseType + '` supplied to `' + componentName + '`, expected ') + ('`' + expectedType + '`.'));
-      }
-      return null;
-    }
-    return createChainableTypeChecker(validate);
-  }
-
-  function createAnyTypeChecker() {
-    return createChainableTypeChecker(emptyFunction.thatReturnsNull);
-  }
-
-  function createArrayOfTypeChecker(typeChecker) {
-    function validate(props, propName, componentName, location, propFullName) {
-      if (typeof typeChecker !== 'function') {
-        return new PropTypeError('Property `' + propFullName + '` of component `' + componentName + '` has invalid PropType notation inside arrayOf.');
-      }
-      var propValue = props[propName];
-      if (!Array.isArray(propValue)) {
-        var propType = getPropType(propValue);
-        return new PropTypeError('Invalid ' + location + ' `' + propFullName + '` of type ' + ('`' + propType + '` supplied to `' + componentName + '`, expected an array.'));
-      }
-      for (var i = 0; i < propValue.length; i++) {
-        var error = typeChecker(propValue, i, componentName, location, propFullName + '[' + i + ']', ReactPropTypesSecret);
-        if (error instanceof Error) {
-          return error;
-        }
-      }
-      return null;
-    }
-    return createChainableTypeChecker(validate);
-  }
-
-  function createElementTypeChecker() {
-    function validate(props, propName, componentName, location, propFullName) {
-      var propValue = props[propName];
-      if (!isValidElement(propValue)) {
-        var propType = getPropType(propValue);
-        return new PropTypeError('Invalid ' + location + ' `' + propFullName + '` of type ' + ('`' + propType + '` supplied to `' + componentName + '`, expected a single ReactElement.'));
-      }
-      return null;
-    }
-    return createChainableTypeChecker(validate);
-  }
-
-  function createInstanceTypeChecker(expectedClass) {
-    function validate(props, propName, componentName, location, propFullName) {
-      if (!(props[propName] instanceof expectedClass)) {
-        var expectedClassName = expectedClass.name || ANONYMOUS;
-        var actualClassName = getClassName(props[propName]);
-        return new PropTypeError('Invalid ' + location + ' `' + propFullName + '` of type ' + ('`' + actualClassName + '` supplied to `' + componentName + '`, expected ') + ('instance of `' + expectedClassName + '`.'));
-      }
-      return null;
-    }
-    return createChainableTypeChecker(validate);
-  }
-
-  function createEnumTypeChecker(expectedValues) {
-    if (!Array.isArray(expectedValues)) {
-      process.env.NODE_ENV !== 'production' ? warning(false, 'Invalid argument supplied to oneOf, expected an instance of array.') : void 0;
-      return emptyFunction.thatReturnsNull;
-    }
-
-    function validate(props, propName, componentName, location, propFullName) {
-      var propValue = props[propName];
-      for (var i = 0; i < expectedValues.length; i++) {
-        if (is(propValue, expectedValues[i])) {
-          return null;
-        }
-      }
-
-      var valuesString = JSON.stringify(expectedValues);
-      return new PropTypeError('Invalid ' + location + ' `' + propFullName + '` of value `' + propValue + '` ' + ('supplied to `' + componentName + '`, expected one of ' + valuesString + '.'));
-    }
-    return createChainableTypeChecker(validate);
-  }
-
-  function createObjectOfTypeChecker(typeChecker) {
-    function validate(props, propName, componentName, location, propFullName) {
-      if (typeof typeChecker !== 'function') {
-        return new PropTypeError('Property `' + propFullName + '` of component `' + componentName + '` has invalid PropType notation inside objectOf.');
-      }
-      var propValue = props[propName];
-      var propType = getPropType(propValue);
-      if (propType !== 'object') {
-        return new PropTypeError('Invalid ' + location + ' `' + propFullName + '` of type ' + ('`' + propType + '` supplied to `' + componentName + '`, expected an object.'));
-      }
-      for (var key in propValue) {
-        if (propValue.hasOwnProperty(key)) {
-          var error = typeChecker(propValue, key, componentName, location, propFullName + '.' + key, ReactPropTypesSecret);
-          if (error instanceof Error) {
-            return error;
-          }
-        }
-      }
-      return null;
-    }
-    return createChainableTypeChecker(validate);
-  }
-
-  function createUnionTypeChecker(arrayOfTypeCheckers) {
-    if (!Array.isArray(arrayOfTypeCheckers)) {
-      process.env.NODE_ENV !== 'production' ? warning(false, 'Invalid argument supplied to oneOfType, expected an instance of array.') : void 0;
-      return emptyFunction.thatReturnsNull;
-    }
-
-    for (var i = 0; i < arrayOfTypeCheckers.length; i++) {
-      var checker = arrayOfTypeCheckers[i];
-      if (typeof checker !== 'function') {
-        warning(
-          false,
-          'Invalid argument supplied to oneOfType. Expected an array of check functions, but ' +
-          'received %s at index %s.',
-          getPostfixForTypeWarning(checker),
-          i
-        );
-        return emptyFunction.thatReturnsNull;
-      }
-    }
-
-    function validate(props, propName, componentName, location, propFullName) {
-      for (var i = 0; i < arrayOfTypeCheckers.length; i++) {
-        var checker = arrayOfTypeCheckers[i];
-        if (checker(props, propName, componentName, location, propFullName, ReactPropTypesSecret) == null) {
-          return null;
-        }
-      }
-
-      return new PropTypeError('Invalid ' + location + ' `' + propFullName + '` supplied to ' + ('`' + componentName + '`.'));
-    }
-    return createChainableTypeChecker(validate);
-  }
-
-  function createNodeChecker() {
-    function validate(props, propName, componentName, location, propFullName) {
-      if (!isNode(props[propName])) {
-        return new PropTypeError('Invalid ' + location + ' `' + propFullName + '` supplied to ' + ('`' + componentName + '`, expected a ReactNode.'));
-      }
-      return null;
-    }
-    return createChainableTypeChecker(validate);
-  }
-
-  function createShapeTypeChecker(shapeTypes) {
-    function validate(props, propName, componentName, location, propFullName) {
-      var propValue = props[propName];
-      var propType = getPropType(propValue);
-      if (propType !== 'object') {
-        return new PropTypeError('Invalid ' + location + ' `' + propFullName + '` of type `' + propType + '` ' + ('supplied to `' + componentName + '`, expected `object`.'));
-      }
-      for (var key in shapeTypes) {
-        var checker = shapeTypes[key];
-        if (!checker) {
-          continue;
-        }
-        var error = checker(propValue, key, componentName, location, propFullName + '.' + key, ReactPropTypesSecret);
-        if (error) {
-          return error;
-        }
-      }
-      return null;
-    }
-    return createChainableTypeChecker(validate);
-  }
-
-  function createStrictShapeTypeChecker(shapeTypes) {
-    function validate(props, propName, componentName, location, propFullName) {
-      var propValue = props[propName];
-      var propType = getPropType(propValue);
-      if (propType !== 'object') {
-        return new PropTypeError('Invalid ' + location + ' `' + propFullName + '` of type `' + propType + '` ' + ('supplied to `' + componentName + '`, expected `object`.'));
-      }
-      // We need to check all keys in case some are required but missing from
-      // props.
-      var allKeys = assign({}, props[propName], shapeTypes);
-      for (var key in allKeys) {
-        var checker = shapeTypes[key];
-        if (!checker) {
-          return new PropTypeError(
-            'Invalid ' + location + ' `' + propFullName + '` key `' + key + '` supplied to `' + componentName + '`.' +
-            '\nBad object: ' + JSON.stringify(props[propName], null, '  ') +
-            '\nValid keys: ' +  JSON.stringify(Object.keys(shapeTypes), null, '  ')
-          );
-        }
-        var error = checker(propValue, key, componentName, location, propFullName + '.' + key, ReactPropTypesSecret);
-        if (error) {
-          return error;
-        }
-      }
-      return null;
-    }
-
-    return createChainableTypeChecker(validate);
-  }
-
-  function isNode(propValue) {
-    switch (typeof propValue) {
-      case 'number':
-      case 'string':
-      case 'undefined':
-        return true;
-      case 'boolean':
-        return !propValue;
-      case 'object':
-        if (Array.isArray(propValue)) {
-          return propValue.every(isNode);
-        }
-        if (propValue === null || isValidElement(propValue)) {
-          return true;
-        }
-
-        var iteratorFn = getIteratorFn(propValue);
-        if (iteratorFn) {
-          var iterator = iteratorFn.call(propValue);
-          var step;
-          if (iteratorFn !== propValue.entries) {
-            while (!(step = iterator.next()).done) {
-              if (!isNode(step.value)) {
-                return false;
-              }
-            }
-          } else {
-            // Iterator will provide entry [k,v] tuples rather than values.
-            while (!(step = iterator.next()).done) {
-              var entry = step.value;
-              if (entry) {
-                if (!isNode(entry[1])) {
-                  return false;
-                }
-              }
-            }
-          }
-        } else {
-          return false;
-        }
-
-        return true;
-      default:
-        return false;
-    }
-  }
-
-  function isSymbol(propType, propValue) {
-    // Native Symbol.
-    if (propType === 'symbol') {
-      return true;
-    }
-
-    // 19.4.3.5 Symbol.prototype[@@toStringTag] === 'Symbol'
-    if (propValue['@@toStringTag'] === 'Symbol') {
-      return true;
-    }
-
-    // Fallback for non-spec compliant Symbols which are polyfilled.
-    if (typeof Symbol === 'function' && propValue instanceof Symbol) {
-      return true;
-    }
-
-    return false;
-  }
-
-  // Equivalent of `typeof` but with special handling for array and regexp.
-  function getPropType(propValue) {
-    var propType = typeof propValue;
-    if (Array.isArray(propValue)) {
-      return 'array';
-    }
-    if (propValue instanceof RegExp) {
-      // Old webkits (at least until Android 4.0) return 'function' rather than
-      // 'object' for typeof a RegExp. We'll normalize this here so that /bla/
-      // passes PropTypes.object.
-      return 'object';
-    }
-    if (isSymbol(propType, propValue)) {
-      return 'symbol';
-    }
-    return propType;
-  }
-
-  // This handles more types than `getPropType`. Only used for error messages.
-  // See `createPrimitiveTypeChecker`.
-  function getPreciseType(propValue) {
-    if (typeof propValue === 'undefined' || propValue === null) {
-      return '' + propValue;
-    }
-    var propType = getPropType(propValue);
-    if (propType === 'object') {
-      if (propValue instanceof Date) {
-        return 'date';
-      } else if (propValue instanceof RegExp) {
-        return 'regexp';
-      }
-    }
-    return propType;
-  }
-
-  // Returns a string that is postfixed to a warning about an invalid type.
-  // For example, "undefined" or "of type array"
-  function getPostfixForTypeWarning(value) {
-    var type = getPreciseType(value);
-    switch (type) {
-      case 'array':
-      case 'object':
-        return 'an ' + type;
-      case 'boolean':
-      case 'date':
-      case 'regexp':
-        return 'a ' + type;
-      default:
-        return type;
-    }
-  }
-
-  // Returns class name of the object, if any.
-  function getClassName(propValue) {
-    if (!propValue.constructor || !propValue.constructor.name) {
-      return ANONYMOUS;
-    }
-    return propValue.constructor.name;
-  }
-
-  ReactPropTypes.checkPropTypes = checkPropTypes;
-  ReactPropTypes.PropTypes = ReactPropTypes;
-
-  return ReactPropTypes;
-};
-
-}).call(this,_dereq_('_process'))
-},{"./checkPropTypes":10,"./lib/ReactPropTypesSecret":14,"_process":16,"fbjs/lib/emptyFunction":2,"fbjs/lib/invariant":3,"fbjs/lib/warning":4,"object-assign":8}],13:[function(_dereq_,module,exports){
-(function (process){
-/**
- * Copyright (c) 2013-present, Facebook, Inc.
- *
- * This source code is licensed under the MIT license found in the
- * LICENSE file in the root directory of this source tree.
- */
-
-if (process.env.NODE_ENV !== 'production') {
-  var REACT_ELEMENT_TYPE = (typeof Symbol === 'function' &&
-    Symbol.for &&
-    Symbol.for('react.element')) ||
-    0xeac7;
-
-  var isValidElement = function(object) {
-    return typeof object === 'object' &&
-      object !== null &&
-      object.$$typeof === REACT_ELEMENT_TYPE;
-  };
-
-  // By explicitly using `prop-types` you are opting into new development behavior.
-  // http://fb.me/prop-types-in-prod
-  var throwOnDirectAccess = true;
-  module.exports = _dereq_('./factoryWithTypeCheckers')(isValidElement, throwOnDirectAccess);
-} else {
-  // By explicitly using `prop-types` you are opting into new production behavior.
-  // http://fb.me/prop-types-in-prod
-  module.exports = _dereq_('./factoryWithThrowingShims')();
-}
-
-}).call(this,_dereq_('_process'))
-},{"./factoryWithThrowingShims":11,"./factoryWithTypeCheckers":12,"_process":16}],14:[function(_dereq_,module,exports){
-/**
- * Copyright (c) 2013-present, Facebook, Inc.
- *
- * This source code is licensed under the MIT license found in the
- * LICENSE file in the root directory of this source tree.
- */
-
-'use strict';
-
-var ReactPropTypesSecret = 'SECRET_DO_NOT_PASS_THIS_OR_YOU_WILL_BE_FIRED';
-
-module.exports = ReactPropTypesSecret;
-
-},{}],15:[function(_dereq_,module,exports){
-
-exports = module.exports = trim;
-
-function trim(str){
-  return str.replace(/^\s*|\s*$/g, '');
-}
-
-exports.left = function(str){
-  return str.replace(/^\s*/, '');
-};
-
-exports.right = function(str){
-  return str.replace(/\s*$/, '');
-};
-
-},{}],16:[function(_dereq_,module,exports){
+},{}],6:[function(_dereq_,module,exports){
 // shim for using process in browser
 var process = module.exports = {};
 
@@ -1329,7 +407,1048 @@ process.chdir = function (dir) {
 };
 process.umask = function() { return 0; };
 
-},{}],17:[function(_dereq_,module,exports){
+},{}],7:[function(_dereq_,module,exports){
+(function (process){(function (){
+/**
+ * Copyright (c) 2013-present, Facebook, Inc.
+ *
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
+
+'use strict';
+
+var printWarning = function() {};
+
+if (process.env.NODE_ENV !== 'production') {
+  var ReactPropTypesSecret = _dereq_('./lib/ReactPropTypesSecret');
+  var loggedTypeFailures = {};
+  var has = _dereq_('./lib/has');
+
+  printWarning = function(text) {
+    var message = 'Warning: ' + text;
+    if (typeof console !== 'undefined') {
+      console.error(message);
+    }
+    try {
+      // --- Welcome to debugging React ---
+      // This error was thrown as a convenience so that you can use this stack
+      // to find the callsite that caused this warning to fire.
+      throw new Error(message);
+    } catch (x) { /**/ }
+  };
+}
+
+/**
+ * Assert that the values match with the type specs.
+ * Error messages are memorized and will only be shown once.
+ *
+ * @param {object} typeSpecs Map of name to a ReactPropType
+ * @param {object} values Runtime values that need to be type-checked
+ * @param {string} location e.g. "prop", "context", "child context"
+ * @param {string} componentName Name of the component for error messages.
+ * @param {?Function} getStack Returns the component stack.
+ * @private
+ */
+function checkPropTypes(typeSpecs, values, location, componentName, getStack) {
+  if (process.env.NODE_ENV !== 'production') {
+    for (var typeSpecName in typeSpecs) {
+      if (has(typeSpecs, typeSpecName)) {
+        var error;
+        // Prop type validation may throw. In case they do, we don't want to
+        // fail the render phase where it didn't fail before. So we log it.
+        // After these have been cleaned up, we'll let them throw.
+        try {
+          // This is intentionally an invariant that gets caught. It's the same
+          // behavior as without this statement except with a better message.
+          if (typeof typeSpecs[typeSpecName] !== 'function') {
+            var err = Error(
+              (componentName || 'React class') + ': ' + location + ' type `' + typeSpecName + '` is invalid; ' +
+              'it must be a function, usually from the `prop-types` package, but received `' + typeof typeSpecs[typeSpecName] + '`.' +
+              'This often happens because of typos such as `PropTypes.function` instead of `PropTypes.func`.'
+            );
+            err.name = 'Invariant Violation';
+            throw err;
+          }
+          error = typeSpecs[typeSpecName](values, typeSpecName, componentName, location, null, ReactPropTypesSecret);
+        } catch (ex) {
+          error = ex;
+        }
+        if (error && !(error instanceof Error)) {
+          printWarning(
+            (componentName || 'React class') + ': type specification of ' +
+            location + ' `' + typeSpecName + '` is invalid; the type checker ' +
+            'function must return `null` or an `Error` but returned a ' + typeof error + '. ' +
+            'You may have forgotten to pass an argument to the type checker ' +
+            'creator (arrayOf, instanceOf, objectOf, oneOf, oneOfType, and ' +
+            'shape all require an argument).'
+          );
+        }
+        if (error instanceof Error && !(error.message in loggedTypeFailures)) {
+          // Only monitor this failure once because there tends to be a lot of the
+          // same error.
+          loggedTypeFailures[error.message] = true;
+
+          var stack = getStack ? getStack() : '';
+
+          printWarning(
+            'Failed ' + location + ' type: ' + error.message + (stack != null ? stack : '')
+          );
+        }
+      }
+    }
+  }
+}
+
+/**
+ * Resets warning cache when testing.
+ *
+ * @private
+ */
+checkPropTypes.resetWarningCache = function() {
+  if (process.env.NODE_ENV !== 'production') {
+    loggedTypeFailures = {};
+  }
+}
+
+module.exports = checkPropTypes;
+
+}).call(this)}).call(this,_dereq_('_process'))
+},{"./lib/ReactPropTypesSecret":11,"./lib/has":12,"_process":6}],8:[function(_dereq_,module,exports){
+/**
+ * Copyright (c) 2013-present, Facebook, Inc.
+ *
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
+
+'use strict';
+
+var ReactPropTypesSecret = _dereq_('./lib/ReactPropTypesSecret');
+
+function emptyFunction() {}
+function emptyFunctionWithReset() {}
+emptyFunctionWithReset.resetWarningCache = emptyFunction;
+
+module.exports = function() {
+  function shim(props, propName, componentName, location, propFullName, secret) {
+    if (secret === ReactPropTypesSecret) {
+      // It is still safe when called from React.
+      return;
+    }
+    var err = new Error(
+      'Calling PropTypes validators directly is not supported by the `prop-types` package. ' +
+      'Use PropTypes.checkPropTypes() to call them. ' +
+      'Read more at http://fb.me/use-check-prop-types'
+    );
+    err.name = 'Invariant Violation';
+    throw err;
+  };
+  shim.isRequired = shim;
+  function getShim() {
+    return shim;
+  };
+  // Important!
+  // Keep this list in sync with production version in `./factoryWithTypeCheckers.js`.
+  var ReactPropTypes = {
+    array: shim,
+    bigint: shim,
+    bool: shim,
+    func: shim,
+    number: shim,
+    object: shim,
+    string: shim,
+    symbol: shim,
+
+    any: shim,
+    arrayOf: getShim,
+    element: shim,
+    elementType: shim,
+    instanceOf: getShim,
+    node: shim,
+    objectOf: getShim,
+    oneOf: getShim,
+    oneOfType: getShim,
+    shape: getShim,
+    exact: getShim,
+
+    checkPropTypes: emptyFunctionWithReset,
+    resetWarningCache: emptyFunction
+  };
+
+  ReactPropTypes.PropTypes = ReactPropTypes;
+
+  return ReactPropTypes;
+};
+
+},{"./lib/ReactPropTypesSecret":11}],9:[function(_dereq_,module,exports){
+(function (process){(function (){
+/**
+ * Copyright (c) 2013-present, Facebook, Inc.
+ *
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
+
+'use strict';
+
+var ReactIs = _dereq_('react-is');
+var assign = _dereq_('object-assign');
+
+var ReactPropTypesSecret = _dereq_('./lib/ReactPropTypesSecret');
+var has = _dereq_('./lib/has');
+var checkPropTypes = _dereq_('./checkPropTypes');
+
+var printWarning = function() {};
+
+if (process.env.NODE_ENV !== 'production') {
+  printWarning = function(text) {
+    var message = 'Warning: ' + text;
+    if (typeof console !== 'undefined') {
+      console.error(message);
+    }
+    try {
+      // --- Welcome to debugging React ---
+      // This error was thrown as a convenience so that you can use this stack
+      // to find the callsite that caused this warning to fire.
+      throw new Error(message);
+    } catch (x) {}
+  };
+}
+
+function emptyFunctionThatReturnsNull() {
+  return null;
+}
+
+module.exports = function(isValidElement, throwOnDirectAccess) {
+  /* global Symbol */
+  var ITERATOR_SYMBOL = typeof Symbol === 'function' && Symbol.iterator;
+  var FAUX_ITERATOR_SYMBOL = '@@iterator'; // Before Symbol spec.
+
+  /**
+   * Returns the iterator method function contained on the iterable object.
+   *
+   * Be sure to invoke the function with the iterable as context:
+   *
+   *     var iteratorFn = getIteratorFn(myIterable);
+   *     if (iteratorFn) {
+   *       var iterator = iteratorFn.call(myIterable);
+   *       ...
+   *     }
+   *
+   * @param {?object} maybeIterable
+   * @return {?function}
+   */
+  function getIteratorFn(maybeIterable) {
+    var iteratorFn = maybeIterable && (ITERATOR_SYMBOL && maybeIterable[ITERATOR_SYMBOL] || maybeIterable[FAUX_ITERATOR_SYMBOL]);
+    if (typeof iteratorFn === 'function') {
+      return iteratorFn;
+    }
+  }
+
+  /**
+   * Collection of methods that allow declaration and validation of props that are
+   * supplied to React components. Example usage:
+   *
+   *   var Props = require('ReactPropTypes');
+   *   var MyArticle = React.createClass({
+   *     propTypes: {
+   *       // An optional string prop named "description".
+   *       description: Props.string,
+   *
+   *       // A required enum prop named "category".
+   *       category: Props.oneOf(['News','Photos']).isRequired,
+   *
+   *       // A prop named "dialog" that requires an instance of Dialog.
+   *       dialog: Props.instanceOf(Dialog).isRequired
+   *     },
+   *     render: function() { ... }
+   *   });
+   *
+   * A more formal specification of how these methods are used:
+   *
+   *   type := array|bool|func|object|number|string|oneOf([...])|instanceOf(...)
+   *   decl := ReactPropTypes.{type}(.isRequired)?
+   *
+   * Each and every declaration produces a function with the same signature. This
+   * allows the creation of custom validation functions. For example:
+   *
+   *  var MyLink = React.createClass({
+   *    propTypes: {
+   *      // An optional string or URI prop named "href".
+   *      href: function(props, propName, componentName) {
+   *        var propValue = props[propName];
+   *        if (propValue != null && typeof propValue !== 'string' &&
+   *            !(propValue instanceof URI)) {
+   *          return new Error(
+   *            'Expected a string or an URI for ' + propName + ' in ' +
+   *            componentName
+   *          );
+   *        }
+   *      }
+   *    },
+   *    render: function() {...}
+   *  });
+   *
+   * @internal
+   */
+
+  var ANONYMOUS = '<<anonymous>>';
+
+  // Important!
+  // Keep this list in sync with production version in `./factoryWithThrowingShims.js`.
+  var ReactPropTypes = {
+    array: createPrimitiveTypeChecker('array'),
+    bigint: createPrimitiveTypeChecker('bigint'),
+    bool: createPrimitiveTypeChecker('boolean'),
+    func: createPrimitiveTypeChecker('function'),
+    number: createPrimitiveTypeChecker('number'),
+    object: createPrimitiveTypeChecker('object'),
+    string: createPrimitiveTypeChecker('string'),
+    symbol: createPrimitiveTypeChecker('symbol'),
+
+    any: createAnyTypeChecker(),
+    arrayOf: createArrayOfTypeChecker,
+    element: createElementTypeChecker(),
+    elementType: createElementTypeTypeChecker(),
+    instanceOf: createInstanceTypeChecker,
+    node: createNodeChecker(),
+    objectOf: createObjectOfTypeChecker,
+    oneOf: createEnumTypeChecker,
+    oneOfType: createUnionTypeChecker,
+    shape: createShapeTypeChecker,
+    exact: createStrictShapeTypeChecker,
+  };
+
+  /**
+   * inlined Object.is polyfill to avoid requiring consumers ship their own
+   * https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/is
+   */
+  /*eslint-disable no-self-compare*/
+  function is(x, y) {
+    // SameValue algorithm
+    if (x === y) {
+      // Steps 1-5, 7-10
+      // Steps 6.b-6.e: +0 != -0
+      return x !== 0 || 1 / x === 1 / y;
+    } else {
+      // Step 6.a: NaN == NaN
+      return x !== x && y !== y;
+    }
+  }
+  /*eslint-enable no-self-compare*/
+
+  /**
+   * We use an Error-like object for backward compatibility as people may call
+   * PropTypes directly and inspect their output. However, we don't use real
+   * Errors anymore. We don't inspect their stack anyway, and creating them
+   * is prohibitively expensive if they are created too often, such as what
+   * happens in oneOfType() for any type before the one that matched.
+   */
+  function PropTypeError(message, data) {
+    this.message = message;
+    this.data = data && typeof data === 'object' ? data: {};
+    this.stack = '';
+  }
+  // Make `instanceof Error` still work for returned errors.
+  PropTypeError.prototype = Error.prototype;
+
+  function createChainableTypeChecker(validate) {
+    if (process.env.NODE_ENV !== 'production') {
+      var manualPropTypeCallCache = {};
+      var manualPropTypeWarningCount = 0;
+    }
+    function checkType(isRequired, props, propName, componentName, location, propFullName, secret) {
+      componentName = componentName || ANONYMOUS;
+      propFullName = propFullName || propName;
+
+      if (secret !== ReactPropTypesSecret) {
+        if (throwOnDirectAccess) {
+          // New behavior only for users of `prop-types` package
+          var err = new Error(
+            'Calling PropTypes validators directly is not supported by the `prop-types` package. ' +
+            'Use `PropTypes.checkPropTypes()` to call them. ' +
+            'Read more at http://fb.me/use-check-prop-types'
+          );
+          err.name = 'Invariant Violation';
+          throw err;
+        } else if (process.env.NODE_ENV !== 'production' && typeof console !== 'undefined') {
+          // Old behavior for people using React.PropTypes
+          var cacheKey = componentName + ':' + propName;
+          if (
+            !manualPropTypeCallCache[cacheKey] &&
+            // Avoid spamming the console because they are often not actionable except for lib authors
+            manualPropTypeWarningCount < 3
+          ) {
+            printWarning(
+              'You are manually calling a React.PropTypes validation ' +
+              'function for the `' + propFullName + '` prop on `' + componentName + '`. This is deprecated ' +
+              'and will throw in the standalone `prop-types` package. ' +
+              'You may be seeing this warning due to a third-party PropTypes ' +
+              'library. See https://fb.me/react-warning-dont-call-proptypes ' + 'for details.'
+            );
+            manualPropTypeCallCache[cacheKey] = true;
+            manualPropTypeWarningCount++;
+          }
+        }
+      }
+      if (props[propName] == null) {
+        if (isRequired) {
+          if (props[propName] === null) {
+            return new PropTypeError('The ' + location + ' `' + propFullName + '` is marked as required ' + ('in `' + componentName + '`, but its value is `null`.'));
+          }
+          return new PropTypeError('The ' + location + ' `' + propFullName + '` is marked as required in ' + ('`' + componentName + '`, but its value is `undefined`.'));
+        }
+        return null;
+      } else {
+        return validate(props, propName, componentName, location, propFullName);
+      }
+    }
+
+    var chainedCheckType = checkType.bind(null, false);
+    chainedCheckType.isRequired = checkType.bind(null, true);
+
+    return chainedCheckType;
+  }
+
+  function createPrimitiveTypeChecker(expectedType) {
+    function validate(props, propName, componentName, location, propFullName, secret) {
+      var propValue = props[propName];
+      var propType = getPropType(propValue);
+      if (propType !== expectedType) {
+        // `propValue` being instance of, say, date/regexp, pass the 'object'
+        // check, but we can offer a more precise error message here rather than
+        // 'of type `object`'.
+        var preciseType = getPreciseType(propValue);
+
+        return new PropTypeError(
+          'Invalid ' + location + ' `' + propFullName + '` of type ' + ('`' + preciseType + '` supplied to `' + componentName + '`, expected ') + ('`' + expectedType + '`.'),
+          {expectedType: expectedType}
+        );
+      }
+      return null;
+    }
+    return createChainableTypeChecker(validate);
+  }
+
+  function createAnyTypeChecker() {
+    return createChainableTypeChecker(emptyFunctionThatReturnsNull);
+  }
+
+  function createArrayOfTypeChecker(typeChecker) {
+    function validate(props, propName, componentName, location, propFullName) {
+      if (typeof typeChecker !== 'function') {
+        return new PropTypeError('Property `' + propFullName + '` of component `' + componentName + '` has invalid PropType notation inside arrayOf.');
+      }
+      var propValue = props[propName];
+      if (!Array.isArray(propValue)) {
+        var propType = getPropType(propValue);
+        return new PropTypeError('Invalid ' + location + ' `' + propFullName + '` of type ' + ('`' + propType + '` supplied to `' + componentName + '`, expected an array.'));
+      }
+      for (var i = 0; i < propValue.length; i++) {
+        var error = typeChecker(propValue, i, componentName, location, propFullName + '[' + i + ']', ReactPropTypesSecret);
+        if (error instanceof Error) {
+          return error;
+        }
+      }
+      return null;
+    }
+    return createChainableTypeChecker(validate);
+  }
+
+  function createElementTypeChecker() {
+    function validate(props, propName, componentName, location, propFullName) {
+      var propValue = props[propName];
+      if (!isValidElement(propValue)) {
+        var propType = getPropType(propValue);
+        return new PropTypeError('Invalid ' + location + ' `' + propFullName + '` of type ' + ('`' + propType + '` supplied to `' + componentName + '`, expected a single ReactElement.'));
+      }
+      return null;
+    }
+    return createChainableTypeChecker(validate);
+  }
+
+  function createElementTypeTypeChecker() {
+    function validate(props, propName, componentName, location, propFullName) {
+      var propValue = props[propName];
+      if (!ReactIs.isValidElementType(propValue)) {
+        var propType = getPropType(propValue);
+        return new PropTypeError('Invalid ' + location + ' `' + propFullName + '` of type ' + ('`' + propType + '` supplied to `' + componentName + '`, expected a single ReactElement type.'));
+      }
+      return null;
+    }
+    return createChainableTypeChecker(validate);
+  }
+
+  function createInstanceTypeChecker(expectedClass) {
+    function validate(props, propName, componentName, location, propFullName) {
+      if (!(props[propName] instanceof expectedClass)) {
+        var expectedClassName = expectedClass.name || ANONYMOUS;
+        var actualClassName = getClassName(props[propName]);
+        return new PropTypeError('Invalid ' + location + ' `' + propFullName + '` of type ' + ('`' + actualClassName + '` supplied to `' + componentName + '`, expected ') + ('instance of `' + expectedClassName + '`.'));
+      }
+      return null;
+    }
+    return createChainableTypeChecker(validate);
+  }
+
+  function createEnumTypeChecker(expectedValues) {
+    if (!Array.isArray(expectedValues)) {
+      if (process.env.NODE_ENV !== 'production') {
+        if (arguments.length > 1) {
+          printWarning(
+            'Invalid arguments supplied to oneOf, expected an array, got ' + arguments.length + ' arguments. ' +
+            'A common mistake is to write oneOf(x, y, z) instead of oneOf([x, y, z]).'
+          );
+        } else {
+          printWarning('Invalid argument supplied to oneOf, expected an array.');
+        }
+      }
+      return emptyFunctionThatReturnsNull;
+    }
+
+    function validate(props, propName, componentName, location, propFullName) {
+      var propValue = props[propName];
+      for (var i = 0; i < expectedValues.length; i++) {
+        if (is(propValue, expectedValues[i])) {
+          return null;
+        }
+      }
+
+      var valuesString = JSON.stringify(expectedValues, function replacer(key, value) {
+        var type = getPreciseType(value);
+        if (type === 'symbol') {
+          return String(value);
+        }
+        return value;
+      });
+      return new PropTypeError('Invalid ' + location + ' `' + propFullName + '` of value `' + String(propValue) + '` ' + ('supplied to `' + componentName + '`, expected one of ' + valuesString + '.'));
+    }
+    return createChainableTypeChecker(validate);
+  }
+
+  function createObjectOfTypeChecker(typeChecker) {
+    function validate(props, propName, componentName, location, propFullName) {
+      if (typeof typeChecker !== 'function') {
+        return new PropTypeError('Property `' + propFullName + '` of component `' + componentName + '` has invalid PropType notation inside objectOf.');
+      }
+      var propValue = props[propName];
+      var propType = getPropType(propValue);
+      if (propType !== 'object') {
+        return new PropTypeError('Invalid ' + location + ' `' + propFullName + '` of type ' + ('`' + propType + '` supplied to `' + componentName + '`, expected an object.'));
+      }
+      for (var key in propValue) {
+        if (has(propValue, key)) {
+          var error = typeChecker(propValue, key, componentName, location, propFullName + '.' + key, ReactPropTypesSecret);
+          if (error instanceof Error) {
+            return error;
+          }
+        }
+      }
+      return null;
+    }
+    return createChainableTypeChecker(validate);
+  }
+
+  function createUnionTypeChecker(arrayOfTypeCheckers) {
+    if (!Array.isArray(arrayOfTypeCheckers)) {
+      process.env.NODE_ENV !== 'production' ? printWarning('Invalid argument supplied to oneOfType, expected an instance of array.') : void 0;
+      return emptyFunctionThatReturnsNull;
+    }
+
+    for (var i = 0; i < arrayOfTypeCheckers.length; i++) {
+      var checker = arrayOfTypeCheckers[i];
+      if (typeof checker !== 'function') {
+        printWarning(
+          'Invalid argument supplied to oneOfType. Expected an array of check functions, but ' +
+          'received ' + getPostfixForTypeWarning(checker) + ' at index ' + i + '.'
+        );
+        return emptyFunctionThatReturnsNull;
+      }
+    }
+
+    function validate(props, propName, componentName, location, propFullName) {
+      var expectedTypes = [];
+      for (var i = 0; i < arrayOfTypeCheckers.length; i++) {
+        var checker = arrayOfTypeCheckers[i];
+        var checkerResult = checker(props, propName, componentName, location, propFullName, ReactPropTypesSecret);
+        if (checkerResult == null) {
+          return null;
+        }
+        if (checkerResult.data && has(checkerResult.data, 'expectedType')) {
+          expectedTypes.push(checkerResult.data.expectedType);
+        }
+      }
+      var expectedTypesMessage = (expectedTypes.length > 0) ? ', expected one of type [' + expectedTypes.join(', ') + ']': '';
+      return new PropTypeError('Invalid ' + location + ' `' + propFullName + '` supplied to ' + ('`' + componentName + '`' + expectedTypesMessage + '.'));
+    }
+    return createChainableTypeChecker(validate);
+  }
+
+  function createNodeChecker() {
+    function validate(props, propName, componentName, location, propFullName) {
+      if (!isNode(props[propName])) {
+        return new PropTypeError('Invalid ' + location + ' `' + propFullName + '` supplied to ' + ('`' + componentName + '`, expected a ReactNode.'));
+      }
+      return null;
+    }
+    return createChainableTypeChecker(validate);
+  }
+
+  function invalidValidatorError(componentName, location, propFullName, key, type) {
+    return new PropTypeError(
+      (componentName || 'React class') + ': ' + location + ' type `' + propFullName + '.' + key + '` is invalid; ' +
+      'it must be a function, usually from the `prop-types` package, but received `' + type + '`.'
+    );
+  }
+
+  function createShapeTypeChecker(shapeTypes) {
+    function validate(props, propName, componentName, location, propFullName) {
+      var propValue = props[propName];
+      var propType = getPropType(propValue);
+      if (propType !== 'object') {
+        return new PropTypeError('Invalid ' + location + ' `' + propFullName + '` of type `' + propType + '` ' + ('supplied to `' + componentName + '`, expected `object`.'));
+      }
+      for (var key in shapeTypes) {
+        var checker = shapeTypes[key];
+        if (typeof checker !== 'function') {
+          return invalidValidatorError(componentName, location, propFullName, key, getPreciseType(checker));
+        }
+        var error = checker(propValue, key, componentName, location, propFullName + '.' + key, ReactPropTypesSecret);
+        if (error) {
+          return error;
+        }
+      }
+      return null;
+    }
+    return createChainableTypeChecker(validate);
+  }
+
+  function createStrictShapeTypeChecker(shapeTypes) {
+    function validate(props, propName, componentName, location, propFullName) {
+      var propValue = props[propName];
+      var propType = getPropType(propValue);
+      if (propType !== 'object') {
+        return new PropTypeError('Invalid ' + location + ' `' + propFullName + '` of type `' + propType + '` ' + ('supplied to `' + componentName + '`, expected `object`.'));
+      }
+      // We need to check all keys in case some are required but missing from props.
+      var allKeys = assign({}, props[propName], shapeTypes);
+      for (var key in allKeys) {
+        var checker = shapeTypes[key];
+        if (has(shapeTypes, key) && typeof checker !== 'function') {
+          return invalidValidatorError(componentName, location, propFullName, key, getPreciseType(checker));
+        }
+        if (!checker) {
+          return new PropTypeError(
+            'Invalid ' + location + ' `' + propFullName + '` key `' + key + '` supplied to `' + componentName + '`.' +
+            '\nBad object: ' + JSON.stringify(props[propName], null, '  ') +
+            '\nValid keys: ' + JSON.stringify(Object.keys(shapeTypes), null, '  ')
+          );
+        }
+        var error = checker(propValue, key, componentName, location, propFullName + '.' + key, ReactPropTypesSecret);
+        if (error) {
+          return error;
+        }
+      }
+      return null;
+    }
+
+    return createChainableTypeChecker(validate);
+  }
+
+  function isNode(propValue) {
+    switch (typeof propValue) {
+      case 'number':
+      case 'string':
+      case 'undefined':
+        return true;
+      case 'boolean':
+        return !propValue;
+      case 'object':
+        if (Array.isArray(propValue)) {
+          return propValue.every(isNode);
+        }
+        if (propValue === null || isValidElement(propValue)) {
+          return true;
+        }
+
+        var iteratorFn = getIteratorFn(propValue);
+        if (iteratorFn) {
+          var iterator = iteratorFn.call(propValue);
+          var step;
+          if (iteratorFn !== propValue.entries) {
+            while (!(step = iterator.next()).done) {
+              if (!isNode(step.value)) {
+                return false;
+              }
+            }
+          } else {
+            // Iterator will provide entry [k,v] tuples rather than values.
+            while (!(step = iterator.next()).done) {
+              var entry = step.value;
+              if (entry) {
+                if (!isNode(entry[1])) {
+                  return false;
+                }
+              }
+            }
+          }
+        } else {
+          return false;
+        }
+
+        return true;
+      default:
+        return false;
+    }
+  }
+
+  function isSymbol(propType, propValue) {
+    // Native Symbol.
+    if (propType === 'symbol') {
+      return true;
+    }
+
+    // falsy value can't be a Symbol
+    if (!propValue) {
+      return false;
+    }
+
+    // 19.4.3.5 Symbol.prototype[@@toStringTag] === 'Symbol'
+    if (propValue['@@toStringTag'] === 'Symbol') {
+      return true;
+    }
+
+    // Fallback for non-spec compliant Symbols which are polyfilled.
+    if (typeof Symbol === 'function' && propValue instanceof Symbol) {
+      return true;
+    }
+
+    return false;
+  }
+
+  // Equivalent of `typeof` but with special handling for array and regexp.
+  function getPropType(propValue) {
+    var propType = typeof propValue;
+    if (Array.isArray(propValue)) {
+      return 'array';
+    }
+    if (propValue instanceof RegExp) {
+      // Old webkits (at least until Android 4.0) return 'function' rather than
+      // 'object' for typeof a RegExp. We'll normalize this here so that /bla/
+      // passes PropTypes.object.
+      return 'object';
+    }
+    if (isSymbol(propType, propValue)) {
+      return 'symbol';
+    }
+    return propType;
+  }
+
+  // This handles more types than `getPropType`. Only used for error messages.
+  // See `createPrimitiveTypeChecker`.
+  function getPreciseType(propValue) {
+    if (typeof propValue === 'undefined' || propValue === null) {
+      return '' + propValue;
+    }
+    var propType = getPropType(propValue);
+    if (propType === 'object') {
+      if (propValue instanceof Date) {
+        return 'date';
+      } else if (propValue instanceof RegExp) {
+        return 'regexp';
+      }
+    }
+    return propType;
+  }
+
+  // Returns a string that is postfixed to a warning about an invalid type.
+  // For example, "undefined" or "of type array"
+  function getPostfixForTypeWarning(value) {
+    var type = getPreciseType(value);
+    switch (type) {
+      case 'array':
+      case 'object':
+        return 'an ' + type;
+      case 'boolean':
+      case 'date':
+      case 'regexp':
+        return 'a ' + type;
+      default:
+        return type;
+    }
+  }
+
+  // Returns class name of the object, if any.
+  function getClassName(propValue) {
+    if (!propValue.constructor || !propValue.constructor.name) {
+      return ANONYMOUS;
+    }
+    return propValue.constructor.name;
+  }
+
+  ReactPropTypes.checkPropTypes = checkPropTypes;
+  ReactPropTypes.resetWarningCache = checkPropTypes.resetWarningCache;
+  ReactPropTypes.PropTypes = ReactPropTypes;
+
+  return ReactPropTypes;
+};
+
+}).call(this)}).call(this,_dereq_('_process'))
+},{"./checkPropTypes":7,"./lib/ReactPropTypesSecret":11,"./lib/has":12,"_process":6,"object-assign":4,"react-is":15}],10:[function(_dereq_,module,exports){
+(function (process){(function (){
+/**
+ * Copyright (c) 2013-present, Facebook, Inc.
+ *
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
+
+if (process.env.NODE_ENV !== 'production') {
+  var ReactIs = _dereq_('react-is');
+
+  // By explicitly using `prop-types` you are opting into new development behavior.
+  // http://fb.me/prop-types-in-prod
+  var throwOnDirectAccess = true;
+  module.exports = _dereq_('./factoryWithTypeCheckers')(ReactIs.isElement, throwOnDirectAccess);
+} else {
+  // By explicitly using `prop-types` you are opting into new production behavior.
+  // http://fb.me/prop-types-in-prod
+  module.exports = _dereq_('./factoryWithThrowingShims')();
+}
+
+}).call(this)}).call(this,_dereq_('_process'))
+},{"./factoryWithThrowingShims":8,"./factoryWithTypeCheckers":9,"_process":6,"react-is":15}],11:[function(_dereq_,module,exports){
+/**
+ * Copyright (c) 2013-present, Facebook, Inc.
+ *
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
+
+'use strict';
+
+var ReactPropTypesSecret = 'SECRET_DO_NOT_PASS_THIS_OR_YOU_WILL_BE_FIRED';
+
+module.exports = ReactPropTypesSecret;
+
+},{}],12:[function(_dereq_,module,exports){
+module.exports = Function.call.bind(Object.prototype.hasOwnProperty);
+
+},{}],13:[function(_dereq_,module,exports){
+(function (process){(function (){
+/** @license React v16.13.1
+ * react-is.development.js
+ *
+ * Copyright (c) Facebook, Inc. and its affiliates.
+ *
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
+
+'use strict';
+
+
+
+if (process.env.NODE_ENV !== "production") {
+  (function() {
+'use strict';
+
+// The Symbol used to tag the ReactElement-like types. If there is no native Symbol
+// nor polyfill, then a plain number is used for performance.
+var hasSymbol = typeof Symbol === 'function' && Symbol.for;
+var REACT_ELEMENT_TYPE = hasSymbol ? Symbol.for('react.element') : 0xeac7;
+var REACT_PORTAL_TYPE = hasSymbol ? Symbol.for('react.portal') : 0xeaca;
+var REACT_FRAGMENT_TYPE = hasSymbol ? Symbol.for('react.fragment') : 0xeacb;
+var REACT_STRICT_MODE_TYPE = hasSymbol ? Symbol.for('react.strict_mode') : 0xeacc;
+var REACT_PROFILER_TYPE = hasSymbol ? Symbol.for('react.profiler') : 0xead2;
+var REACT_PROVIDER_TYPE = hasSymbol ? Symbol.for('react.provider') : 0xeacd;
+var REACT_CONTEXT_TYPE = hasSymbol ? Symbol.for('react.context') : 0xeace; // TODO: We don't use AsyncMode or ConcurrentMode anymore. They were temporary
+// (unstable) APIs that have been removed. Can we remove the symbols?
+
+var REACT_ASYNC_MODE_TYPE = hasSymbol ? Symbol.for('react.async_mode') : 0xeacf;
+var REACT_CONCURRENT_MODE_TYPE = hasSymbol ? Symbol.for('react.concurrent_mode') : 0xeacf;
+var REACT_FORWARD_REF_TYPE = hasSymbol ? Symbol.for('react.forward_ref') : 0xead0;
+var REACT_SUSPENSE_TYPE = hasSymbol ? Symbol.for('react.suspense') : 0xead1;
+var REACT_SUSPENSE_LIST_TYPE = hasSymbol ? Symbol.for('react.suspense_list') : 0xead8;
+var REACT_MEMO_TYPE = hasSymbol ? Symbol.for('react.memo') : 0xead3;
+var REACT_LAZY_TYPE = hasSymbol ? Symbol.for('react.lazy') : 0xead4;
+var REACT_BLOCK_TYPE = hasSymbol ? Symbol.for('react.block') : 0xead9;
+var REACT_FUNDAMENTAL_TYPE = hasSymbol ? Symbol.for('react.fundamental') : 0xead5;
+var REACT_RESPONDER_TYPE = hasSymbol ? Symbol.for('react.responder') : 0xead6;
+var REACT_SCOPE_TYPE = hasSymbol ? Symbol.for('react.scope') : 0xead7;
+
+function isValidElementType(type) {
+  return typeof type === 'string' || typeof type === 'function' || // Note: its typeof might be other than 'symbol' or 'number' if it's a polyfill.
+  type === REACT_FRAGMENT_TYPE || type === REACT_CONCURRENT_MODE_TYPE || type === REACT_PROFILER_TYPE || type === REACT_STRICT_MODE_TYPE || type === REACT_SUSPENSE_TYPE || type === REACT_SUSPENSE_LIST_TYPE || typeof type === 'object' && type !== null && (type.$$typeof === REACT_LAZY_TYPE || type.$$typeof === REACT_MEMO_TYPE || type.$$typeof === REACT_PROVIDER_TYPE || type.$$typeof === REACT_CONTEXT_TYPE || type.$$typeof === REACT_FORWARD_REF_TYPE || type.$$typeof === REACT_FUNDAMENTAL_TYPE || type.$$typeof === REACT_RESPONDER_TYPE || type.$$typeof === REACT_SCOPE_TYPE || type.$$typeof === REACT_BLOCK_TYPE);
+}
+
+function typeOf(object) {
+  if (typeof object === 'object' && object !== null) {
+    var $$typeof = object.$$typeof;
+
+    switch ($$typeof) {
+      case REACT_ELEMENT_TYPE:
+        var type = object.type;
+
+        switch (type) {
+          case REACT_ASYNC_MODE_TYPE:
+          case REACT_CONCURRENT_MODE_TYPE:
+          case REACT_FRAGMENT_TYPE:
+          case REACT_PROFILER_TYPE:
+          case REACT_STRICT_MODE_TYPE:
+          case REACT_SUSPENSE_TYPE:
+            return type;
+
+          default:
+            var $$typeofType = type && type.$$typeof;
+
+            switch ($$typeofType) {
+              case REACT_CONTEXT_TYPE:
+              case REACT_FORWARD_REF_TYPE:
+              case REACT_LAZY_TYPE:
+              case REACT_MEMO_TYPE:
+              case REACT_PROVIDER_TYPE:
+                return $$typeofType;
+
+              default:
+                return $$typeof;
+            }
+
+        }
+
+      case REACT_PORTAL_TYPE:
+        return $$typeof;
+    }
+  }
+
+  return undefined;
+} // AsyncMode is deprecated along with isAsyncMode
+
+var AsyncMode = REACT_ASYNC_MODE_TYPE;
+var ConcurrentMode = REACT_CONCURRENT_MODE_TYPE;
+var ContextConsumer = REACT_CONTEXT_TYPE;
+var ContextProvider = REACT_PROVIDER_TYPE;
+var Element = REACT_ELEMENT_TYPE;
+var ForwardRef = REACT_FORWARD_REF_TYPE;
+var Fragment = REACT_FRAGMENT_TYPE;
+var Lazy = REACT_LAZY_TYPE;
+var Memo = REACT_MEMO_TYPE;
+var Portal = REACT_PORTAL_TYPE;
+var Profiler = REACT_PROFILER_TYPE;
+var StrictMode = REACT_STRICT_MODE_TYPE;
+var Suspense = REACT_SUSPENSE_TYPE;
+var hasWarnedAboutDeprecatedIsAsyncMode = false; // AsyncMode should be deprecated
+
+function isAsyncMode(object) {
+  {
+    if (!hasWarnedAboutDeprecatedIsAsyncMode) {
+      hasWarnedAboutDeprecatedIsAsyncMode = true; // Using console['warn'] to evade Babel and ESLint
+
+      console['warn']('The ReactIs.isAsyncMode() alias has been deprecated, ' + 'and will be removed in React 17+. Update your code to use ' + 'ReactIs.isConcurrentMode() instead. It has the exact same API.');
+    }
+  }
+
+  return isConcurrentMode(object) || typeOf(object) === REACT_ASYNC_MODE_TYPE;
+}
+function isConcurrentMode(object) {
+  return typeOf(object) === REACT_CONCURRENT_MODE_TYPE;
+}
+function isContextConsumer(object) {
+  return typeOf(object) === REACT_CONTEXT_TYPE;
+}
+function isContextProvider(object) {
+  return typeOf(object) === REACT_PROVIDER_TYPE;
+}
+function isElement(object) {
+  return typeof object === 'object' && object !== null && object.$$typeof === REACT_ELEMENT_TYPE;
+}
+function isForwardRef(object) {
+  return typeOf(object) === REACT_FORWARD_REF_TYPE;
+}
+function isFragment(object) {
+  return typeOf(object) === REACT_FRAGMENT_TYPE;
+}
+function isLazy(object) {
+  return typeOf(object) === REACT_LAZY_TYPE;
+}
+function isMemo(object) {
+  return typeOf(object) === REACT_MEMO_TYPE;
+}
+function isPortal(object) {
+  return typeOf(object) === REACT_PORTAL_TYPE;
+}
+function isProfiler(object) {
+  return typeOf(object) === REACT_PROFILER_TYPE;
+}
+function isStrictMode(object) {
+  return typeOf(object) === REACT_STRICT_MODE_TYPE;
+}
+function isSuspense(object) {
+  return typeOf(object) === REACT_SUSPENSE_TYPE;
+}
+
+exports.AsyncMode = AsyncMode;
+exports.ConcurrentMode = ConcurrentMode;
+exports.ContextConsumer = ContextConsumer;
+exports.ContextProvider = ContextProvider;
+exports.Element = Element;
+exports.ForwardRef = ForwardRef;
+exports.Fragment = Fragment;
+exports.Lazy = Lazy;
+exports.Memo = Memo;
+exports.Portal = Portal;
+exports.Profiler = Profiler;
+exports.StrictMode = StrictMode;
+exports.Suspense = Suspense;
+exports.isAsyncMode = isAsyncMode;
+exports.isConcurrentMode = isConcurrentMode;
+exports.isContextConsumer = isContextConsumer;
+exports.isContextProvider = isContextProvider;
+exports.isElement = isElement;
+exports.isForwardRef = isForwardRef;
+exports.isFragment = isFragment;
+exports.isLazy = isLazy;
+exports.isMemo = isMemo;
+exports.isPortal = isPortal;
+exports.isProfiler = isProfiler;
+exports.isStrictMode = isStrictMode;
+exports.isSuspense = isSuspense;
+exports.isValidElementType = isValidElementType;
+exports.typeOf = typeOf;
+  })();
+}
+
+}).call(this)}).call(this,_dereq_('_process'))
+},{"_process":6}],14:[function(_dereq_,module,exports){
+/** @license React v16.13.1
+ * react-is.production.min.js
+ *
+ * Copyright (c) Facebook, Inc. and its affiliates.
+ *
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
+
+'use strict';var b="function"===typeof Symbol&&Symbol.for,c=b?Symbol.for("react.element"):60103,d=b?Symbol.for("react.portal"):60106,e=b?Symbol.for("react.fragment"):60107,f=b?Symbol.for("react.strict_mode"):60108,g=b?Symbol.for("react.profiler"):60114,h=b?Symbol.for("react.provider"):60109,k=b?Symbol.for("react.context"):60110,l=b?Symbol.for("react.async_mode"):60111,m=b?Symbol.for("react.concurrent_mode"):60111,n=b?Symbol.for("react.forward_ref"):60112,p=b?Symbol.for("react.suspense"):60113,q=b?
+Symbol.for("react.suspense_list"):60120,r=b?Symbol.for("react.memo"):60115,t=b?Symbol.for("react.lazy"):60116,v=b?Symbol.for("react.block"):60121,w=b?Symbol.for("react.fundamental"):60117,x=b?Symbol.for("react.responder"):60118,y=b?Symbol.for("react.scope"):60119;
+function z(a){if("object"===typeof a&&null!==a){var u=a.$$typeof;switch(u){case c:switch(a=a.type,a){case l:case m:case e:case g:case f:case p:return a;default:switch(a=a&&a.$$typeof,a){case k:case n:case t:case r:case h:return a;default:return u}}case d:return u}}}function A(a){return z(a)===m}exports.AsyncMode=l;exports.ConcurrentMode=m;exports.ContextConsumer=k;exports.ContextProvider=h;exports.Element=c;exports.ForwardRef=n;exports.Fragment=e;exports.Lazy=t;exports.Memo=r;exports.Portal=d;
+exports.Profiler=g;exports.StrictMode=f;exports.Suspense=p;exports.isAsyncMode=function(a){return A(a)||z(a)===l};exports.isConcurrentMode=A;exports.isContextConsumer=function(a){return z(a)===k};exports.isContextProvider=function(a){return z(a)===h};exports.isElement=function(a){return"object"===typeof a&&null!==a&&a.$$typeof===c};exports.isForwardRef=function(a){return z(a)===n};exports.isFragment=function(a){return z(a)===e};exports.isLazy=function(a){return z(a)===t};
+exports.isMemo=function(a){return z(a)===r};exports.isPortal=function(a){return z(a)===d};exports.isProfiler=function(a){return z(a)===g};exports.isStrictMode=function(a){return z(a)===f};exports.isSuspense=function(a){return z(a)===p};
+exports.isValidElementType=function(a){return"string"===typeof a||"function"===typeof a||a===e||a===m||a===g||a===f||a===p||a===q||"object"===typeof a&&null!==a&&(a.$$typeof===t||a.$$typeof===r||a.$$typeof===h||a.$$typeof===k||a.$$typeof===n||a.$$typeof===w||a.$$typeof===x||a.$$typeof===y||a.$$typeof===v)};exports.typeOf=z;
+
+},{}],15:[function(_dereq_,module,exports){
+(function (process){(function (){
+'use strict';
+
+if (process.env.NODE_ENV === 'production') {
+  module.exports = _dereq_('./cjs/react-is.production.min.js');
+} else {
+  module.exports = _dereq_('./cjs/react-is.development.js');
+}
+
+}).call(this)}).call(this,_dereq_('_process'))
+},{"./cjs/react-is.development.js":13,"./cjs/react-is.production.min.js":14,"_process":6}],16:[function(_dereq_,module,exports){
 "use strict";
 var window = _dereq_("global/window")
 var isFunction = _dereq_("is-function")
@@ -1337,6 +1456,8 @@ var parseHeaders = _dereq_("parse-headers")
 var xtend = _dereq_("xtend")
 
 module.exports = createXHR
+// Allow use of default import syntax in TypeScript
+module.exports.default = createXHR;
 createXHR.XMLHttpRequest = window.XMLHttpRequest || noop
 createXHR.XDomainRequest = "withCredentials" in (new createXHR.XMLHttpRequest()) ? createXHR.XMLHttpRequest : window.XDomainRequest
 
@@ -1576,7 +1697,7 @@ function getXml(xhr) {
 
 function noop() {}
 
-},{"global/window":6,"is-function":7,"parse-headers":9,"xtend":18}],18:[function(_dereq_,module,exports){
+},{"global/window":2,"is-function":3,"parse-headers":5,"xtend":17}],17:[function(_dereq_,module,exports){
 module.exports = extend
 
 var hasOwnProperty = Object.prototype.hasOwnProperty;
@@ -1597,51 +1718,80 @@ function extend() {
     return target
 }
 
-},{}],19:[function(_dereq_,module,exports){
+},{}],18:[function(_dereq_,module,exports){
 "use strict";
+
+function _typeof(obj) { "@babel/helpers - typeof"; return _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (obj) { return typeof obj; } : function (obj) { return obj && "function" == typeof Symbol && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }, _typeof(obj); }
 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
+exports["default"] = void 0;
 
-var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
+var _xhr = _interopRequireDefault(_dereq_("xhr"));
 
-var _xhr = _dereq_("xhr");
+var _solrQuery = _interopRequireWildcard(_dereq_("./solr-query"));
 
-var _xhr2 = _interopRequireDefault(_xhr);
+function _getRequireWildcardCache(nodeInterop) { if (typeof WeakMap !== "function") return null; var cacheBabelInterop = new WeakMap(); var cacheNodeInterop = new WeakMap(); return (_getRequireWildcardCache = function _getRequireWildcardCache(nodeInterop) { return nodeInterop ? cacheNodeInterop : cacheBabelInterop; })(nodeInterop); }
 
-var _solrQuery = _dereq_("./solr-query");
+function _interopRequireWildcard(obj, nodeInterop) { if (!nodeInterop && obj && obj.__esModule) { return obj; } if (obj === null || _typeof(obj) !== "object" && typeof obj !== "function") { return { "default": obj }; } var cache = _getRequireWildcardCache(nodeInterop); if (cache && cache.has(obj)) { return cache.get(obj); } var newObj = {}; var hasPropertyDescriptor = Object.defineProperty && Object.getOwnPropertyDescriptor; for (var key in obj) { if (key !== "default" && Object.prototype.hasOwnProperty.call(obj, key)) { var desc = hasPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : null; if (desc && (desc.get || desc.set)) { Object.defineProperty(newObj, key, desc); } else { newObj[key] = obj[key]; } } } newObj["default"] = obj; if (cache) { cache.set(obj, newObj); } return newObj; }
 
-var _solrQuery2 = _interopRequireDefault(_solrQuery);
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
 
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+function ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); enumerableOnly && (symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; })), keys.push.apply(keys, symbols); } return keys; }
+
+function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = null != arguments[i] ? arguments[i] : {}; i % 2 ? ownKeys(Object(source), !0).forEach(function (key) { _defineProperty(target, key, source[key]); }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)) : ownKeys(Object(source)).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } return target; }
+
+function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
 
 var MAX_INT = 2147483647;
+var server = {}; // Determine the necessary options for the XHR request based on settings.
 
-var server = {};
+var getXHROptions = function getXHROptions(query, queryString) {
+  // When using the proxy to query solr, make a GET request
+  // and append the query in the QS.
+  var options = {
+    url: "".concat(query.url, "?").concat(queryString),
+    method: "GET"
+  }; // When querying solr directly, make a POST request
+  // with the query as form data.
+
+  if (query.proxyIsDisabled) {
+    options = {
+      url: query.url,
+      data: queryString,
+      method: "POST",
+      headers: _objectSpread({
+        "Content-type": "application/x-www-form-urlencoded"
+      }, query.userpass ? {
+        "Authorization": "Basic " + query.userpass
+      } : {})
+    };
+  }
+
+  return options;
+};
 
 server.performXhr = function (options, accept) {
   var reject = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : function () {
     console.warn("Undefined reject callback! ");
     (console.trace || function () {})();
   };
-
-  (0, _xhr2.default)(options, accept, reject);
+  (0, _xhr["default"])(options, accept, reject);
 };
 
 server.submitQuery = function (query, callback) {
-  callback({ type: "SET_RESULTS_PENDING" });
-
-  server.performXhr({
-    url: query.url,
-    data: (0, _solrQuery2.default)(query),
-    method: "POST",
-    headers: _extends({
-      "Content-type": "application/x-www-form-urlencoded"
-    }, query.userpass ? { "Authorization": "Basic " + query.userpass } : {})
-  }, function (err, resp) {
+  callback({
+    type: "SET_RESULTS_PENDING"
+  });
+  var queryString = (0, _solrQuery["default"])(query);
+  var options = getXHROptions(query, queryString);
+  server.performXhr(options, function (err, resp) {
     if (resp.statusCode >= 200 && resp.statusCode < 300) {
-      callback({ type: "SET_RESULTS", data: JSON.parse(resp.body) });
+      callback({
+        type: "SET_RESULTS",
+        data: JSON.parse(resp.body)
+      });
     } else {
       console.log("Server error: ", resp.statusCode);
     }
@@ -1649,18 +1799,17 @@ server.submitQuery = function (query, callback) {
 };
 
 server.submitSuggestQuery = function (suggestQuery, callback) {
-  callback({ type: "SET_SUGGESTIONS_PENDING" });
-
-  server.performXhr({
-    url: suggestQuery.url,
-    data: (0, _solrQuery.solrSuggestQuery)(suggestQuery),
-    method: "POST",
-    headers: _extends({
-      "Content-type": "application/x-www-form-urlencoded"
-    }, suggestQuery.userpass ? { "Authorization": "Basic " + suggestQuery.userpass } : {})
-  }, function (err, resp) {
+  callback({
+    type: "SET_SUGGESTIONS_PENDING"
+  });
+  var queryString = (0, _solrQuery.solrSuggestQuery)(suggestQuery);
+  var options = getXHROptions(suggestQuery, queryString);
+  server.performXhr(options, function (err, resp) {
     if (resp.statusCode >= 200 && resp.statusCode < 300) {
-      callback({ type: "SET_SUGGESTIONS", data: JSON.parse(resp.body) });
+      callback({
+        type: "SET_SUGGESTIONS",
+        data: JSON.parse(resp.body)
+      });
     } else {
       console.log("Server error: ", resp.statusCode);
     }
@@ -1670,15 +1819,19 @@ server.submitSuggestQuery = function (suggestQuery, callback) {
 server.fetchCsv = function (query, callback) {
   server.performXhr({
     url: query.url,
-    data: (0, _solrQuery2.default)(_extends({}, query, { rows: MAX_INT }), {
+    data: (0, _solrQuery["default"])(_objectSpread(_objectSpread({}, query), {}, {
+      rows: MAX_INT
+    }), {
       wt: "csv",
       "csv.mv.separator": "|",
       "csv.separator": ";"
     }),
     method: "POST",
-    headers: _extends({
+    headers: _objectSpread({
       "Content-type": "application/x-www-form-urlencoded"
-    }, query.userpass ? { "Authorization": "Basic " + query.userpass } : {})
+    }, query.userpass ? {
+      "Authorization": "Basic " + query.userpass
+    } : {})
   }, function (err, resp) {
     if (resp.statusCode >= 200 && resp.statusCode < 300) {
       callback(resp.body);
@@ -1688,56 +1841,48 @@ server.fetchCsv = function (query, callback) {
   });
 };
 
-exports.default = server;
+var _default = server;
+exports["default"] = _default;
 
-},{"./solr-query":21,"xhr":17}],20:[function(_dereq_,module,exports){
+},{"./solr-query":20,"xhr":16}],19:[function(_dereq_,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.SolrClient = undefined;
+exports.SolrClient = void 0;
 
-var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
+var _query = _interopRequireDefault(_dereq_("../reducers/query"));
 
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-// import { submitQuery, fetchCsv } from "./server";
+var _results = _interopRequireDefault(_dereq_("../reducers/results"));
 
+var _suggestions = _interopRequireDefault(_dereq_("../reducers/suggestions"));
 
-var _query = _dereq_("../reducers/query");
+var _suggestQuery = _interopRequireDefault(_dereq_("../reducers/suggestQuery"));
 
-var _query2 = _interopRequireDefault(_query);
+var _server = _interopRequireDefault(_dereq_("./server"));
 
-var _results = _dereq_("../reducers/results");
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
 
-var _results2 = _interopRequireDefault(_results);
+function ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); enumerableOnly && (symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; })), keys.push.apply(keys, symbols); } return keys; }
 
-var _suggestions = _dereq_("../reducers/suggestions");
+function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = null != arguments[i] ? arguments[i] : {}; i % 2 ? ownKeys(Object(source), !0).forEach(function (key) { _defineProperty(target, key, source[key]); }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)) : ownKeys(Object(source)).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } return target; }
 
-var _suggestions2 = _interopRequireDefault(_suggestions);
-
-var _suggestQuery = _dereq_("../reducers/suggestQuery");
-
-var _suggestQuery2 = _interopRequireDefault(_suggestQuery);
-
-var _server = _dereq_("./server");
-
-var _server2 = _interopRequireDefault(_server);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
-var SolrClient = function () {
+function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
+
+function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); Object.defineProperty(Constructor, "prototype", { writable: false }); return Constructor; }
+
+var SolrClient = /*#__PURE__*/function () {
   function SolrClient(settings) {
     _classCallCheck(this, SolrClient);
 
     var onChange = settings.onChange;
-
-
     this.onChange = onChange;
     delete settings.onChange;
-
     this.state = {
       query: settings,
       results: {
@@ -1747,11 +1892,12 @@ var SolrClient = function () {
         numFound: 0
       }
     };
-    this.settings = _extends({}, settings);
+    this.settings = _objectSpread({}, settings);
 
     if (!this.state.query.pageStrategy) {
       this.state.query.pageStrategy = "paginate";
     }
+
     if (!this.state.query.rows) {
       this.state.query.rows = 20;
     }
@@ -1764,24 +1910,25 @@ var SolrClient = function () {
   _createClass(SolrClient, [{
     key: "setInitialQuery",
     value: function setInitialQuery(queryToMerge) {
-
       var searchFieldsToMerge = queryToMerge.searchFields || [];
       var sortFieldsToMerge = queryToMerge.sortFields || [];
-
       this.state.query.searchFields = this.state.query.searchFields.map(function (sf) {
         return searchFieldsToMerge.map(function (sfm) {
           return sfm.field;
-        }).indexOf(sf.field) > -1 ? _extends({}, sf, { value: searchFieldsToMerge.find(function (sfm) {
+        }).indexOf(sf.field) > -1 ? _objectSpread(_objectSpread({}, sf), {}, {
+          value: searchFieldsToMerge.find(function (sfm) {
             return sfm.field === sf.field;
-          }).value }) : sf;
+          }).value
+        }) : sf;
       });
-
       this.state.query.sortFields = this.state.query.sortFields.map(function (sf) {
         return sortFieldsToMerge.map(function (sfm) {
           return sfm.field;
-        }).indexOf(sf.field) > -1 ? _extends({}, sf, { value: sortFieldsToMerge.find(function (sfm) {
+        }).indexOf(sf.field) > -1 ? _objectSpread(_objectSpread({}, sf), {}, {
+          value: sortFieldsToMerge.find(function (sfm) {
             return sfm.field === sf.field;
-          }).value }) : sf;
+          }).value
+        }) : sf;
       });
     }
   }, {
@@ -1790,13 +1937,13 @@ var SolrClient = function () {
       var query = this.state.query;
       var pageStrategy = query.pageStrategy;
 
-      var payload = _extends({
+      var payload = _objectSpread(_objectSpread({
         type: "SET_QUERY_FIELDS"
-      }, query, { start: pageStrategy === "paginate" ? 0 : null
+      }, query), {}, {
+        start: pageStrategy === "paginate" ? 0 : null
       });
 
-      this.sendQuery((0, _query2.default)(this.state.query, payload));
-
+      this.sendQuery((0, _query["default"])(this.state.query, payload));
       return this;
     }
   }, {
@@ -1805,11 +1952,13 @@ var SolrClient = function () {
       var query = this.state.query;
       var pageStrategy = query.pageStrategy;
 
-      var payload = _extends({
+      var payload = _objectSpread(_objectSpread({
         type: "SET_QUERY_FIELDS"
-      }, this.settings, { start: pageStrategy === "paginate" ? 0 : null
+      }, this.settings), {}, {
+        start: pageStrategy === "paginate" ? 0 : null
       });
-      this.sendQuery((0, _query2.default)(this.state.query, payload));
+
+      this.sendQuery((0, _query["default"])(this.state.query, payload));
     }
   }, {
     key: "sendQuery",
@@ -1817,40 +1966,45 @@ var SolrClient = function () {
       var _this = this;
 
       var query = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : this.state.query;
-
       delete query.cursorMark;
       this.state.query = query;
-      _server2.default.submitQuery(query, function (action) {
-        _this.state.results = (0, _results2.default)(_this.state.results, action);
-        _this.state.query = (0, _query2.default)(_this.state.query, action);
+
+      _server["default"].submitQuery(query, function (action) {
+        _this.state.results = (0, _results["default"])(_this.state.results, action);
+        _this.state.query = (0, _query["default"])(_this.state.query, action);
+
         _this.onChange(_this.state, _this.getHandlers());
       });
     }
   }, {
     key: "setSuggestQuery",
     value: function setSuggestQuery(query, autocomplete, value) {
-      var searchFields = query.searchFields;
-      // Add the current text field value to the searchFields array.
+      var searchFields = query.searchFields; // Add the current text field value to the searchFields array.
 
       var newFields = searchFields.map(function (searchField) {
-        return searchField.field === query.mainQueryField ? _extends({}, searchField, { value: value }) : searchField;
+        return searchField.field === query.mainQueryField ? _objectSpread(_objectSpread({}, searchField), {}, {
+          value: value
+        }) : searchField;
       });
       var payload = {
         type: "SET_SUGGEST_QUERY",
         suggestQuery: {
+          isD7: query.isD7,
           searchFields: newFields,
           sortFields: query.sortFields,
           filters: query.filters,
-          userpass: query.userpass,
+          userpass: autocomplete.userpass || "",
           mainQueryField: query.mainQueryField,
           start: 0,
-          mode: autocomplete.mode,
+          proxyIsDisabled: autocomplete.proxyIsDisabled,
           url: autocomplete.url,
-          rows: autocomplete.suggestionRows,
+          mode: autocomplete.mode,
+          rows: autocomplete.suggestionRows || 5,
+          appendWildcard: autocomplete.appendWildcard || false,
           value: value
         }
       };
-      this.sendSuggestQuery((0, _suggestQuery2.default)(this.state.suggestQuery, payload));
+      this.sendSuggestQuery((0, _suggestQuery["default"])(this.state.suggestQuery, payload));
     }
   }, {
     key: "sendSuggestQuery",
@@ -1858,11 +2012,12 @@ var SolrClient = function () {
       var _this2 = this;
 
       var suggestQuery = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : this.state.suggestQuery;
-
       this.state.suggestQuery = suggestQuery;
-      _server2.default.submitSuggestQuery(suggestQuery, function (action) {
-        _this2.state.suggestions = (0, _suggestions2.default)(_this2.state.suggestions, action);
-        _this2.state.suggestQuery = (0, _suggestQuery2.default)(_this2.state.suggestQuery, action);
+
+      _server["default"].submitSuggestQuery(suggestQuery, function (action) {
+        _this2.state.suggestions = (0, _suggestions["default"])(_this2.state.suggestions, action);
+        _this2.state.suggestQuery = (0, _suggestQuery["default"])(_this2.state.suggestQuery, action);
+
         _this2.onChange(_this2.state, _this2.getHandlers());
       });
     }
@@ -1871,27 +2026,25 @@ var SolrClient = function () {
     value: function sendNextCursorQuery() {
       var _this3 = this;
 
-      _server2.default.submitQuery(this.state.query, function (action) {
-        _this3.state.results = (0, _results2.default)(_this3.state.results, _extends({}, action, {
+      _server["default"].submitQuery(this.state.query, function (action) {
+        _this3.state.results = (0, _results["default"])(_this3.state.results, _objectSpread(_objectSpread({}, action), {}, {
           type: action.type === "SET_RESULTS" ? "SET_NEXT_RESULTS" : action.type
         }));
-        _this3.state.query = (0, _query2.default)(_this3.state.query, action);
+        _this3.state.query = (0, _query["default"])(_this3.state.query, action);
+
         _this3.onChange(_this3.state, _this3.getHandlers());
       });
     }
   }, {
     key: "fetchCsv",
     value: function fetchCsv() {
-      _server2.default.fetchCsv(this.state.query, function (data) {
+      _server["default"].fetchCsv(this.state.query, function (data) {
         var element = document.createElement("a");
         element.setAttribute("href", "data:application/csv;charset=utf-8," + encodeURIComponent(data));
         element.setAttribute("download", "export.csv");
-
         element.style.display = "none";
         document.body.appendChild(element);
-
         element.click();
-
         document.body.removeChild(element);
       });
     }
@@ -1900,33 +2053,40 @@ var SolrClient = function () {
     value: function setCurrentPage(page) {
       var query = this.state.query;
       var rows = query.rows;
-
-      var payload = { type: "SET_START", newStart: page * rows };
-      this.sendQuery((0, _query2.default)(this.state.query, payload));
+      var payload = {
+        type: "SET_START",
+        newStart: page * rows
+      };
+      this.sendQuery((0, _query["default"])(this.state.query, payload));
     }
   }, {
     key: "setGroup",
     value: function setGroup(group) {
-      var payload = { type: "SET_GROUP", group: group };
-      this.sendQuery((0, _query2.default)(this.state.query, payload));
+      var payload = {
+        type: "SET_GROUP",
+        group: group
+      };
+      this.sendQuery((0, _query["default"])(this.state.query, payload));
     }
   }, {
     key: "setSearchFieldValue",
     value: function setSearchFieldValue(field, value) {
       var query = this.state.query;
       var searchFields = query.searchFields;
-
       var newFields = searchFields.map(function (searchField) {
-        return searchField.field === field ? _extends({}, searchField, { value: value }) : searchField;
+        return searchField.field === field ? _objectSpread(_objectSpread({}, searchField), {}, {
+          value: value
+        }) : searchField;
       });
+      var payload = {
+        type: "SET_SEARCH_FIELDS",
+        newFields: newFields
+      };
+      this.sendQuery((0, _query["default"])(this.state.query, payload)); // Enable the the autosuggest input to be cleared cleared
+      // but only if autocomplete has been configured.
 
-      var payload = { type: "SET_SEARCH_FIELDS", newFields: newFields };
-
-      this.sendQuery((0, _query2.default)(this.state.query, payload));
-      // Enable the the autosuggest input to be cleared cleared
-      // but only if autcomplete has been configured.
       if (Object.hasOwnProperty.call(this.state, "suggestQuery")) {
-        this.state.suggestQuery = (0, _suggestQuery2.default)(this.state.suggestQuery, payload);
+        this.state.suggestQuery = (0, _suggestQuery["default"])(this.state.suggestQuery, payload);
       }
     }
   }, {
@@ -1934,45 +2094,59 @@ var SolrClient = function () {
     value: function setFacetSort(field, value) {
       var query = this.state.query;
       var searchFields = query.searchFields;
-
       var newFields = searchFields.map(function (searchField) {
-        return searchField.field === field ? _extends({}, searchField, { facetSort: value }) : searchField;
+        return searchField.field === field ? _objectSpread(_objectSpread({}, searchField), {}, {
+          facetSort: value
+        }) : searchField;
       });
-
-      var payload = { type: "SET_SEARCH_FIELDS", newFields: newFields };
-
-      this.sendQuery((0, _query2.default)(this.state.query, payload));
+      var payload = {
+        type: "SET_SEARCH_FIELDS",
+        newFields: newFields
+      };
+      this.sendQuery((0, _query["default"])(this.state.query, payload));
     }
   }, {
     key: "setSortFieldValue",
     value: function setSortFieldValue(field, value) {
       var query = this.state.query;
       var sortFields = query.sortFields;
-
       var newSortFields = sortFields.map(function (sortField) {
-        return sortField.field === field ? _extends({}, sortField, { value: value }) : _extends({}, sortField, { value: null });
+        return sortField.field === field ? _objectSpread(_objectSpread({}, sortField), {}, {
+          value: value
+        }) : _objectSpread(_objectSpread({}, sortField), {}, {
+          value: null
+        });
       });
-
-      var payload = { type: "SET_SORT_FIELDS", newSortFields: newSortFields };
-      this.sendQuery((0, _query2.default)(this.state.query, payload));
+      var payload = {
+        type: "SET_SORT_FIELDS",
+        newSortFields: newSortFields
+      };
+      this.sendQuery((0, _query["default"])(this.state.query, payload));
     }
   }, {
     key: "setFilters",
     value: function setFilters(filters) {
-      var payload = { type: "SET_FILTERS", newFilters: filters };
-      this.sendQuery((0, _query2.default)(this.state.query, payload));
+      var payload = {
+        type: "SET_FILTERS",
+        newFilters: filters
+      };
+      this.sendQuery((0, _query["default"])(this.state.query, payload));
     }
   }, {
     key: "setCollapse",
     value: function setCollapse(field, value) {
       var query = this.state.query;
       var searchFields = query.searchFields;
-
       var newFields = searchFields.map(function (searchField) {
-        return searchField.field === field ? _extends({}, searchField, { collapse: value }) : searchField;
+        return searchField.field === field ? _objectSpread(_objectSpread({}, searchField), {}, {
+          collapse: value
+        }) : searchField;
       });
-      var payload = { type: "SET_SEARCH_FIELDS", newFields: newFields };
-      this.state.query = (0, _query2.default)(this.state.query, payload);
+      var payload = {
+        type: "SET_SEARCH_FIELDS",
+        newFields: newFields
+      };
+      this.state.query = (0, _query["default"])(this.state.query, payload);
       this.onChange(this.state, this.getHandlers());
     }
   }, {
@@ -1998,54 +2172,70 @@ var SolrClient = function () {
 
 exports.SolrClient = SolrClient;
 
-},{"../reducers/query":44,"../reducers/results":45,"../reducers/suggestQuery":46,"../reducers/suggestions":47,"./server":19}],21:[function(_dereq_,module,exports){
+},{"../reducers/query":43,"../reducers/results":44,"../reducers/suggestQuery":45,"../reducers/suggestions":46,"./server":18}],20:[function(_dereq_,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
+exports.textFieldToQueryFilter = exports.solrSuggestQuery = exports.solrQuery = exports.rangeFacetToQueryFilter = exports.periodRangeFacetToQueryFilter = exports.listFacetFieldToQueryFilter = exports.fieldToQueryFilter = exports.facetSorts = exports.facetFields = exports["default"] = exports.buildSuggestQuery = exports.buildSort = exports.buildQuery = exports.buildMainQuery = exports.buildHighlight = void 0;
 
-var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
+function ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); enumerableOnly && (symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; })), keys.push.apply(keys, symbols); } return keys; }
 
-var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
+function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = null != arguments[i] ? arguments[i] : {}; i % 2 ? ownKeys(Object(source), !0).forEach(function (key) { _defineProperty(target, key, source[key]); }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)) : ownKeys(Object(source)).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } return target; }
+
+function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
+
+function _typeof(obj) { "@babel/helpers - typeof"; return _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (obj) { return typeof obj; } : function (obj) { return obj && "function" == typeof Symbol && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }, _typeof(obj); }
 
 var rangeFacetToQueryFilter = function rangeFacetToQueryFilter(field) {
   var filters = field.value || [];
+
   if (filters.length < 2) {
     return null;
   }
 
-  return encodeURIComponent(field.field + ":[" + filters[0] + " TO " + filters[1] + "]");
+  return encodeURIComponent("".concat(field.field, ":[").concat(filters[0], " TO ").concat(filters[1], "]"));
 };
+
+exports.rangeFacetToQueryFilter = rangeFacetToQueryFilter;
 
 var periodRangeFacetToQueryFilter = function periodRangeFacetToQueryFilter(field) {
   var filters = field.value || [];
+
   if (filters.length < 2) {
     return null;
   }
 
-  return encodeURIComponent(field.lowerBound + ":[" + filters[0] + " TO " + filters[1] + "] OR " + (field.upperBound + ":[" + filters[0] + " TO " + filters[1] + "] OR ") + ("(" + field.lowerBound + ":[* TO " + filters[0] + "] AND " + field.upperBound + ":[" + filters[1] + " TO *])"));
+  return encodeURIComponent("".concat(field.lowerBound, ":[").concat(filters[0], " TO ").concat(filters[1], "] OR ") + "".concat(field.upperBound, ":[").concat(filters[0], " TO ").concat(filters[1], "] OR ") + "(".concat(field.lowerBound, ":[* TO ").concat(filters[0], "] AND ").concat(field.upperBound, ":[").concat(filters[1], " TO *])"));
 };
+
+exports.periodRangeFacetToQueryFilter = periodRangeFacetToQueryFilter;
 
 var listFacetFieldToQueryFilter = function listFacetFieldToQueryFilter(field) {
   var filters = field.value || [];
+
   if (filters.length === 0) {
     return null;
   }
 
   var filterQ = filters.map(function (f) {
-    return "\"" + f + "\"";
+    return "\"".concat(f, "\"");
   }).join(" OR ");
-  return encodeURIComponent(field.field + ":(" + filterQ + ")");
+  return encodeURIComponent("".concat(field.field, ":(").concat(filterQ, ")"));
 };
+
+exports.listFacetFieldToQueryFilter = listFacetFieldToQueryFilter;
 
 var textFieldToQueryFilter = function textFieldToQueryFilter(field) {
   if (!field.value || field.value.length === 0) {
     return null;
   }
 
-  return encodeURIComponent(field.field === "*" ? field.value : field.field + ":" + field.value);
+  return encodeURIComponent(field.field === "*" ? field.value : "".concat(field.field, ":").concat(field.value));
 };
+
+exports.textFieldToQueryFilter = textFieldToQueryFilter;
 
 var fieldToQueryFilter = function fieldToQueryFilter(field) {
   if (field.type === "text") {
@@ -2057,150 +2247,117 @@ var fieldToQueryFilter = function fieldToQueryFilter(field) {
   } else if (field.type === "period-range-facet" || field.type === "period-range") {
     return periodRangeFacetToQueryFilter(field);
   }
+
   return null;
 };
 
+exports.fieldToQueryFilter = fieldToQueryFilter;
+
 var buildQuery = function buildQuery(fields, mainQueryField) {
-  return fields
-  // Do not include main query field in filter field query param.
+  return fields // Do not include main query field in filter field query param.
   .filter(function (searchField) {
     return !Object.hasOwnProperty.call(searchField, "field") || Object.hasOwnProperty.call(searchField, "field") && searchField.field !== mainQueryField;
   }).map(fieldToQueryFilter).filter(function (queryFilter) {
     return queryFilter !== null;
   }).map(function (queryFilter) {
-    return "fq=" + queryFilter;
+    return "fq=".concat(queryFilter);
   }).join("&");
 };
+
+exports.buildQuery = buildQuery;
 
 var facetFields = function facetFields(fields) {
   return fields.filter(function (field) {
     return field.type === "list-facet" || field.type === "range-facet";
   }).map(function (field) {
-    return "facet.field=" + encodeURIComponent(field.field);
+    return "facet.field=".concat(encodeURIComponent(field.field));
   }).concat(fields.filter(function (field) {
     return field.type === "period-range-facet";
   }).map(function (field) {
-    return "facet.field=" + encodeURIComponent(field.lowerBound) + "&facet.field=" + encodeURIComponent(field.upperBound);
+    return "facet.field=".concat(encodeURIComponent(field.lowerBound), "&facet.field=").concat(encodeURIComponent(field.upperBound));
   })).join("&");
 };
+
+exports.facetFields = facetFields;
 
 var facetSorts = function facetSorts(fields) {
   return fields.filter(function (field) {
     return field.facetSort;
   }).map(function (field) {
-    return "f." + encodeURIComponent(field.field) + ".facet.sort=" + field.facetSort;
+    return "f.".concat(encodeURIComponent(field.field), ".facet.sort=").concat(field.facetSort);
   }).join("&");
 };
+
+exports.facetSorts = facetSorts;
 
 var buildSort = function buildSort(sortFields) {
   return sortFields.filter(function (sortField) {
     return sortField.value;
   }).map(function (sortField) {
-    return encodeURIComponent(sortField.field + " " + sortField.value);
+    return encodeURIComponent("".concat(sortField.field, " ").concat(sortField.value));
   }).join(",");
 };
 
+exports.buildSort = buildSort;
+
 var buildFormat = function buildFormat(format) {
   return Object.keys(format).map(function (key) {
-    return key + "=" + encodeURIComponent(format[key]);
+    return "".concat(key, "=").concat(encodeURIComponent(format[key]));
   }).join("&");
 };
 
-var buildMainQuery = function buildMainQuery(fields, mainQueryField) {
-  var qs = "q=";
+var buildMainQuery = function buildMainQuery(fields, mainQueryField, isD7, proxyIsDisabled) {
+  // Use "search" as the main param for D7 proxy implementations.
+  var mainParam = isD7 && !proxyIsDisabled ? "search" : "q";
   var params = fields.filter(function (searchField) {
     return searchField.field === mainQueryField;
   }).map(function (searchField) {
-    return fieldToQueryFilter(searchField);
-  });
-  // If there are multiple main query fields, join them.
-  if (params.length > 1) {
-    qs += params.join("&");
-  }
-  // If there is only one main query field, add only it.
-  else if (params.length === 1) {
-      if (params[0] !== null) {
-        qs += params[0];
-      } else {
-        // If query field exists but is null send the wildcard query.
-        qs += "*:*";
-      }
-    }
-    // If there are no main query fields, send the wildcard query.
-    else {
-        qs += "*:*";
-      }
-  return qs;
+    return searchField.value;
+  }); // Add value of the mainQueryField to the q param, if there is one.
+
+  if (params[0]) {
+    return "".concat(mainParam, "=").concat(params[0]);
+  } // If query field exists but is null/empty/undefined send the wildcard query.
+
+
+  return "".concat(mainParam, "=*:*");
 };
 
+exports.buildMainQuery = buildMainQuery;
+
 var buildHighlight = function buildHighlight(highlight) {
-  var hlQs = "";
-  // If highlight is set, then populate params from keys/values.
-  if (highlight !== null && (typeof highlight === "undefined" ? "undefined" : _typeof(highlight)) === "object") {
+  var hlQs = ""; // If highlight is set, then populate params from keys/values.
+
+  if (highlight !== null && _typeof(highlight) === "object") {
     var hlParams = "hl=on";
 
-    var _iteratorNormalCompletion = true;
-    var _didIteratorError = false;
-    var _iteratorError = undefined;
+    for (var _i = 0, _Object$keys = Object.keys(highlight); _i < _Object$keys.length; _i++) {
+      var key = _Object$keys[_i];
 
-    try {
-      for (var _iterator = Object.keys(highlight)[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
-        var key = _step.value;
-
-        // Support nested objects like hl.simple.tags
-        if (_typeof(highlight[key]) === "object") {
-          var _iteratorNormalCompletion2 = true;
-          var _didIteratorError2 = false;
-          var _iteratorError2 = undefined;
-
-          try {
-            for (var _iterator2 = Object.keys(highlight[key])[Symbol.iterator](), _step2; !(_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done); _iteratorNormalCompletion2 = true) {
-              var nestedKey = _step2.value;
-
-              hlParams += "&hl." + key + "." + nestedKey + "=" + encodeURIComponent(highlight[key][nestedKey]);
-            }
-          } catch (err) {
-            _didIteratorError2 = true;
-            _iteratorError2 = err;
-          } finally {
-            try {
-              if (!_iteratorNormalCompletion2 && _iterator2.return) {
-                _iterator2.return();
-              }
-            } finally {
-              if (_didIteratorError2) {
-                throw _iteratorError2;
-              }
-            }
-          }
+      // Support nested objects like hl.simple.tags
+      if (_typeof(highlight[key]) === "object") {
+        for (var _i2 = 0, _Object$keys2 = Object.keys(highlight[key]); _i2 < _Object$keys2.length; _i2++) {
+          var nestedKey = _Object$keys2[_i2];
+          hlParams += "&hl.".concat(key, ".").concat(nestedKey, "=").concat(encodeURIComponent(highlight[key][nestedKey]));
         }
-        // Support flat key/values like hl.fl=my_field_name
-        else {
-            hlParams += "&hl." + key + "=" + encodeURIComponent(highlight[key]);
-          }
-      }
-    } catch (err) {
-      _didIteratorError = true;
-      _iteratorError = err;
-    } finally {
-      try {
-        if (!_iteratorNormalCompletion && _iterator.return) {
-          _iterator.return();
-        }
-      } finally {
-        if (_didIteratorError) {
-          throw _iteratorError;
-        }
+      } // Support flat key/values like hl.fl=my_field_name
+      else {
+        hlParams += "&hl.".concat(key, "=").concat(encodeURIComponent(highlight[key]));
       }
     }
 
     hlQs = hlParams;
   }
+
   return hlQs;
 };
 
+exports.buildHighlight = buildHighlight;
+
 var solrQuery = function solrQuery(query) {
-  var format = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : { wt: "json" };
+  var format = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {
+    wt: "json"
+  };
   var searchFields = query.searchFields,
       sortFields = query.sortFields,
       rows = query.rows,
@@ -2211,230 +2368,223 @@ var solrQuery = function solrQuery(query) {
       cursorMark = query.cursorMark,
       idField = query.idField,
       group = query.group,
-      hl = query.hl;
-
-
+      hl = query.hl,
+      isD7 = query.isD7,
+      proxyIsDisabled = query.proxyIsDisabled;
   var mainQueryField = Object.hasOwnProperty.call(query, "mainQueryField") ? query.mainQueryField : null;
-
   var filters = (query.filters || []).map(function (filter) {
-    return _extends({}, filter, { type: filter.type || "text" });
+    return _objectSpread(_objectSpread({}, filter), {}, {
+      type: filter.type || "text"
+    });
   });
-  var mainQuery = buildMainQuery(searchFields.concat(filters), mainQueryField);
+  var mainQuery = buildMainQuery(searchFields.concat(filters), mainQueryField, isD7, proxyIsDisabled);
   var queryParams = buildQuery(searchFields.concat(filters), mainQueryField);
-
   var facetFieldParam = facetFields(searchFields);
   var facetSortParams = facetSorts(searchFields);
-  var facetLimitParam = "facet.limit=" + (facetLimit || -1);
-  var facetSortParam = "facet.sort=" + (facetSort || "index");
-
-  var cursorMarkParam = pageStrategy === "cursor" ? "cursorMark=" + encodeURIComponent(cursorMark || "*") : "";
-  var idSort = pageStrategy === "cursor" ? [{ field: idField, value: "asc" }] : [];
-
+  var facetLimitParam = "facet.limit=".concat(facetLimit || -1);
+  var facetSortParam = "facet.sort=".concat(facetSort || "index");
+  var cursorMarkParam = pageStrategy === "cursor" ? "cursorMark=".concat(encodeURIComponent(cursorMark || "*")) : "";
+  var idSort = pageStrategy === "cursor" ? [{
+    field: idField,
+    value: "asc"
+  }] : [];
   var sortParam = buildSort(sortFields.concat(idSort));
-  var groupParam = group && group.field ? "group=on&group.field=" + encodeURIComponent(group.field) : "";
+  var groupParam = group && group.field ? "group=on&group.field=".concat(encodeURIComponent(group.field)) : "";
   var highlightParam = buildHighlight(hl);
-
-  return mainQuery + ("" + (queryParams.length > 0 ? "&" + queryParams : "")) + ("" + (sortParam.length > 0 ? "&sort=" + sortParam : "")) + ("" + (facetFieldParam.length > 0 ? "&" + facetFieldParam : "")) + ("" + (facetSortParams.length > 0 ? "&" + facetSortParams : "")) + ("" + (groupParam.length > 0 ? "&" + groupParam : "")) + ("&rows=" + rows) + ("&" + facetLimitParam) + ("&" + facetSortParam) + ("&" + cursorMarkParam) + (start === null ? "" : "&start=" + start) + "&facet=on" + (highlightParam === "" ? "" : "&" + highlightParam) + ("&" + buildFormat(format));
+  return mainQuery + "".concat(queryParams.length > 0 ? "&".concat(queryParams) : "") + "".concat(sortParam.length > 0 ? "&sort=".concat(sortParam) : "") + "".concat(facetFieldParam.length > 0 ? "&".concat(facetFieldParam) : "") + "".concat(facetSortParams.length > 0 ? "&".concat(facetSortParams) : "") + "".concat(groupParam.length > 0 ? "&".concat(groupParam) : "") + "&rows=".concat(rows) + "&".concat(facetLimitParam) + "&".concat(facetSortParam) + "&".concat(cursorMarkParam) + (start === null ? "" : "&start=".concat(start)) + "&facet=on" + (highlightParam === "" ? "" : "&".concat(highlightParam)) + "&".concat(buildFormat(format));
 };
 
-exports.default = solrQuery;
+exports.solrQuery = solrQuery;
+var _default = solrQuery;
+exports["default"] = _default;
 
-
-var buildSuggestQuery = function buildSuggestQuery(fields, suggestQueryField) {
-  var qs = "q=";
+var buildSuggestQuery = function buildSuggestQuery(fields, mainQueryField, appendWildcard, isProxyDisabled, isD7) {
+  // Use "search" as the main param for D7 proxy implementations.
+  var qs = isD7 && !isProxyDisabled ? "search=" : "q=";
   var params = fields.filter(function (searchField) {
-    return searchField.field === suggestQueryField;
+    return searchField.field === mainQueryField;
   }).map(function (searchField) {
-    // To support search-as-you-type we add a wildcard to match zero or more
-    // additional characters at the end of the users search term.
+    // Remove spaces on either end of the value.
+    var trimmed = searchField.value.trim(); // One method of supporting search-as-you-type is to append a wildcard '*'
+    //   to match zero or more additional characters at the end of the users search term.
     // @see: https://lucene.apache.org/solr/guide/6_6/the-standard-query-parser.html#TheStandardQueryParser-WildcardSearches
     // @see: https://opensourceconnections.com/blog/2013/06/07/search-as-you-type-with-solr/
-    // We also set the default field to the suggestQueryField.
-    return searchField.value !== "" ? searchField.value + "+" + searchField.value + "*&df=" + searchField.field : "";
-  });
-  // If there are multiple suggest query fields, join them.
-  if (params.length > 1) {
-    qs += params.join("&");
-  }
-  // If there is only one suggest query field, add only it.
-  else if (params.length === 1) {
-      if (params[0] !== null) {
-        qs += params[0];
+
+    if (appendWildcard && trimmed.length > 0) {
+      if (isProxyDisabled) {
+        // Split into word chunks.
+        var words = trimmed.split(" "); // If there are multiple chunks, join them with "+", repeat the last word + append "*".
+
+        if (words.length > 1) {
+          return "".concat(words.join("+"), "+").concat(words.pop(), "*");
+        } // If there is only 1 word, repeat it an append "*".
+
+
+        return "".concat(words, "+").concat(words, "*");
+      } else {
+        return "".concat(trimmed, "*");
       }
-    }
+    } // If we are not supposed to append a wildcard, just return the value.
+    // ngram tokens/filters should be set up in solr config for
+    // the autocomplete endpoint request handler.
+
+
+    return trimmed;
+  });
+
+  if (params[0]) {
+    qs += params[0];
+  }
+
   return qs;
 };
 
+exports.buildSuggestQuery = buildSuggestQuery;
+
 var solrSuggestQuery = function solrSuggestQuery(suggestQuery) {
-  var format = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : { wt: "json" };
+  var format = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {
+    wt: "json"
+  };
   var rows = suggestQuery.rows,
       searchFields = suggestQuery.searchFields,
-      filters = suggestQuery.filters;
-
-
+      filters = suggestQuery.filters,
+      appendWildcard = suggestQuery.appendWildcard,
+      proxyIsDisabled = suggestQuery.proxyIsDisabled,
+      isD7 = suggestQuery.isD7;
   var mainQueryField = Object.hasOwnProperty.call(suggestQuery, "mainQueryField") ? suggestQuery.mainQueryField : null;
-
   var queryFilters = (filters || []).map(function (filter) {
-    return _extends({}, filter, { type: filter.type || "text" });
+    return _objectSpread(_objectSpread({}, filter), {}, {
+      type: filter.type || "text"
+    });
   });
-  var mainQuery = buildSuggestQuery(searchFields.concat(queryFilters), mainQueryField);
+  var mainQuery = buildSuggestQuery(searchFields.concat(queryFilters), mainQueryField, appendWildcard, proxyIsDisabled, isD7);
   var queryParams = buildQuery(searchFields.concat(queryFilters), mainQueryField);
   var facetFieldParam = facetFields(searchFields);
-
-  return mainQuery + ("" + (queryParams.length > 0 ? "&" + queryParams : "")) + ("" + (facetFieldParam.length > 0 ? "&" + facetFieldParam : "")) + ("&rows=" + rows) + ("&" + buildFormat(format));
+  return mainQuery + "".concat(queryParams.length > 0 ? "&".concat(queryParams) : "") + "".concat(facetFieldParam.length > 0 ? "&".concat(facetFieldParam) : "") + "&rows=".concat(rows) + "&".concat(buildFormat(format));
 };
 
-exports.rangeFacetToQueryFilter = rangeFacetToQueryFilter;
-exports.periodRangeFacetToQueryFilter = periodRangeFacetToQueryFilter;
-exports.listFacetFieldToQueryFilter = listFacetFieldToQueryFilter;
-exports.textFieldToQueryFilter = textFieldToQueryFilter;
-exports.fieldToQueryFilter = fieldToQueryFilter;
-exports.buildQuery = buildQuery;
-exports.buildMainQuery = buildMainQuery;
-exports.buildSuggestQuery = buildSuggestQuery;
-exports.buildHighlight = buildHighlight;
-exports.facetFields = facetFields;
-exports.facetSorts = facetSorts;
-exports.buildSort = buildSort;
-exports.solrQuery = solrQuery;
 exports.solrSuggestQuery = solrSuggestQuery;
 
-},{}],22:[function(_dereq_,module,exports){
+},{}],21:[function(_dereq_,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
+exports["default"] = void 0;
 
-var _result = _dereq_("./results/result");
+var _result = _interopRequireDefault(_dereq_("./results/result"));
 
-var _result2 = _interopRequireDefault(_result);
+var _textSearch = _interopRequireDefault(_dereq_("./text-search"));
 
-var _textSearch = _dereq_("./text-search");
+var _listFacet = _interopRequireDefault(_dereq_("./list-facet"));
 
-var _textSearch2 = _interopRequireDefault(_textSearch);
+var _header = _interopRequireDefault(_dereq_("./results/header"));
 
-var _listFacet = _dereq_("./list-facet");
+var _list = _interopRequireDefault(_dereq_("./results/list"));
 
-var _listFacet2 = _interopRequireDefault(_listFacet);
+var _pending = _interopRequireDefault(_dereq_("./results/pending"));
 
-var _header = _dereq_("./results/header");
+var _container = _interopRequireDefault(_dereq_("./results/container"));
 
-var _header2 = _interopRequireDefault(_header);
+var _pagination = _interopRequireDefault(_dereq_("./results/pagination"));
 
-var _list = _dereq_("./results/list");
+var _preloadIndicator = _interopRequireDefault(_dereq_("./results/preload-indicator"));
 
-var _list2 = _interopRequireDefault(_list);
+var _csvExport = _interopRequireDefault(_dereq_("./results/csv-export"));
 
-var _pending = _dereq_("./results/pending");
+var _searchFieldContainer = _interopRequireDefault(_dereq_("./search-field-container"));
 
-var _pending2 = _interopRequireDefault(_pending);
+var _rangeFacet = _interopRequireDefault(_dereq_("./range-facet"));
 
-var _container = _dereq_("./results/container");
+var _countLabel = _interopRequireDefault(_dereq_("./results/count-label"));
 
-var _container2 = _interopRequireDefault(_container);
+var _sortMenu = _interopRequireDefault(_dereq_("./sort-menu"));
 
-var _pagination = _dereq_("./results/pagination");
+var _currentQuery = _interopRequireDefault(_dereq_("./current-query"));
 
-var _pagination2 = _interopRequireDefault(_pagination);
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
 
-var _preloadIndicator = _dereq_("./results/preload-indicator");
-
-var _preloadIndicator2 = _interopRequireDefault(_preloadIndicator);
-
-var _csvExport = _dereq_("./results/csv-export");
-
-var _csvExport2 = _interopRequireDefault(_csvExport);
-
-var _searchFieldContainer = _dereq_("./search-field-container");
-
-var _searchFieldContainer2 = _interopRequireDefault(_searchFieldContainer);
-
-var _rangeFacet = _dereq_("./range-facet");
-
-var _rangeFacet2 = _interopRequireDefault(_rangeFacet);
-
-var _countLabel = _dereq_("./results/count-label");
-
-var _countLabel2 = _interopRequireDefault(_countLabel);
-
-var _sortMenu = _dereq_("./sort-menu");
-
-var _sortMenu2 = _interopRequireDefault(_sortMenu);
-
-var _currentQuery = _dereq_("./current-query");
-
-var _currentQuery2 = _interopRequireDefault(_currentQuery);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-exports.default = {
+var _default = {
   searchFields: {
-    text: _textSearch2.default,
-    "list-facet": _listFacet2.default,
-    "range-facet": _rangeFacet2.default,
-    "period-range-facet": _rangeFacet2.default,
-    container: _searchFieldContainer2.default,
-    currentQuery: _currentQuery2.default
+    text: _textSearch["default"],
+    "list-facet": _listFacet["default"],
+    "range-facet": _rangeFacet["default"],
+    "period-range-facet": _rangeFacet["default"],
+    container: _searchFieldContainer["default"],
+    currentQuery: _currentQuery["default"]
   },
   results: {
-    result: _result2.default,
-    resultCount: _countLabel2.default,
-    header: _header2.default,
-    list: _list2.default,
-    container: _container2.default,
-    pending: _pending2.default,
-    preloadIndicator: _preloadIndicator2.default,
-    csvExport: _csvExport2.default,
-    paginate: _pagination2.default
+    result: _result["default"],
+    resultCount: _countLabel["default"],
+    header: _header["default"],
+    list: _list["default"],
+    container: _container["default"],
+    pending: _pending["default"],
+    preloadIndicator: _preloadIndicator["default"],
+    csvExport: _csvExport["default"],
+    paginate: _pagination["default"]
   },
   sortFields: {
-    menu: _sortMenu2.default
+    menu: _sortMenu["default"]
   }
 };
+exports["default"] = _default;
 
-},{"./current-query":23,"./list-facet":27,"./range-facet":28,"./results/container":30,"./results/count-label":31,"./results/csv-export":32,"./results/header":33,"./results/list":34,"./results/pagination":35,"./results/pending":36,"./results/preload-indicator":37,"./results/result":38,"./search-field-container":39,"./sort-menu":41,"./text-search":42}],23:[function(_dereq_,module,exports){
+},{"./current-query":22,"./list-facet":26,"./range-facet":27,"./results/container":29,"./results/count-label":30,"./results/csv-export":31,"./results/header":32,"./results/list":33,"./results/pagination":34,"./results/pending":35,"./results/preload-indicator":36,"./results/result":37,"./search-field-container":38,"./sort-menu":40,"./text-search":41}],22:[function(_dereq_,module,exports){
 "use strict";
+
+function _typeof(obj) { "@babel/helpers - typeof"; return _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (obj) { return typeof obj; } : function (obj) { return obj && "function" == typeof Symbol && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }, _typeof(obj); }
 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
+exports["default"] = void 0;
 
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+var _propTypes = _interopRequireDefault(_dereq_("prop-types"));
 
-var _propTypes = _dereq_("prop-types");
+var _react = _interopRequireDefault(_dereq_("react"));
 
-var _propTypes2 = _interopRequireDefault(_propTypes);
+var _classnames = _interopRequireDefault(_dereq_("classnames"));
 
-var _react = _dereq_("react");
-
-var _react2 = _interopRequireDefault(_react);
-
-var _classnames = _dereq_("classnames");
-
-var _classnames2 = _interopRequireDefault(_classnames);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
-function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
 
-function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); Object.defineProperty(Constructor, "prototype", { writable: false }); return Constructor; }
 
-var CurrentQuery = function (_React$Component) {
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function"); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, writable: true, configurable: true } }); Object.defineProperty(subClass, "prototype", { writable: false }); if (superClass) _setPrototypeOf(subClass, superClass); }
+
+function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf(o, p) { o.__proto__ = p; return o; }; return _setPrototypeOf(o, p); }
+
+function _createSuper(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct(); return function _createSuperInternal() { var Super = _getPrototypeOf(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = _getPrototypeOf(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return _possibleConstructorReturn(this, result); }; }
+
+function _possibleConstructorReturn(self, call) { if (call && (_typeof(call) === "object" || typeof call === "function")) { return call; } else if (call !== void 0) { throw new TypeError("Derived constructors may only return object or undefined"); } return _assertThisInitialized(self); }
+
+function _assertThisInitialized(self) { if (self === void 0) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return self; }
+
+function _isNativeReflectConstruct() { if (typeof Reflect === "undefined" || !Reflect.construct) return false; if (Reflect.construct.sham) return false; if (typeof Proxy === "function") return true; try { Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function () {})); return true; } catch (e) { return false; } }
+
+function _getPrototypeOf(o) { _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf(o) { return o.__proto__ || Object.getPrototypeOf(o); }; return _getPrototypeOf(o); }
+
+var CurrentQuery = /*#__PURE__*/function (_React$Component) {
   _inherits(CurrentQuery, _React$Component);
+
+  var _super = _createSuper(CurrentQuery);
 
   function CurrentQuery() {
     _classCallCheck(this, CurrentQuery);
 
-    return _possibleConstructorReturn(this, (CurrentQuery.__proto__ || Object.getPrototypeOf(CurrentQuery)).apply(this, arguments));
+    return _super.apply(this, arguments);
   }
 
   _createClass(CurrentQuery, [{
     key: "removeListFacetValue",
     value: function removeListFacetValue(field, values, value) {
       var foundIdx = values.indexOf(value);
+
       if (foundIdx > -1) {
         this.props.onChange(field, values.filter(function (v, i) {
           return i !== foundIdx;
@@ -2454,79 +2604,75 @@ var CurrentQuery = function (_React$Component) {
   }, {
     key: "renderFieldValues",
     value: function renderFieldValues(searchField) {
-      var _this2 = this;
+      var _this = this;
 
       var bootstrapCss = this.props.bootstrapCss;
-
 
       switch (searchField.type) {
         case "list-facet":
           return searchField.value.map(function (val, i) {
-            return _react2.default.createElement(
-              "span",
-              { className: (0, _classnames2.default)({ "label": bootstrapCss, "label-default": bootstrapCss }), key: i,
-                onClick: function onClick() {
-                  return _this2.removeListFacetValue(searchField.field, searchField.value, val);
-                } },
-              val,
-              _react2.default.createElement(
-                "a",
-                null,
-                bootstrapCss ? _react2.default.createElement("span", { className: "glyphicon glyphicon-remove-sign" }) : "❌"
-              )
-            );
+            return /*#__PURE__*/_react["default"].createElement("span", {
+              className: (0, _classnames["default"])({
+                "label": bootstrapCss,
+                "label-default": bootstrapCss
+              }),
+              key: i,
+              onClick: function onClick() {
+                return _this.removeListFacetValue(searchField.field, searchField.value, val);
+              }
+            }, val, /*#__PURE__*/_react["default"].createElement("a", null, bootstrapCss ? /*#__PURE__*/_react["default"].createElement("span", {
+              className: "glyphicon glyphicon-remove-sign"
+            }) : "❌"));
           });
 
         case "range-facet":
-          return _react2.default.createElement(
-            "span",
-            { className: (0, _classnames2.default)({ "label": bootstrapCss, "label-default": bootstrapCss }),
-              onClick: function onClick() {
-                return _this2.removeRangeFacetValue(searchField.field);
-              } },
-            searchField.value[0],
-            " - ",
-            searchField.value[1],
-            _react2.default.createElement(
-              "a",
-              null,
-              bootstrapCss ? _react2.default.createElement("span", { className: "glyphicon glyphicon-remove-sign" }) : "❌"
-            )
-          );
+          return /*#__PURE__*/_react["default"].createElement("span", {
+            className: (0, _classnames["default"])({
+              "label": bootstrapCss,
+              "label-default": bootstrapCss
+            }),
+            onClick: function onClick() {
+              return _this.removeRangeFacetValue(searchField.field);
+            }
+          }, searchField.value[0], " - ", searchField.value[1], /*#__PURE__*/_react["default"].createElement("a", null, bootstrapCss ? /*#__PURE__*/_react["default"].createElement("span", {
+            className: "glyphicon glyphicon-remove-sign"
+          }) : "❌"));
 
         case "text":
-          return _react2.default.createElement(
-            "span",
-            { className: (0, _classnames2.default)({ "label": bootstrapCss, "label-default": bootstrapCss }),
-              onClick: function onClick() {
-                return _this2.removeTextValue(searchField.field);
-              } },
-            searchField.value,
-            _react2.default.createElement(
-              "a",
-              null,
-              bootstrapCss ? _react2.default.createElement("span", { className: "glyphicon glyphicon-remove-sign" }) : "❌"
-            )
-          );
+          return /*#__PURE__*/_react["default"].createElement("span", {
+            className: (0, _classnames["default"])({
+              "label": bootstrapCss,
+              "label-default": bootstrapCss
+            }),
+            onClick: function onClick() {
+              return _this.removeTextValue(searchField.field);
+            }
+          }, searchField.value, /*#__PURE__*/_react["default"].createElement("a", null, bootstrapCss ? /*#__PURE__*/_react["default"].createElement("span", {
+            className: "glyphicon glyphicon-remove-sign"
+          }) : "❌"));
       }
+
       return null;
     }
   }, {
     key: "render",
     value: function render() {
-      var _this3 = this;
+      var _this2 = this;
 
-      var _props = this.props,
-          bootstrapCss = _props.bootstrapCss,
-          query = _props.query;
-
-
+      var _this$props = this.props,
+          bootstrapCss = _this$props.bootstrapCss,
+          query = _this$props.query;
       var splitFields = query.searchFields.filter(function (searchField) {
         return searchField.value && searchField.value.length > 0;
       }).map(function (searchField, i) {
-        return i % 2 === 0 ? { type: "odds", searchField: searchField } : { type: "evens", searchField: searchField };
+        return i % 2 === 0 ? {
+          type: "odds",
+          searchField: searchField
+        } : {
+          type: "evens",
+          searchField: searchField
+        };
       });
-
       var odds = splitFields.filter(function (sf) {
         return sf.type === "evens";
       }).map(function (sf) {
@@ -2542,281 +2688,312 @@ var CurrentQuery = function (_React$Component) {
         return null;
       }
 
-      return _react2.default.createElement(
-        "div",
-        { className: (0, _classnames2.default)("current-query", { "panel-body": bootstrapCss }) },
-        _react2.default.createElement(
-          "div",
-          { className: (0, _classnames2.default)({ "row": bootstrapCss }) },
-          _react2.default.createElement(
-            "ul",
-            { className: (0, _classnames2.default)({ "col-md-6": bootstrapCss }) },
-            evens.map(function (searchField, i) {
-              return _react2.default.createElement(
-                "li",
-                { className: (0, _classnames2.default)({ "list-group-item": bootstrapCss }), key: i },
-                _react2.default.createElement(
-                  "label",
-                  null,
-                  searchField.label
-                ),
-                _this3.renderFieldValues(searchField)
-              );
-            })
-          ),
-          _react2.default.createElement(
-            "ul",
-            { className: (0, _classnames2.default)({ "col-md-6": bootstrapCss }) },
-            odds.map(function (searchField, i) {
-              return _react2.default.createElement(
-                "li",
-                { className: (0, _classnames2.default)({ "list-group-item": bootstrapCss }), key: i },
-                _react2.default.createElement(
-                  "label",
-                  null,
-                  searchField.label
-                ),
-                _this3.renderFieldValues(searchField)
-              );
-            })
-          )
-        )
-      );
+      return /*#__PURE__*/_react["default"].createElement("div", {
+        className: (0, _classnames["default"])("current-query", {
+          "panel-body": bootstrapCss
+        })
+      }, /*#__PURE__*/_react["default"].createElement("div", {
+        className: (0, _classnames["default"])({
+          "row": bootstrapCss
+        })
+      }, /*#__PURE__*/_react["default"].createElement("ul", {
+        className: (0, _classnames["default"])({
+          "col-md-6": bootstrapCss
+        })
+      }, evens.map(function (searchField, i) {
+        return /*#__PURE__*/_react["default"].createElement("li", {
+          className: (0, _classnames["default"])({
+            "list-group-item": bootstrapCss
+          }),
+          key: i
+        }, /*#__PURE__*/_react["default"].createElement("label", null, searchField.label), _this2.renderFieldValues(searchField));
+      })), /*#__PURE__*/_react["default"].createElement("ul", {
+        className: (0, _classnames["default"])({
+          "col-md-6": bootstrapCss
+        })
+      }, odds.map(function (searchField, i) {
+        return /*#__PURE__*/_react["default"].createElement("li", {
+          className: (0, _classnames["default"])({
+            "list-group-item": bootstrapCss
+          }),
+          key: i
+        }, /*#__PURE__*/_react["default"].createElement("label", null, searchField.label), _this2.renderFieldValues(searchField));
+      }))));
     }
   }]);
 
   return CurrentQuery;
-}(_react2.default.Component);
+}(_react["default"].Component);
 
 CurrentQuery.propTypes = {
-  bootstrapCss: _propTypes2.default.bool,
-  onChange: _propTypes2.default.func,
-  query: _propTypes2.default.object
+  bootstrapCss: _propTypes["default"].bool,
+  onChange: _propTypes["default"].func,
+  query: _propTypes["default"].object
 };
+var _default = CurrentQuery;
+exports["default"] = _default;
 
-exports.default = CurrentQuery;
-
-},{"classnames":1,"prop-types":13,"react":"react"}],24:[function(_dereq_,module,exports){
+},{"classnames":1,"prop-types":10,"react":"react"}],23:[function(_dereq_,module,exports){
 "use strict";
+
+function _typeof(obj) { "@babel/helpers - typeof"; return _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (obj) { return typeof obj; } : function (obj) { return obj && "function" == typeof Symbol && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }, _typeof(obj); }
 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
+exports["default"] = void 0;
 
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+var _propTypes = _interopRequireDefault(_dereq_("prop-types"));
 
-var _propTypes = _dereq_("prop-types");
+var _react = _interopRequireDefault(_dereq_("react"));
 
-var _propTypes2 = _interopRequireDefault(_propTypes);
-
-var _react = _dereq_("react");
-
-var _react2 = _interopRequireDefault(_react);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
-function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
 
-function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); Object.defineProperty(Constructor, "prototype", { writable: false }); return Constructor; }
 
-var CheckedIcon = function (_React$Component) {
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function"); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, writable: true, configurable: true } }); Object.defineProperty(subClass, "prototype", { writable: false }); if (superClass) _setPrototypeOf(subClass, superClass); }
+
+function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf(o, p) { o.__proto__ = p; return o; }; return _setPrototypeOf(o, p); }
+
+function _createSuper(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct(); return function _createSuperInternal() { var Super = _getPrototypeOf(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = _getPrototypeOf(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return _possibleConstructorReturn(this, result); }; }
+
+function _possibleConstructorReturn(self, call) { if (call && (_typeof(call) === "object" || typeof call === "function")) { return call; } else if (call !== void 0) { throw new TypeError("Derived constructors may only return object or undefined"); } return _assertThisInitialized(self); }
+
+function _assertThisInitialized(self) { if (self === void 0) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return self; }
+
+function _isNativeReflectConstruct() { if (typeof Reflect === "undefined" || !Reflect.construct) return false; if (Reflect.construct.sham) return false; if (typeof Proxy === "function") return true; try { Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function () {})); return true; } catch (e) { return false; } }
+
+function _getPrototypeOf(o) { _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf(o) { return o.__proto__ || Object.getPrototypeOf(o); }; return _getPrototypeOf(o); }
+
+var CheckedIcon = /*#__PURE__*/function (_React$Component) {
   _inherits(CheckedIcon, _React$Component);
+
+  var _super = _createSuper(CheckedIcon);
 
   function CheckedIcon() {
     _classCallCheck(this, CheckedIcon);
 
-    return _possibleConstructorReturn(this, (CheckedIcon.__proto__ || Object.getPrototypeOf(CheckedIcon)).apply(this, arguments));
+    return _super.apply(this, arguments);
   }
 
   _createClass(CheckedIcon, [{
     key: "render",
     value: function render() {
-      var title = this.props.title != null ? _react2.default.createElement(
-        "title",
-        null,
-        this.props.title
-      ) : null;
-
-      return _react2.default.createElement(
-        "svg",
-        { className: "checkbox-icon checked", viewBox: "0 0 489 402", width: "10" },
-        title,
-        _react2.default.createElement("path", {
-          d: "M 377.87,24.128 C 361.786,8.044 342.417,0.002 319.769,0.002 H 82.227 C 59.579,0.002 40.211,8.044 24.125,24.128 8.044,40.214 0.002,59.578 0.002,82.23 v 237.543 c 0,22.647 8.042,42.014 24.123,58.101 16.086,16.085 35.454,24.127 58.102,24.127 h 237.542 c 22.648,0 42.011,-8.042 58.102,-24.127 16.085,-16.087 24.126,-35.453 24.126,-58.101 V 82.23 C 401.993,59.582 393.951,40.214 377.87,24.128 z m -12.422,295.645 c 0,12.559 -4.47,23.314 -13.415,32.264 -8.945,8.945 -19.698,13.411 -32.265,13.411 H 82.227 c -12.563,0 -23.317,-4.466 -32.264,-13.411 -8.945,-8.949 -13.418,-19.705 -13.418,-32.264 V 82.23 c 0,-12.562 4.473,-23.316 13.418,-32.264 C 58.91,41.02 69.664,36.548 82.227,36.548 h 237.542 c 12.566,0 23.319,4.473 32.265,13.418 8.945,8.947 13.415,19.701 13.415,32.264 v 237.543 l -0.001,0 z" }),
-        _react2.default.createElement("path", {
-          d: "M 480.59183,75.709029 442.06274,38.831006 c -5.28301,-5.060423 -11.70817,-7.591583 -19.26056,-7.591583 -7.55937,0 -13.98453,2.53116 -19.26753,7.591583 L 217.6825,216.98773 134.38968,136.99258 c -5.28896,-5.06231 -11.71015,-7.59062 -19.26256,-7.59062 -7.55736,0 -13.97854,2.52831 -19.267516,7.59062 l -38.529082,36.87898 c -5.28897,5.06136 -7.932461,11.20929 -7.932461,18.44186 0,7.22686 2.643491,13.38049 7.932461,18.4409 l 102.555358,98.15873 38.53207,36.87803 c 5.28598,5.06421 11.70916,7.59253 19.26455,7.59253 7.5524,0 13.97558,-2.53496 19.26454,-7.59253 l 38.53107,-36.87803 205.11372,-196.32314 c 5.284,-5.06232 7.93246,-11.20929 7.93246,-18.441873 0.005,-7.228765 -2.64846,-13.376685 -7.93246,-18.439008 z" })
-      );
+      var title = this.props.title != null ? /*#__PURE__*/_react["default"].createElement("title", null, this.props.title) : null;
+      return /*#__PURE__*/_react["default"].createElement("svg", {
+        className: "checkbox-icon checked",
+        viewBox: "0 0 489 402",
+        width: "10"
+      }, title, /*#__PURE__*/_react["default"].createElement("path", {
+        d: "M 377.87,24.128 C 361.786,8.044 342.417,0.002 319.769,0.002 H 82.227 C 59.579,0.002 40.211,8.044 24.125,24.128 8.044,40.214 0.002,59.578 0.002,82.23 v 237.543 c 0,22.647 8.042,42.014 24.123,58.101 16.086,16.085 35.454,24.127 58.102,24.127 h 237.542 c 22.648,0 42.011,-8.042 58.102,-24.127 16.085,-16.087 24.126,-35.453 24.126,-58.101 V 82.23 C 401.993,59.582 393.951,40.214 377.87,24.128 z m -12.422,295.645 c 0,12.559 -4.47,23.314 -13.415,32.264 -8.945,8.945 -19.698,13.411 -32.265,13.411 H 82.227 c -12.563,0 -23.317,-4.466 -32.264,-13.411 -8.945,-8.949 -13.418,-19.705 -13.418,-32.264 V 82.23 c 0,-12.562 4.473,-23.316 13.418,-32.264 C 58.91,41.02 69.664,36.548 82.227,36.548 h 237.542 c 12.566,0 23.319,4.473 32.265,13.418 8.945,8.947 13.415,19.701 13.415,32.264 v 237.543 l -0.001,0 z"
+      }), /*#__PURE__*/_react["default"].createElement("path", {
+        d: "M 480.59183,75.709029 442.06274,38.831006 c -5.28301,-5.060423 -11.70817,-7.591583 -19.26056,-7.591583 -7.55937,0 -13.98453,2.53116 -19.26753,7.591583 L 217.6825,216.98773 134.38968,136.99258 c -5.28896,-5.06231 -11.71015,-7.59062 -19.26256,-7.59062 -7.55736,0 -13.97854,2.52831 -19.267516,7.59062 l -38.529082,36.87898 c -5.28897,5.06136 -7.932461,11.20929 -7.932461,18.44186 0,7.22686 2.643491,13.38049 7.932461,18.4409 l 102.555358,98.15873 38.53207,36.87803 c 5.28598,5.06421 11.70916,7.59253 19.26455,7.59253 7.5524,0 13.97558,-2.53496 19.26454,-7.59253 l 38.53107,-36.87803 205.11372,-196.32314 c 5.284,-5.06232 7.93246,-11.20929 7.93246,-18.441873 0.005,-7.228765 -2.64846,-13.376685 -7.93246,-18.439008 z"
+      }));
     }
   }]);
 
   return CheckedIcon;
-}(_react2.default.Component);
+}(_react["default"].Component);
 
 CheckedIcon.defaultProps = {};
-
 CheckedIcon.propTypes = {
-  title: _propTypes2.default.string
+  title: _propTypes["default"].string
 };
+var _default = CheckedIcon;
+exports["default"] = _default;
 
-exports.default = CheckedIcon;
-
-},{"prop-types":13,"react":"react"}],25:[function(_dereq_,module,exports){
+},{"prop-types":10,"react":"react"}],24:[function(_dereq_,module,exports){
 "use strict";
+
+function _typeof(obj) { "@babel/helpers - typeof"; return _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (obj) { return typeof obj; } : function (obj) { return obj && "function" == typeof Symbol && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }, _typeof(obj); }
 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
+exports["default"] = void 0;
 
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+var _react = _interopRequireDefault(_dereq_("react"));
 
-var _react = _dereq_("react");
-
-var _react2 = _interopRequireDefault(_react);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
-function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
 
-function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); Object.defineProperty(Constructor, "prototype", { writable: false }); return Constructor; }
 
-var Search = function (_React$Component) {
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function"); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, writable: true, configurable: true } }); Object.defineProperty(subClass, "prototype", { writable: false }); if (superClass) _setPrototypeOf(subClass, superClass); }
+
+function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf(o, p) { o.__proto__ = p; return o; }; return _setPrototypeOf(o, p); }
+
+function _createSuper(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct(); return function _createSuperInternal() { var Super = _getPrototypeOf(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = _getPrototypeOf(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return _possibleConstructorReturn(this, result); }; }
+
+function _possibleConstructorReturn(self, call) { if (call && (_typeof(call) === "object" || typeof call === "function")) { return call; } else if (call !== void 0) { throw new TypeError("Derived constructors may only return object or undefined"); } return _assertThisInitialized(self); }
+
+function _assertThisInitialized(self) { if (self === void 0) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return self; }
+
+function _isNativeReflectConstruct() { if (typeof Reflect === "undefined" || !Reflect.construct) return false; if (Reflect.construct.sham) return false; if (typeof Proxy === "function") return true; try { Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function () {})); return true; } catch (e) { return false; } }
+
+function _getPrototypeOf(o) { _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf(o) { return o.__proto__ || Object.getPrototypeOf(o); }; return _getPrototypeOf(o); }
+
+var Search = /*#__PURE__*/function (_React$Component) {
   _inherits(Search, _React$Component);
+
+  var _super = _createSuper(Search);
 
   function Search() {
     _classCallCheck(this, Search);
 
-    return _possibleConstructorReturn(this, (Search.__proto__ || Object.getPrototypeOf(Search)).apply(this, arguments));
+    return _super.apply(this, arguments);
   }
 
   _createClass(Search, [{
     key: "render",
     value: function render() {
-      return _react2.default.createElement(
-        "svg",
-        { className: "search-icon", viewBox: "0 0 250.313 250.313", width: "10" },
-        _react2.default.createElement("path", {
-          d: "M244.186,214.604l-54.379-54.378c-0.289-0.289-0.628-0.491-0.93-0.76 c10.7-16.231,16.945-35.66,16.945-56.554C205.822,46.075,159.747,0,102.911,0S0,46.075,0,102.911 c0,56.835,46.074,102.911,102.91,102.911c20.895,0,40.323-6.245,56.554-16.945c0.269,0.301,0.47,0.64,0.759,0.929l54.38,54.38 c8.169,8.168,21.413,8.168,29.583,0C252.354,236.017,252.354,222.773,244.186,214.604z M102.911,170.146 c-37.134,0-67.236-30.102-67.236-67.235c0-37.134,30.103-67.236,67.236-67.236c37.132,0,67.235,30.103,67.235,67.236 C170.146,140.044,140.043,170.146,102.911,170.146z" })
-      );
+      return /*#__PURE__*/_react["default"].createElement("svg", {
+        className: "search-icon",
+        viewBox: "0 0 250.313 250.313",
+        width: "10"
+      }, /*#__PURE__*/_react["default"].createElement("path", {
+        d: "M244.186,214.604l-54.379-54.378c-0.289-0.289-0.628-0.491-0.93-0.76 c10.7-16.231,16.945-35.66,16.945-56.554C205.822,46.075,159.747,0,102.911,0S0,46.075,0,102.911 c0,56.835,46.074,102.911,102.91,102.911c20.895,0,40.323-6.245,56.554-16.945c0.269,0.301,0.47,0.64,0.759,0.929l54.38,54.38 c8.169,8.168,21.413,8.168,29.583,0C252.354,236.017,252.354,222.773,244.186,214.604z M102.911,170.146 c-37.134,0-67.236-30.102-67.236-67.235c0-37.134,30.103-67.236,67.236-67.236c37.132,0,67.235,30.103,67.235,67.236 C170.146,140.044,140.043,170.146,102.911,170.146z"
+      }));
     }
   }]);
 
   return Search;
-}(_react2.default.Component);
+}(_react["default"].Component);
 
-exports.default = Search;
+var _default = Search;
+exports["default"] = _default;
 
-},{"react":"react"}],26:[function(_dereq_,module,exports){
+},{"react":"react"}],25:[function(_dereq_,module,exports){
 "use strict";
+
+function _typeof(obj) { "@babel/helpers - typeof"; return _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (obj) { return typeof obj; } : function (obj) { return obj && "function" == typeof Symbol && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }, _typeof(obj); }
 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
+exports["default"] = void 0;
 
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+var _propTypes = _interopRequireDefault(_dereq_("prop-types"));
 
-var _propTypes = _dereq_("prop-types");
+var _react = _interopRequireDefault(_dereq_("react"));
 
-var _propTypes2 = _interopRequireDefault(_propTypes);
-
-var _react = _dereq_("react");
-
-var _react2 = _interopRequireDefault(_react);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
-function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
 
-function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); Object.defineProperty(Constructor, "prototype", { writable: false }); return Constructor; }
 
-var UncheckedIcon = function (_React$Component) {
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function"); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, writable: true, configurable: true } }); Object.defineProperty(subClass, "prototype", { writable: false }); if (superClass) _setPrototypeOf(subClass, superClass); }
+
+function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf(o, p) { o.__proto__ = p; return o; }; return _setPrototypeOf(o, p); }
+
+function _createSuper(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct(); return function _createSuperInternal() { var Super = _getPrototypeOf(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = _getPrototypeOf(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return _possibleConstructorReturn(this, result); }; }
+
+function _possibleConstructorReturn(self, call) { if (call && (_typeof(call) === "object" || typeof call === "function")) { return call; } else if (call !== void 0) { throw new TypeError("Derived constructors may only return object or undefined"); } return _assertThisInitialized(self); }
+
+function _assertThisInitialized(self) { if (self === void 0) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return self; }
+
+function _isNativeReflectConstruct() { if (typeof Reflect === "undefined" || !Reflect.construct) return false; if (Reflect.construct.sham) return false; if (typeof Proxy === "function") return true; try { Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function () {})); return true; } catch (e) { return false; } }
+
+function _getPrototypeOf(o) { _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf(o) { return o.__proto__ || Object.getPrototypeOf(o); }; return _getPrototypeOf(o); }
+
+var UncheckedIcon = /*#__PURE__*/function (_React$Component) {
   _inherits(UncheckedIcon, _React$Component);
+
+  var _super = _createSuper(UncheckedIcon);
 
   function UncheckedIcon() {
     _classCallCheck(this, UncheckedIcon);
 
-    return _possibleConstructorReturn(this, (UncheckedIcon.__proto__ || Object.getPrototypeOf(UncheckedIcon)).apply(this, arguments));
+    return _super.apply(this, arguments);
   }
 
   _createClass(UncheckedIcon, [{
     key: "render",
     value: function render() {
-      var title = this.props.title != null ? _react2.default.createElement(
-        "title",
-        null,
-        this.props.title
-      ) : null;
-
-      return _react2.default.createElement(
-        "svg",
-        { className: "checkbox-icon unchecked", viewBox: "0 0 401.998 401.998", width: "10" },
-        _react2.default.createElement("path", {
-          d: "M377.87,24.126C361.786,8.042,342.417,0,319.769,0H82.227C59.579,0,40.211,8.042,24.125,24.126 C8.044,40.212,0.002,59.576,0.002,82.228v237.543c0,22.647,8.042,42.014,24.123,58.101c16.086,16.085,35.454,24.127,58.102,24.127 h237.542c22.648,0,42.011-8.042,58.102-24.127c16.085-16.087,24.126-35.453,24.126-58.101V82.228 C401.993,59.58,393.951,40.212,377.87,24.126z M365.448,319.771c0,12.559-4.47,23.314-13.415,32.264 c-8.945,8.945-19.698,13.411-32.265,13.411H82.227c-12.563,0-23.317-4.466-32.264-13.411c-8.945-8.949-13.418-19.705-13.418-32.264 V82.228c0-12.562,4.473-23.316,13.418-32.264c8.947-8.946,19.701-13.418,32.264-13.418h237.542 c12.566,0,23.319,4.473,32.265,13.418c8.945,8.947,13.415,19.701,13.415,32.264V319.771L365.448,319.771z" })
-      );
+      var title = this.props.title != null ? /*#__PURE__*/_react["default"].createElement("title", null, this.props.title) : null;
+      return /*#__PURE__*/_react["default"].createElement("svg", {
+        className: "checkbox-icon unchecked",
+        viewBox: "0 0 401.998 401.998",
+        width: "10"
+      }, /*#__PURE__*/_react["default"].createElement("path", {
+        d: "M377.87,24.126C361.786,8.042,342.417,0,319.769,0H82.227C59.579,0,40.211,8.042,24.125,24.126 C8.044,40.212,0.002,59.576,0.002,82.228v237.543c0,22.647,8.042,42.014,24.123,58.101c16.086,16.085,35.454,24.127,58.102,24.127 h237.542c22.648,0,42.011-8.042,58.102-24.127c16.085-16.087,24.126-35.453,24.126-58.101V82.228 C401.993,59.58,393.951,40.212,377.87,24.126z M365.448,319.771c0,12.559-4.47,23.314-13.415,32.264 c-8.945,8.945-19.698,13.411-32.265,13.411H82.227c-12.563,0-23.317-4.466-32.264-13.411c-8.945-8.949-13.418-19.705-13.418-32.264 V82.228c0-12.562,4.473-23.316,13.418-32.264c8.947-8.946,19.701-13.418,32.264-13.418h237.542 c12.566,0,23.319,4.473,32.265,13.418c8.945,8.947,13.415,19.701,13.415,32.264V319.771L365.448,319.771z"
+      }));
     }
   }]);
 
   return UncheckedIcon;
-}(_react2.default.Component);
+}(_react["default"].Component);
 
 UncheckedIcon.defaultProps = {};
-
 UncheckedIcon.propTypes = {
-  title: _propTypes2.default.string
+  title: _propTypes["default"].string
 };
+var _default = UncheckedIcon;
+exports["default"] = _default;
 
-exports.default = UncheckedIcon;
-
-},{"prop-types":13,"react":"react"}],27:[function(_dereq_,module,exports){
+},{"prop-types":10,"react":"react"}],26:[function(_dereq_,module,exports){
 "use strict";
+
+function _typeof(obj) { "@babel/helpers - typeof"; return _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (obj) { return typeof obj; } : function (obj) { return obj && "function" == typeof Symbol && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }, _typeof(obj); }
 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
+exports["default"] = void 0;
 
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+var _propTypes = _interopRequireDefault(_dereq_("prop-types"));
 
-var _propTypes = _dereq_("prop-types");
+var _react = _interopRequireDefault(_dereq_("react"));
 
-var _propTypes2 = _interopRequireDefault(_propTypes);
+var _classnames = _interopRequireDefault(_dereq_("classnames"));
 
-var _react = _dereq_("react");
+var _checked = _interopRequireDefault(_dereq_("../icons/checked"));
 
-var _react2 = _interopRequireDefault(_react);
+var _unchecked = _interopRequireDefault(_dereq_("../icons/unchecked"));
 
-var _classnames = _dereq_("classnames");
-
-var _classnames2 = _interopRequireDefault(_classnames);
-
-var _checked = _dereq_("../icons/checked");
-
-var _checked2 = _interopRequireDefault(_checked);
-
-var _unchecked = _dereq_("../icons/unchecked");
-
-var _unchecked2 = _interopRequireDefault(_unchecked);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
-function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
 
-function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); Object.defineProperty(Constructor, "prototype", { writable: false }); return Constructor; }
 
-var ListFacet = function (_React$Component) {
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function"); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, writable: true, configurable: true } }); Object.defineProperty(subClass, "prototype", { writable: false }); if (superClass) _setPrototypeOf(subClass, superClass); }
+
+function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf(o, p) { o.__proto__ = p; return o; }; return _setPrototypeOf(o, p); }
+
+function _createSuper(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct(); return function _createSuperInternal() { var Super = _getPrototypeOf(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = _getPrototypeOf(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return _possibleConstructorReturn(this, result); }; }
+
+function _possibleConstructorReturn(self, call) { if (call && (_typeof(call) === "object" || typeof call === "function")) { return call; } else if (call !== void 0) { throw new TypeError("Derived constructors may only return object or undefined"); } return _assertThisInitialized(self); }
+
+function _assertThisInitialized(self) { if (self === void 0) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return self; }
+
+function _isNativeReflectConstruct() { if (typeof Reflect === "undefined" || !Reflect.construct) return false; if (Reflect.construct.sham) return false; if (typeof Proxy === "function") return true; try { Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function () {})); return true; } catch (e) { return false; } }
+
+function _getPrototypeOf(o) { _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf(o) { return o.__proto__ || Object.getPrototypeOf(o); }; return _getPrototypeOf(o); }
+
+var ListFacet = /*#__PURE__*/function (_React$Component) {
   _inherits(ListFacet, _React$Component);
 
+  var _super = _createSuper(ListFacet);
+
   function ListFacet(props) {
+    var _this;
+
     _classCallCheck(this, ListFacet);
 
-    var _this = _possibleConstructorReturn(this, (ListFacet.__proto__ || Object.getPrototypeOf(ListFacet)).call(this, props));
-
+    _this = _super.call(this, props);
     _this.state = {
       filter: "",
       truncateFacetListsAt: props.truncateFacetListsAt
@@ -2828,6 +3005,7 @@ var ListFacet = function (_React$Component) {
     key: "handleClick",
     value: function handleClick(value) {
       var foundIdx = this.props.value.indexOf(value);
+
       if (foundIdx < 0) {
         this.props.onChange(this.props.field, this.props.value.concat(value));
       } else {
@@ -2846,209 +3024,190 @@ var ListFacet = function (_React$Component) {
     value: function render() {
       var _this2 = this;
 
-      var _props = this.props,
-          query = _props.query,
-          label = _props.label,
-          facets = _props.facets,
-          field = _props.field,
-          value = _props.value,
-          bootstrapCss = _props.bootstrapCss,
-          facetSort = _props.facetSort,
-          collapse = _props.collapse;
+      var _this$props = this.props,
+          query = _this$props.query,
+          label = _this$props.label,
+          facets = _this$props.facets,
+          field = _this$props.field,
+          value = _this$props.value,
+          bootstrapCss = _this$props.bootstrapCss,
+          facetSort = _this$props.facetSort,
+          collapse = _this$props.collapse;
       var truncateFacetListsAt = this.state.truncateFacetListsAt;
-
-
       var facetCounts = facets.filter(function (facet, i) {
         return i % 2 === 1;
       });
       var facetValues = facets.filter(function (facet, i) {
         return i % 2 === 0;
       });
-
       var facetSortValue = facetSort ? facetSort : query.facetSort ? query.facetSort : query.facetLimit && query.facetLimit > -1 ? "count" : "index";
-
       var expanded = !(collapse || false);
-
-      var showMoreLink = truncateFacetListsAt > -1 && truncateFacetListsAt < facetValues.length ? _react2.default.createElement(
-        "li",
-        { className: (0, _classnames2.default)({ "list-group-item": bootstrapCss }), onClick: function onClick() {
-            return _this2.setState({ truncateFacetListsAt: -1 });
-          } },
-        "Show all (",
-        facetValues.length,
-        ")"
-      ) : null;
-
-      return _react2.default.createElement(
-        "li",
-        { className: (0, _classnames2.default)("list-facet", { "list-group-item": bootstrapCss }), id: "solr-list-facet-" + field },
-        _react2.default.createElement(
-          "header",
-          { onClick: this.toggleExpand.bind(this) },
-          _react2.default.createElement(
-            "h5",
-            null,
-            bootstrapCss ? _react2.default.createElement(
-              "span",
-              null,
-              _react2.default.createElement("span", { className: (0, _classnames2.default)("glyphicon", {
-                  "glyphicon-collapse-down": expanded,
-                  "glyphicon-collapse-up": !expanded
-                }) }),
-              " "
-            ) : null,
-            label
-          )
-        ),
-        expanded ? _react2.default.createElement(
-          "div",
-          null,
-          _react2.default.createElement(
-            "ul",
-            { className: (0, _classnames2.default)({ "list-group": bootstrapCss }) },
-            facetValues.filter(function (facetValue, i) {
-              return truncateFacetListsAt < 0 || i < truncateFacetListsAt;
-            }).map(function (facetValue, i) {
-              return _this2.state.filter.length === 0 || facetValue.toLowerCase().indexOf(_this2.state.filter.toLowerCase()) > -1 ? _react2.default.createElement(
-                "li",
-                { className: (0, _classnames2.default)("facet-item-type-" + field, { "list-group-item": bootstrapCss }),
-                  key: facetValue + "_" + facetCounts[i], onClick: function onClick() {
-                    return _this2.handleClick(facetValue);
-                  } },
-                value.indexOf(facetValue) > -1 ? _react2.default.createElement(_checked2.default, null) : _react2.default.createElement(_unchecked2.default, null),
-                " ",
-                facetValue,
-                _react2.default.createElement(
-                  "span",
-                  { className: "facet-item-amount" },
-                  facetCounts[i]
-                )
-              ) : null;
-            }),
-            showMoreLink
-          ),
-          facetValues.length > 4 ? _react2.default.createElement(
-            "div",
-            null,
-            _react2.default.createElement("input", { onChange: function onChange(ev) {
-                return _this2.setState({ filter: ev.target.value });
-              }, placeholder: "Filter... ", type: "text",
-              value: this.state.filter }),
-            "\xA0",
-            _react2.default.createElement(
-              "span",
-              { className: (0, _classnames2.default)({ "btn-group": bootstrapCss }) },
-              _react2.default.createElement(
-                "button",
-                { className: (0, _classnames2.default)({
-                    "btn": bootstrapCss,
-                    "btn-default": bootstrapCss,
-                    "btn-xs": bootstrapCss,
-                    active: facetSortValue === "index"
-                  }),
-                  onClick: function onClick() {
-                    return _this2.props.onFacetSortChange(field, "index");
-                  } },
-                "a-z"
-              ),
-              _react2.default.createElement(
-                "button",
-                { className: (0, _classnames2.default)({
-                    "btn": bootstrapCss,
-                    "btn-default": bootstrapCss,
-                    "btn-xs": bootstrapCss,
-                    active: facetSortValue === "count"
-                  }),
-                  onClick: function onClick() {
-                    return _this2.props.onFacetSortChange(field, "count");
-                  } },
-                "0-9"
-              )
-            ),
-            _react2.default.createElement(
-              "span",
-              { className: (0, _classnames2.default)({ "btn-group": bootstrapCss, "pull-right": bootstrapCss }) },
-              _react2.default.createElement(
-                "button",
-                { className: (0, _classnames2.default)({ "btn": bootstrapCss, "btn-default": bootstrapCss, "btn-xs": bootstrapCss }),
-                  onClick: function onClick() {
-                    return _this2.props.onChange(field, []);
-                  } },
-                "clear"
-              )
-            )
-          ) : null
-        ) : null
-      );
+      var showMoreLink = truncateFacetListsAt > -1 && truncateFacetListsAt < facetValues.length ? /*#__PURE__*/_react["default"].createElement("li", {
+        className: (0, _classnames["default"])({
+          "list-group-item": bootstrapCss
+        }),
+        onClick: function onClick() {
+          return _this2.setState({
+            truncateFacetListsAt: -1
+          });
+        }
+      }, "Show all (", facetValues.length, ")") : null;
+      return /*#__PURE__*/_react["default"].createElement("li", {
+        className: (0, _classnames["default"])("list-facet", {
+          "list-group-item": bootstrapCss
+        }),
+        id: "solr-list-facet-".concat(field)
+      }, /*#__PURE__*/_react["default"].createElement("header", {
+        onClick: this.toggleExpand.bind(this)
+      }, /*#__PURE__*/_react["default"].createElement("h5", null, bootstrapCss ? /*#__PURE__*/_react["default"].createElement("span", null, /*#__PURE__*/_react["default"].createElement("span", {
+        className: (0, _classnames["default"])("glyphicon", {
+          "glyphicon-collapse-down": expanded,
+          "glyphicon-collapse-up": !expanded
+        })
+      }), " ") : null, label)), expanded ? /*#__PURE__*/_react["default"].createElement("div", null, /*#__PURE__*/_react["default"].createElement("ul", {
+        className: (0, _classnames["default"])({
+          "list-group": bootstrapCss
+        })
+      }, facetValues.filter(function (facetValue, i) {
+        return truncateFacetListsAt < 0 || i < truncateFacetListsAt;
+      }).map(function (facetValue, i) {
+        return _this2.state.filter.length === 0 || facetValue.toLowerCase().indexOf(_this2.state.filter.toLowerCase()) > -1 ? /*#__PURE__*/_react["default"].createElement("li", {
+          className: (0, _classnames["default"])("facet-item-type-".concat(field), {
+            "list-group-item": bootstrapCss
+          }),
+          key: "".concat(facetValue, "_").concat(facetCounts[i]),
+          onClick: function onClick() {
+            return _this2.handleClick(facetValue);
+          }
+        }, value.indexOf(facetValue) > -1 ? /*#__PURE__*/_react["default"].createElement(_checked["default"], null) : /*#__PURE__*/_react["default"].createElement(_unchecked["default"], null), " ", facetValue, /*#__PURE__*/_react["default"].createElement("span", {
+          className: "facet-item-amount"
+        }, facetCounts[i])) : null;
+      }), showMoreLink), facetValues.length > 4 ? /*#__PURE__*/_react["default"].createElement("div", null, /*#__PURE__*/_react["default"].createElement("input", {
+        onChange: function onChange(ev) {
+          return _this2.setState({
+            filter: ev.target.value
+          });
+        },
+        placeholder: "Filter... ",
+        type: "text",
+        value: this.state.filter
+      }), "\xA0", /*#__PURE__*/_react["default"].createElement("span", {
+        className: (0, _classnames["default"])({
+          "btn-group": bootstrapCss
+        })
+      }, /*#__PURE__*/_react["default"].createElement("button", {
+        className: (0, _classnames["default"])({
+          "btn": bootstrapCss,
+          "btn-default": bootstrapCss,
+          "btn-xs": bootstrapCss,
+          active: facetSortValue === "index"
+        }),
+        onClick: function onClick() {
+          return _this2.props.onFacetSortChange(field, "index");
+        }
+      }, "a-z"), /*#__PURE__*/_react["default"].createElement("button", {
+        className: (0, _classnames["default"])({
+          "btn": bootstrapCss,
+          "btn-default": bootstrapCss,
+          "btn-xs": bootstrapCss,
+          active: facetSortValue === "count"
+        }),
+        onClick: function onClick() {
+          return _this2.props.onFacetSortChange(field, "count");
+        }
+      }, "0-9")), /*#__PURE__*/_react["default"].createElement("span", {
+        className: (0, _classnames["default"])({
+          "btn-group": bootstrapCss,
+          "pull-right": bootstrapCss
+        })
+      }, /*#__PURE__*/_react["default"].createElement("button", {
+        className: (0, _classnames["default"])({
+          "btn": bootstrapCss,
+          "btn-default": bootstrapCss,
+          "btn-xs": bootstrapCss
+        }),
+        onClick: function onClick() {
+          return _this2.props.onChange(field, []);
+        }
+      }, "clear"))) : null) : null);
     }
   }]);
 
   return ListFacet;
-}(_react2.default.Component);
+}(_react["default"].Component);
 
 ListFacet.defaultProps = {
   value: []
 };
-
 ListFacet.propTypes = {
-  bootstrapCss: _propTypes2.default.bool,
-  children: _propTypes2.default.array,
-  collapse: _propTypes2.default.bool,
-  facetSort: _propTypes2.default.string,
-  facets: _propTypes2.default.array.isRequired,
-  field: _propTypes2.default.string.isRequired,
-  label: _propTypes2.default.string,
-  onChange: _propTypes2.default.func,
-  onFacetSortChange: _propTypes2.default.func,
-  onSetCollapse: _propTypes2.default.func,
-  query: _propTypes2.default.object,
-  truncateFacetListsAt: _propTypes2.default.number,
-  value: _propTypes2.default.array
+  bootstrapCss: _propTypes["default"].bool,
+  children: _propTypes["default"].array,
+  collapse: _propTypes["default"].bool,
+  facetSort: _propTypes["default"].string,
+  facets: _propTypes["default"].array.isRequired,
+  field: _propTypes["default"].string.isRequired,
+  label: _propTypes["default"].string,
+  onChange: _propTypes["default"].func,
+  onFacetSortChange: _propTypes["default"].func,
+  onSetCollapse: _propTypes["default"].func,
+  query: _propTypes["default"].object,
+  truncateFacetListsAt: _propTypes["default"].number,
+  value: _propTypes["default"].array
 };
+var _default = ListFacet;
+exports["default"] = _default;
 
-exports.default = ListFacet;
-
-},{"../icons/checked":24,"../icons/unchecked":26,"classnames":1,"prop-types":13,"react":"react"}],28:[function(_dereq_,module,exports){
+},{"../icons/checked":23,"../icons/unchecked":25,"classnames":1,"prop-types":10,"react":"react"}],27:[function(_dereq_,module,exports){
 "use strict";
+
+function _typeof(obj) { "@babel/helpers - typeof"; return _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (obj) { return typeof obj; } : function (obj) { return obj && "function" == typeof Symbol && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }, _typeof(obj); }
 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
+exports["default"] = void 0;
 
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+var _propTypes = _interopRequireDefault(_dereq_("prop-types"));
 
-var _propTypes = _dereq_("prop-types");
+var _react = _interopRequireDefault(_dereq_("react"));
 
-var _propTypes2 = _interopRequireDefault(_propTypes);
+var _classnames = _interopRequireDefault(_dereq_("classnames"));
 
-var _react = _dereq_("react");
+var _rangeSlider = _interopRequireDefault(_dereq_("./range-slider"));
 
-var _react2 = _interopRequireDefault(_react);
-
-var _classnames = _dereq_("classnames");
-
-var _classnames2 = _interopRequireDefault(_classnames);
-
-var _rangeSlider = _dereq_("./range-slider");
-
-var _rangeSlider2 = _interopRequireDefault(_rangeSlider);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
-function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
 
-function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); Object.defineProperty(Constructor, "prototype", { writable: false }); return Constructor; }
 
-var RangeFacet = function (_React$Component) {
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function"); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, writable: true, configurable: true } }); Object.defineProperty(subClass, "prototype", { writable: false }); if (superClass) _setPrototypeOf(subClass, superClass); }
+
+function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf(o, p) { o.__proto__ = p; return o; }; return _setPrototypeOf(o, p); }
+
+function _createSuper(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct(); return function _createSuperInternal() { var Super = _getPrototypeOf(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = _getPrototypeOf(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return _possibleConstructorReturn(this, result); }; }
+
+function _possibleConstructorReturn(self, call) { if (call && (_typeof(call) === "object" || typeof call === "function")) { return call; } else if (call !== void 0) { throw new TypeError("Derived constructors may only return object or undefined"); } return _assertThisInitialized(self); }
+
+function _assertThisInitialized(self) { if (self === void 0) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return self; }
+
+function _isNativeReflectConstruct() { if (typeof Reflect === "undefined" || !Reflect.construct) return false; if (Reflect.construct.sham) return false; if (typeof Proxy === "function") return true; try { Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function () {})); return true; } catch (e) { return false; } }
+
+function _getPrototypeOf(o) { _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf(o) { return o.__proto__ || Object.getPrototypeOf(o); }; return _getPrototypeOf(o); }
+
+var RangeFacet = /*#__PURE__*/function (_React$Component) {
   _inherits(RangeFacet, _React$Component);
 
+  var _super = _createSuper(RangeFacet);
+
   function RangeFacet(props) {
+    var _this;
+
     _classCallCheck(this, RangeFacet);
 
-    var _this = _possibleConstructorReturn(this, (RangeFacet.__proto__ || Object.getPrototypeOf(RangeFacet)).call(this, props));
-
+    _this = _super.call(this, props);
     _this.state = {
       value: props.value
     };
@@ -3058,14 +3217,14 @@ var RangeFacet = function (_React$Component) {
   _createClass(RangeFacet, [{
     key: "componentWillReceiveProps",
     value: function componentWillReceiveProps(nextProps) {
-      this.setState({ value: nextProps.value });
+      this.setState({
+        value: nextProps.value
+      });
     }
   }, {
     key: "facetsToRange",
     value: function facetsToRange() {
       var facets = this.props.facets;
-
-
       return facets.filter(function (facet, i) {
         return i % 2 === 0;
       }).map(function (v) {
@@ -3083,7 +3242,6 @@ var RangeFacet = function (_React$Component) {
       var lowerBound = bounds[0];
       var upperBound = bounds[1];
       var realRange = upperBound - lowerBound;
-
       var newState = {
         value: [Math.floor(range.lowerLimit * realRange) + lowerBound, Math.ceil(range.upperLimit * realRange) + lowerBound]
       };
@@ -3100,7 +3258,6 @@ var RangeFacet = function (_React$Component) {
       var lowerBound = range[0];
       var upperBound = range[1];
       var realRange = upperBound - lowerBound;
-
       var atRange = value - lowerBound;
       return atRange / realRange;
     }
@@ -3116,127 +3273,120 @@ var RangeFacet = function (_React$Component) {
     value: function render() {
       var _this2 = this;
 
-      var _props = this.props,
-          label = _props.label,
-          field = _props.field,
-          bootstrapCss = _props.bootstrapCss,
-          collapse = _props.collapse;
+      var _this$props = this.props,
+          label = _this$props.label,
+          field = _this$props.field,
+          bootstrapCss = _this$props.bootstrapCss,
+          collapse = _this$props.collapse;
       var value = this.state.value;
-
-
       var range = this.facetsToRange();
-
       var filterRange = value.length > 0 ? value : range;
-
-      return _react2.default.createElement(
-        "li",
-        { className: (0, _classnames2.default)("range-facet", { "list-group-item": bootstrapCss }), id: "solr-range-facet-" + field },
-        _react2.default.createElement(
-          "header",
-          { onClick: this.toggleExpand.bind(this) },
-          _react2.default.createElement(
-            "button",
-            { style: { display: this.state.expanded ? "block" : "none" },
-              className: (0, _classnames2.default)("clear-button", {
-                "btn": bootstrapCss,
-                "btn-default": bootstrapCss,
-                "btn-xs": bootstrapCss,
-                "pull-right": bootstrapCss
-              }),
-              onClick: function onClick() {
-                return _this2.props.onChange(field, []);
-              } },
-            "clear"
-          ),
-          _react2.default.createElement(
-            "h5",
-            null,
-            bootstrapCss ? _react2.default.createElement(
-              "span",
-              null,
-              _react2.default.createElement("span", { className: (0, _classnames2.default)("glyphicon", {
-                  "glyphicon-collapse-down": !collapse,
-                  "glyphicon-collapse-up": collapse
-                }) }),
-              " "
-            ) : null,
-            label
-          )
-        ),
-        _react2.default.createElement(
-          "div",
-          { style: { display: collapse ? "none" : "block" } },
-          _react2.default.createElement(_rangeSlider2.default, { lowerLimit: this.getPercentage(range, filterRange[0]), onChange: this.onRangeChange.bind(this),
-            upperLimit: this.getPercentage(range, filterRange[1]) }),
-          _react2.default.createElement(
-            "label",
-            null,
-            filterRange[0]
-          ),
-          _react2.default.createElement(
-            "label",
-            { className: (0, _classnames2.default)({ "pull-right": bootstrapCss }) },
-            filterRange[1]
-          )
-        )
-      );
+      return /*#__PURE__*/_react["default"].createElement("li", {
+        className: (0, _classnames["default"])("range-facet", {
+          "list-group-item": bootstrapCss
+        }),
+        id: "solr-range-facet-".concat(field)
+      }, /*#__PURE__*/_react["default"].createElement("header", {
+        onClick: this.toggleExpand.bind(this)
+      }, /*#__PURE__*/_react["default"].createElement("button", {
+        style: {
+          display: this.state.expanded ? "block" : "none"
+        },
+        className: (0, _classnames["default"])("clear-button", {
+          "btn": bootstrapCss,
+          "btn-default": bootstrapCss,
+          "btn-xs": bootstrapCss,
+          "pull-right": bootstrapCss
+        }),
+        onClick: function onClick() {
+          return _this2.props.onChange(field, []);
+        }
+      }, "clear"), /*#__PURE__*/_react["default"].createElement("h5", null, bootstrapCss ? /*#__PURE__*/_react["default"].createElement("span", null, /*#__PURE__*/_react["default"].createElement("span", {
+        className: (0, _classnames["default"])("glyphicon", {
+          "glyphicon-collapse-down": !collapse,
+          "glyphicon-collapse-up": collapse
+        })
+      }), " ") : null, label)), /*#__PURE__*/_react["default"].createElement("div", {
+        style: {
+          display: collapse ? "none" : "block"
+        }
+      }, /*#__PURE__*/_react["default"].createElement(_rangeSlider["default"], {
+        lowerLimit: this.getPercentage(range, filterRange[0]),
+        onChange: this.onRangeChange.bind(this),
+        upperLimit: this.getPercentage(range, filterRange[1])
+      }), /*#__PURE__*/_react["default"].createElement("label", null, filterRange[0]), /*#__PURE__*/_react["default"].createElement("label", {
+        className: (0, _classnames["default"])({
+          "pull-right": bootstrapCss
+        })
+      }, filterRange[1])));
     }
   }]);
 
   return RangeFacet;
-}(_react2.default.Component);
+}(_react["default"].Component);
 
 RangeFacet.defaultProps = {
   value: []
 };
-
 RangeFacet.propTypes = {
-  bootstrapCss: _propTypes2.default.bool,
-  collapse: _propTypes2.default.bool,
-  facets: _propTypes2.default.array.isRequired,
-  field: _propTypes2.default.string.isRequired,
-  label: _propTypes2.default.string,
-  onChange: _propTypes2.default.func,
-  onSetCollapse: _propTypes2.default.func,
-  value: _propTypes2.default.array
+  bootstrapCss: _propTypes["default"].bool,
+  collapse: _propTypes["default"].bool,
+  facets: _propTypes["default"].array.isRequired,
+  field: _propTypes["default"].string.isRequired,
+  label: _propTypes["default"].string,
+  onChange: _propTypes["default"].func,
+  onSetCollapse: _propTypes["default"].func,
+  value: _propTypes["default"].array
 };
+var _default = RangeFacet;
+exports["default"] = _default;
 
-exports.default = RangeFacet;
-
-},{"./range-slider":29,"classnames":1,"prop-types":13,"react":"react"}],29:[function(_dereq_,module,exports){
+},{"./range-slider":28,"classnames":1,"prop-types":10,"react":"react"}],28:[function(_dereq_,module,exports){
 "use strict";
+
+function _typeof(obj) { "@babel/helpers - typeof"; return _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (obj) { return typeof obj; } : function (obj) { return obj && "function" == typeof Symbol && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }, _typeof(obj); }
 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
+exports["default"] = void 0;
 
-var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
+var _propTypes = _interopRequireDefault(_dereq_("prop-types"));
 
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+var _react = _interopRequireDefault(_dereq_("react"));
 
-var _propTypes = _dereq_("prop-types");
+var _reactDom = _interopRequireDefault(_dereq_("react-dom"));
 
-var _propTypes2 = _interopRequireDefault(_propTypes);
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
 
-var _react = _dereq_("react");
+function ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); enumerableOnly && (symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; })), keys.push.apply(keys, symbols); } return keys; }
 
-var _react2 = _interopRequireDefault(_react);
+function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = null != arguments[i] ? arguments[i] : {}; i % 2 ? ownKeys(Object(source), !0).forEach(function (key) { _defineProperty(target, key, source[key]); }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)) : ownKeys(Object(source)).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } return target; }
 
-var _reactDom = _dereq_("react-dom");
-
-var _reactDom2 = _interopRequireDefault(_reactDom);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
-function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
 
-function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); Object.defineProperty(Constructor, "prototype", { writable: false }); return Constructor; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function"); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, writable: true, configurable: true } }); Object.defineProperty(subClass, "prototype", { writable: false }); if (superClass) _setPrototypeOf(subClass, superClass); }
+
+function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf(o, p) { o.__proto__ = p; return o; }; return _setPrototypeOf(o, p); }
+
+function _createSuper(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct(); return function _createSuperInternal() { var Super = _getPrototypeOf(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = _getPrototypeOf(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return _possibleConstructorReturn(this, result); }; }
+
+function _possibleConstructorReturn(self, call) { if (call && (_typeof(call) === "object" || typeof call === "function")) { return call; } else if (call !== void 0) { throw new TypeError("Derived constructors may only return object or undefined"); } return _assertThisInitialized(self); }
+
+function _assertThisInitialized(self) { if (self === void 0) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return self; }
+
+function _isNativeReflectConstruct() { if (typeof Reflect === "undefined" || !Reflect.construct) return false; if (Reflect.construct.sham) return false; if (typeof Proxy === "function") return true; try { Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function () {})); return true; } catch (e) { return false; } }
+
+function _getPrototypeOf(o) { _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf(o) { return o.__proto__ || Object.getPrototypeOf(o); }; return _getPrototypeOf(o); }
 
 var MOUSE_DOWN = 0;
 var MOUSE_UP = 1;
-
 var styles = {
   slider: {
     "MozUserSelect": "none",
@@ -3252,20 +3402,24 @@ var styles = {
   }
 };
 
-var RangeSlider = function (_React$Component) {
+var RangeSlider = /*#__PURE__*/function (_React$Component) {
   _inherits(RangeSlider, _React$Component);
 
+  var _super = _createSuper(RangeSlider);
+
   function RangeSlider(props) {
+    var _this;
+
     _classCallCheck(this, RangeSlider);
 
-    var _this = _possibleConstructorReturn(this, (RangeSlider.__proto__ || Object.getPrototypeOf(RangeSlider)).call(this, props));
-
+    _this = _super.call(this, props);
     _this.mouseState = MOUSE_UP;
-    _this.mouseUpListener = _this.onMouseUp.bind(_this);
-    _this.mouseMoveListener = _this.onMouseMove.bind(_this);
-    _this.touchMoveListener = _this.onTouchMove.bind(_this);
-
-    _this.state = _extends({}, _this.propsToState(_this.props), { hoverState: null });
+    _this.mouseUpListener = _this.onMouseUp.bind(_assertThisInitialized(_this));
+    _this.mouseMoveListener = _this.onMouseMove.bind(_assertThisInitialized(_this));
+    _this.touchMoveListener = _this.onTouchMove.bind(_assertThisInitialized(_this));
+    _this.state = _objectSpread(_objectSpread({}, _this.propsToState(_this.props)), {
+      hoverState: null
+    });
     return _this;
   }
 
@@ -3303,54 +3457,75 @@ var RangeSlider = function (_React$Component) {
   }, {
     key: "getPositionForLimit",
     value: function getPositionForLimit(pageX) {
-      var rect = _reactDom2.default.findDOMNode(this).getBoundingClientRect();
+      var rect = _reactDom["default"].findDOMNode(this).getBoundingClientRect();
+
       if (rect.width > 0) {
         var percentage = (pageX - rect.left) / rect.width;
+
         if (percentage > 1) {
           percentage = 1;
         } else if (percentage < 0) {
           percentage = 0;
         }
+
         var center = (this.state.upperLimit + this.state.lowerLimit) / 2;
 
         if (this.state.hoverState === "bar") {
           var lowerLimit = percentage + this.state.lowerLimit - center;
           var upperLimit = percentage - (center - this.state.upperLimit);
+
           if (upperLimit >= 1) {
             upperLimit = 1;
           }
+
           if (lowerLimit <= 0) {
             lowerLimit = 0;
           }
-          return { lowerLimit: lowerLimit, upperLimit: upperLimit };
+
+          return {
+            lowerLimit: lowerLimit,
+            upperLimit: upperLimit
+          };
         } else if (this.state.hoverState === "lowerLimit") {
           if (percentage >= this.state.upperLimit) {
             percentage = this.state.upperLimit;
           }
-          return { lowerLimit: percentage };
+
+          return {
+            lowerLimit: percentage
+          };
         } else if (this.state.hoverState === "upperLimit") {
           if (percentage <= this.state.lowerLimit) {
             percentage = this.state.lowerLimit;
           }
-          return { upperLimit: percentage };
+
+          return {
+            upperLimit: percentage
+          };
         }
       }
+
       return null;
     }
   }, {
     key: "setRange",
     value: function setRange(pageX) {
       var posForLim = this.getPositionForLimit(pageX);
+
       if (posForLim !== null) {
         this.setState(posForLim);
-        this.props.onChange(_extends({}, this.state, { refresh: false }));
+        this.props.onChange(_objectSpread(_objectSpread({}, this.state), {}, {
+          refresh: false
+        }));
       }
     }
   }, {
     key: "onMouseDown",
     value: function onMouseDown(target, ev) {
       this.mouseState = MOUSE_DOWN;
-      this.setState({ hoverState: target });
+      this.setState({
+        hoverState: target
+      });
       return ev.preventDefault();
     }
   }, {
@@ -3373,9 +3548,14 @@ var RangeSlider = function (_React$Component) {
     key: "onMouseUp",
     value: function onMouseUp() {
       if (this.mouseState === MOUSE_DOWN) {
-        this.props.onChange(_extends({}, this.state, { refresh: true }));
+        this.props.onChange(_objectSpread(_objectSpread({}, this.state), {}, {
+          refresh: true
+        }));
       }
-      this.setState({ hoverState: null });
+
+      this.setState({
+        hoverState: null
+      });
       this.mouseState = MOUSE_UP;
     }
   }, {
@@ -3387,139 +3567,164 @@ var RangeSlider = function (_React$Component) {
     key: "getRangeCircle",
     value: function getRangeCircle(key) {
       var percentage = this.state[key];
-      return _react2.default.createElement("circle", {
+      return /*#__PURE__*/_react["default"].createElement("circle", {
         className: this.state.hoverState === key ? "hovering" : "",
-        cx: percentage * 400, cy: "13",
+        cx: percentage * 400,
+        cy: "13",
         onMouseDown: this.onMouseDown.bind(this, key),
         onTouchStart: this.onMouseDown.bind(this, key),
-        r: "13" });
+        r: "13"
+      });
     }
   }, {
     key: "render",
     value: function render() {
       var keys = this.state.hoverState === "lowerLimit" ? ["upperLimit", "lowerLimit"] : ["lowerLimit", "upperLimit"];
-      return _react2.default.createElement(
-        "svg",
-        { className: "facet-range-slider", viewBox: "0 0 400 26" },
-        _react2.default.createElement("path", { d: "M0 0 L 0 26 Z", fill: "transparent" }),
-        _react2.default.createElement("path", { d: "M400 0 L 400 26 Z", fill: "transparent" }),
-        _react2.default.createElement("path", { d: "M0 13 L 400 13 Z", fill: "transparent" }),
-        _react2.default.createElement(
-          "g",
-          { className: "range-line" },
-          _react2.default.createElement("path", {
-            className: this.state.hoverState === "bar" ? "hovering" : "",
-            d: this.getRangePath(),
-            onMouseDown: this.onMouseDown.bind(this, "bar"),
-            onTouchStart: this.onMouseDown.bind(this, "bar")
-          }),
-          this.getRangeCircle(keys[0]),
-          this.getRangeCircle(keys[1])
-        )
-      );
+      return /*#__PURE__*/_react["default"].createElement("svg", {
+        className: "facet-range-slider",
+        viewBox: "0 0 400 26"
+      }, /*#__PURE__*/_react["default"].createElement("path", {
+        d: "M0 0 L 0 26 Z",
+        fill: "transparent"
+      }), /*#__PURE__*/_react["default"].createElement("path", {
+        d: "M400 0 L 400 26 Z",
+        fill: "transparent"
+      }), /*#__PURE__*/_react["default"].createElement("path", {
+        d: "M0 13 L 400 13 Z",
+        fill: "transparent"
+      }), /*#__PURE__*/_react["default"].createElement("g", {
+        className: "range-line"
+      }, /*#__PURE__*/_react["default"].createElement("path", {
+        className: this.state.hoverState === "bar" ? "hovering" : "",
+        d: this.getRangePath(),
+        onMouseDown: this.onMouseDown.bind(this, "bar"),
+        onTouchStart: this.onMouseDown.bind(this, "bar")
+      }), this.getRangeCircle(keys[0]), this.getRangeCircle(keys[1])));
     }
   }]);
 
   return RangeSlider;
-}(_react2.default.Component);
+}(_react["default"].Component);
 
 RangeSlider.propTypes = {
-  lowerLimit: _propTypes2.default.number,
-  onChange: _propTypes2.default.func.isRequired,
-  upperLimit: _propTypes2.default.number
+  lowerLimit: _propTypes["default"].number,
+  onChange: _propTypes["default"].func.isRequired,
+  upperLimit: _propTypes["default"].number
 };
+var _default = RangeSlider;
+exports["default"] = _default;
 
-exports.default = RangeSlider;
-
-},{"prop-types":13,"react":"react","react-dom":"react-dom"}],30:[function(_dereq_,module,exports){
+},{"prop-types":10,"react":"react","react-dom":"react-dom"}],29:[function(_dereq_,module,exports){
 "use strict";
+
+function _typeof(obj) { "@babel/helpers - typeof"; return _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (obj) { return typeof obj; } : function (obj) { return obj && "function" == typeof Symbol && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }, _typeof(obj); }
 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
+exports["default"] = void 0;
 
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+var _propTypes = _interopRequireDefault(_dereq_("prop-types"));
 
-var _propTypes = _dereq_("prop-types");
+var _react = _interopRequireDefault(_dereq_("react"));
 
-var _propTypes2 = _interopRequireDefault(_propTypes);
+var _classnames = _interopRequireDefault(_dereq_("classnames"));
 
-var _react = _dereq_("react");
-
-var _react2 = _interopRequireDefault(_react);
-
-var _classnames = _dereq_("classnames");
-
-var _classnames2 = _interopRequireDefault(_classnames);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
-function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
 
-function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); Object.defineProperty(Constructor, "prototype", { writable: false }); return Constructor; }
 
-var ResultContainer = function (_React$Component) {
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function"); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, writable: true, configurable: true } }); Object.defineProperty(subClass, "prototype", { writable: false }); if (superClass) _setPrototypeOf(subClass, superClass); }
+
+function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf(o, p) { o.__proto__ = p; return o; }; return _setPrototypeOf(o, p); }
+
+function _createSuper(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct(); return function _createSuperInternal() { var Super = _getPrototypeOf(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = _getPrototypeOf(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return _possibleConstructorReturn(this, result); }; }
+
+function _possibleConstructorReturn(self, call) { if (call && (_typeof(call) === "object" || typeof call === "function")) { return call; } else if (call !== void 0) { throw new TypeError("Derived constructors may only return object or undefined"); } return _assertThisInitialized(self); }
+
+function _assertThisInitialized(self) { if (self === void 0) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return self; }
+
+function _isNativeReflectConstruct() { if (typeof Reflect === "undefined" || !Reflect.construct) return false; if (Reflect.construct.sham) return false; if (typeof Proxy === "function") return true; try { Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function () {})); return true; } catch (e) { return false; } }
+
+function _getPrototypeOf(o) { _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf(o) { return o.__proto__ || Object.getPrototypeOf(o); }; return _getPrototypeOf(o); }
+
+var ResultContainer = /*#__PURE__*/function (_React$Component) {
   _inherits(ResultContainer, _React$Component);
+
+  var _super = _createSuper(ResultContainer);
 
   function ResultContainer() {
     _classCallCheck(this, ResultContainer);
 
-    return _possibleConstructorReturn(this, (ResultContainer.__proto__ || Object.getPrototypeOf(ResultContainer)).apply(this, arguments));
+    return _super.apply(this, arguments);
   }
 
   _createClass(ResultContainer, [{
     key: "render",
     value: function render() {
       var bootstrapCss = this.props.bootstrapCss;
-
-      return _react2.default.createElement(
-        "div",
-        { className: (0, _classnames2.default)("solr-search-results", { "col-md-9": bootstrapCss }) },
-        _react2.default.createElement(
-          "div",
-          { className: (0, _classnames2.default)({ "panel": bootstrapCss, "panel-default": bootstrapCss }) },
-          this.props.children
-        )
-      );
+      return /*#__PURE__*/_react["default"].createElement("div", {
+        className: (0, _classnames["default"])("solr-search-results", {
+          "col-md-9": bootstrapCss
+        })
+      }, /*#__PURE__*/_react["default"].createElement("div", {
+        className: (0, _classnames["default"])({
+          "panel": bootstrapCss,
+          "panel-default": bootstrapCss
+        })
+      }, this.props.children));
     }
   }]);
 
   return ResultContainer;
-}(_react2.default.Component);
+}(_react["default"].Component);
 
 ResultContainer.propTypes = {
-  bootstrapCss: _propTypes2.default.bool,
-  children: _propTypes2.default.array
+  bootstrapCss: _propTypes["default"].bool,
+  children: _propTypes["default"].array
 };
+var _default = ResultContainer;
+exports["default"] = _default;
 
-exports.default = ResultContainer;
-
-},{"classnames":1,"prop-types":13,"react":"react"}],31:[function(_dereq_,module,exports){
+},{"classnames":1,"prop-types":10,"react":"react"}],30:[function(_dereq_,module,exports){
 "use strict";
+
+function _typeof(obj) { "@babel/helpers - typeof"; return _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (obj) { return typeof obj; } : function (obj) { return obj && "function" == typeof Symbol && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }, _typeof(obj); }
 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
+exports["default"] = void 0;
 
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+var _propTypes = _interopRequireDefault(_dereq_("prop-types"));
 
-var _propTypes = _dereq_("prop-types");
+var _react = _interopRequireDefault(_dereq_("react"));
 
-var _propTypes2 = _interopRequireDefault(_propTypes);
-
-var _react = _dereq_("react");
-
-var _react2 = _interopRequireDefault(_react);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
-function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
 
-function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); Object.defineProperty(Constructor, "prototype", { writable: false }); return Constructor; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function"); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, writable: true, configurable: true } }); Object.defineProperty(subClass, "prototype", { writable: false }); if (superClass) _setPrototypeOf(subClass, superClass); }
+
+function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf(o, p) { o.__proto__ = p; return o; }; return _setPrototypeOf(o, p); }
+
+function _createSuper(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct(); return function _createSuperInternal() { var Super = _getPrototypeOf(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = _getPrototypeOf(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return _possibleConstructorReturn(this, result); }; }
+
+function _possibleConstructorReturn(self, call) { if (call && (_typeof(call) === "object" || typeof call === "function")) { return call; } else if (call !== void 0) { throw new TypeError("Derived constructors may only return object or undefined"); } return _assertThisInitialized(self); }
+
+function _assertThisInitialized(self) { if (self === void 0) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return self; }
+
+function _isNativeReflectConstruct() { if (typeof Reflect === "undefined" || !Reflect.construct) return false; if (Reflect.construct.sham) return false; if (typeof Proxy === "function") return true; try { Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function () {})); return true; } catch (e) { return false; } }
+
+function _getPrototypeOf(o) { _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf(o) { return o.__proto__ || Object.getPrototypeOf(o); }; return _getPrototypeOf(o); }
 
 var resultCountLabels = {
   pl: "Found % results",
@@ -3527,230 +3732,252 @@ var resultCountLabels = {
   none: "No results"
 };
 
-var Result = function (_React$Component) {
+var Result = /*#__PURE__*/function (_React$Component) {
   _inherits(Result, _React$Component);
+
+  var _super = _createSuper(Result);
 
   function Result() {
     _classCallCheck(this, Result);
 
-    return _possibleConstructorReturn(this, (Result.__proto__ || Object.getPrototypeOf(Result)).apply(this, arguments));
+    return _super.apply(this, arguments);
   }
 
   _createClass(Result, [{
     key: "render",
     value: function render() {
       var numFound = this.props.numFound;
-
       var resultLabel = numFound > 1 ? resultCountLabels.pl : numFound === 1 ? resultCountLabels.sg : resultCountLabels.none;
-
-      return _react2.default.createElement(
-        "label",
-        null,
-        resultLabel.replace("%", numFound)
-      );
+      return /*#__PURE__*/_react["default"].createElement("label", null, resultLabel.replace("%", numFound));
     }
   }]);
 
   return Result;
-}(_react2.default.Component);
+}(_react["default"].Component);
 
 Result.propTypes = {
-  numFound: _propTypes2.default.number.isRequired
+  numFound: _propTypes["default"].number.isRequired
 };
+var _default = Result;
+exports["default"] = _default;
 
-exports.default = Result;
-
-},{"prop-types":13,"react":"react"}],32:[function(_dereq_,module,exports){
+},{"prop-types":10,"react":"react"}],31:[function(_dereq_,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
+exports["default"] = _default;
 
-exports.default = function (props) {
+var _react = _interopRequireDefault(_dereq_("react"));
+
+var _classnames = _interopRequireDefault(_dereq_("classnames"));
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
+
+function _default(props) {
   var bootstrapCss = props.bootstrapCss,
       onClick = props.onClick;
+  return /*#__PURE__*/_react["default"].createElement("button", {
+    onClick: onClick,
+    className: (0, _classnames["default"])({
+      btn: bootstrapCss,
+      "btn-default": bootstrapCss,
+      "pull-right": bootstrapCss,
+      "btn-xs": bootstrapCss
+    })
+  }, "Export excel");
+}
 
-  return _react2.default.createElement(
-    "button",
-    { onClick: onClick, className: (0, _classnames2.default)({
-        btn: bootstrapCss,
-        "btn-default": bootstrapCss,
-        "pull-right": bootstrapCss,
-        "btn-xs": bootstrapCss
-      }) },
-    "Export excel"
-  );
-};
-
-var _react = _dereq_("react");
-
-var _react2 = _interopRequireDefault(_react);
-
-var _classnames = _dereq_("classnames");
-
-var _classnames2 = _interopRequireDefault(_classnames);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-},{"classnames":1,"react":"react"}],33:[function(_dereq_,module,exports){
+},{"classnames":1,"react":"react"}],32:[function(_dereq_,module,exports){
 "use strict";
+
+function _typeof(obj) { "@babel/helpers - typeof"; return _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (obj) { return typeof obj; } : function (obj) { return obj && "function" == typeof Symbol && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }, _typeof(obj); }
 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
+exports["default"] = void 0;
 
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+var _propTypes = _interopRequireDefault(_dereq_("prop-types"));
 
-var _propTypes = _dereq_("prop-types");
+var _react = _interopRequireDefault(_dereq_("react"));
 
-var _propTypes2 = _interopRequireDefault(_propTypes);
+var _classnames = _interopRequireDefault(_dereq_("classnames"));
 
-var _react = _dereq_("react");
-
-var _react2 = _interopRequireDefault(_react);
-
-var _classnames = _dereq_("classnames");
-
-var _classnames2 = _interopRequireDefault(_classnames);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
-function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
 
-function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); Object.defineProperty(Constructor, "prototype", { writable: false }); return Constructor; }
 
-var ResultHeader = function (_React$Component) {
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function"); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, writable: true, configurable: true } }); Object.defineProperty(subClass, "prototype", { writable: false }); if (superClass) _setPrototypeOf(subClass, superClass); }
+
+function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf(o, p) { o.__proto__ = p; return o; }; return _setPrototypeOf(o, p); }
+
+function _createSuper(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct(); return function _createSuperInternal() { var Super = _getPrototypeOf(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = _getPrototypeOf(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return _possibleConstructorReturn(this, result); }; }
+
+function _possibleConstructorReturn(self, call) { if (call && (_typeof(call) === "object" || typeof call === "function")) { return call; } else if (call !== void 0) { throw new TypeError("Derived constructors may only return object or undefined"); } return _assertThisInitialized(self); }
+
+function _assertThisInitialized(self) { if (self === void 0) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return self; }
+
+function _isNativeReflectConstruct() { if (typeof Reflect === "undefined" || !Reflect.construct) return false; if (Reflect.construct.sham) return false; if (typeof Proxy === "function") return true; try { Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function () {})); return true; } catch (e) { return false; } }
+
+function _getPrototypeOf(o) { _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf(o) { return o.__proto__ || Object.getPrototypeOf(o); }; return _getPrototypeOf(o); }
+
+var ResultHeader = /*#__PURE__*/function (_React$Component) {
   _inherits(ResultHeader, _React$Component);
+
+  var _super = _createSuper(ResultHeader);
 
   function ResultHeader() {
     _classCallCheck(this, ResultHeader);
 
-    return _possibleConstructorReturn(this, (ResultHeader.__proto__ || Object.getPrototypeOf(ResultHeader)).apply(this, arguments));
+    return _super.apply(this, arguments);
   }
 
   _createClass(ResultHeader, [{
     key: "render",
     value: function render() {
       var bootstrapCss = this.props.bootstrapCss;
-
-      return _react2.default.createElement(
-        "div",
-        { className: (0, _classnames2.default)({ "panel-heading": bootstrapCss }) },
-        this.props.children
-      );
+      return /*#__PURE__*/_react["default"].createElement("div", {
+        className: (0, _classnames["default"])({
+          "panel-heading": bootstrapCss
+        })
+      }, this.props.children);
     }
   }]);
 
   return ResultHeader;
-}(_react2.default.Component);
+}(_react["default"].Component);
 
 ResultHeader.propTypes = {
-  bootstrapCss: _propTypes2.default.bool,
-  children: _propTypes2.default.array
+  bootstrapCss: _propTypes["default"].bool,
+  children: _propTypes["default"].array
 };
+var _default = ResultHeader;
+exports["default"] = _default;
 
-exports.default = ResultHeader;
-
-},{"classnames":1,"prop-types":13,"react":"react"}],34:[function(_dereq_,module,exports){
+},{"classnames":1,"prop-types":10,"react":"react"}],33:[function(_dereq_,module,exports){
 "use strict";
+
+function _typeof(obj) { "@babel/helpers - typeof"; return _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (obj) { return typeof obj; } : function (obj) { return obj && "function" == typeof Symbol && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }, _typeof(obj); }
 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
+exports["default"] = void 0;
 
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+var _propTypes = _interopRequireDefault(_dereq_("prop-types"));
 
-var _propTypes = _dereq_("prop-types");
+var _react = _interopRequireDefault(_dereq_("react"));
 
-var _propTypes2 = _interopRequireDefault(_propTypes);
+var _classnames = _interopRequireDefault(_dereq_("classnames"));
 
-var _react = _dereq_("react");
-
-var _react2 = _interopRequireDefault(_react);
-
-var _classnames = _dereq_("classnames");
-
-var _classnames2 = _interopRequireDefault(_classnames);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
-function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
 
-function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); Object.defineProperty(Constructor, "prototype", { writable: false }); return Constructor; }
 
-var ResultList = function (_React$Component) {
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function"); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, writable: true, configurable: true } }); Object.defineProperty(subClass, "prototype", { writable: false }); if (superClass) _setPrototypeOf(subClass, superClass); }
+
+function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf(o, p) { o.__proto__ = p; return o; }; return _setPrototypeOf(o, p); }
+
+function _createSuper(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct(); return function _createSuperInternal() { var Super = _getPrototypeOf(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = _getPrototypeOf(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return _possibleConstructorReturn(this, result); }; }
+
+function _possibleConstructorReturn(self, call) { if (call && (_typeof(call) === "object" || typeof call === "function")) { return call; } else if (call !== void 0) { throw new TypeError("Derived constructors may only return object or undefined"); } return _assertThisInitialized(self); }
+
+function _assertThisInitialized(self) { if (self === void 0) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return self; }
+
+function _isNativeReflectConstruct() { if (typeof Reflect === "undefined" || !Reflect.construct) return false; if (Reflect.construct.sham) return false; if (typeof Proxy === "function") return true; try { Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function () {})); return true; } catch (e) { return false; } }
+
+function _getPrototypeOf(o) { _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf(o) { return o.__proto__ || Object.getPrototypeOf(o); }; return _getPrototypeOf(o); }
+
+var ResultList = /*#__PURE__*/function (_React$Component) {
   _inherits(ResultList, _React$Component);
+
+  var _super = _createSuper(ResultList);
 
   function ResultList() {
     _classCallCheck(this, ResultList);
 
-    return _possibleConstructorReturn(this, (ResultList.__proto__ || Object.getPrototypeOf(ResultList)).apply(this, arguments));
+    return _super.apply(this, arguments);
   }
 
   _createClass(ResultList, [{
     key: "render",
     value: function render() {
       var bootstrapCss = this.props.bootstrapCss;
-
-      return _react2.default.createElement(
-        "ul",
-        { className: (0, _classnames2.default)({ "list-group": bootstrapCss }) },
-        this.props.children
-      );
+      return /*#__PURE__*/_react["default"].createElement("ul", {
+        className: (0, _classnames["default"])({
+          "list-group": bootstrapCss
+        })
+      }, this.props.children);
     }
   }]);
 
   return ResultList;
-}(_react2.default.Component);
+}(_react["default"].Component);
 
 ResultList.propTypes = {
-  bootstrapCss: _propTypes2.default.bool,
-  children: _propTypes2.default.array
+  bootstrapCss: _propTypes["default"].bool,
+  children: _propTypes["default"].array
 };
+var _default = ResultList;
+exports["default"] = _default;
 
-exports.default = ResultList;
-
-},{"classnames":1,"prop-types":13,"react":"react"}],35:[function(_dereq_,module,exports){
+},{"classnames":1,"prop-types":10,"react":"react"}],34:[function(_dereq_,module,exports){
 "use strict";
+
+function _typeof(obj) { "@babel/helpers - typeof"; return _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (obj) { return typeof obj; } : function (obj) { return obj && "function" == typeof Symbol && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }, _typeof(obj); }
 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
+exports["default"] = void 0;
 
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+var _propTypes = _interopRequireDefault(_dereq_("prop-types"));
 
-var _propTypes = _dereq_("prop-types");
+var _react = _interopRequireDefault(_dereq_("react"));
 
-var _propTypes2 = _interopRequireDefault(_propTypes);
+var _classnames = _interopRequireDefault(_dereq_("classnames"));
 
-var _react = _dereq_("react");
-
-var _react2 = _interopRequireDefault(_react);
-
-var _classnames = _dereq_("classnames");
-
-var _classnames2 = _interopRequireDefault(_classnames);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
-function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
 
-function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); Object.defineProperty(Constructor, "prototype", { writable: false }); return Constructor; }
 
-var Pagination = function (_React$Component) {
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function"); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, writable: true, configurable: true } }); Object.defineProperty(subClass, "prototype", { writable: false }); if (superClass) _setPrototypeOf(subClass, superClass); }
+
+function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf(o, p) { o.__proto__ = p; return o; }; return _setPrototypeOf(o, p); }
+
+function _createSuper(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct(); return function _createSuperInternal() { var Super = _getPrototypeOf(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = _getPrototypeOf(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return _possibleConstructorReturn(this, result); }; }
+
+function _possibleConstructorReturn(self, call) { if (call && (_typeof(call) === "object" || typeof call === "function")) { return call; } else if (call !== void 0) { throw new TypeError("Derived constructors may only return object or undefined"); } return _assertThisInitialized(self); }
+
+function _assertThisInitialized(self) { if (self === void 0) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return self; }
+
+function _isNativeReflectConstruct() { if (typeof Reflect === "undefined" || !Reflect.construct) return false; if (Reflect.construct.sham) return false; if (typeof Proxy === "function") return true; try { Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function () {})); return true; } catch (e) { return false; } }
+
+function _getPrototypeOf(o) { _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf(o) { return o.__proto__ || Object.getPrototypeOf(o); }; return _getPrototypeOf(o); }
+
+var Pagination = /*#__PURE__*/function (_React$Component) {
   _inherits(Pagination, _React$Component);
+
+  var _super = _createSuper(Pagination);
 
   function Pagination() {
     _classCallCheck(this, Pagination);
 
-    return _possibleConstructorReturn(this, (Pagination.__proto__ || Object.getPrototypeOf(Pagination)).apply(this, arguments));
+    return _super.apply(this, arguments);
   }
 
   _createClass(Pagination, [{
@@ -3759,212 +3986,224 @@ var Pagination = function (_React$Component) {
       if (page >= pageAmt || page < 0) {
         return;
       }
+
       this.props.onChange(page);
     }
   }, {
     key: "renderPage",
     value: function renderPage(page, currentPage, key) {
-      return _react2.default.createElement(
-        "li",
-        { className: (0, _classnames2.default)({ "active": page === currentPage }), key: key },
-        _react2.default.createElement(
-          "a",
-          { onClick: this.onPageChange.bind(this, page) },
-          page + 1
-        )
-      );
+      return /*#__PURE__*/_react["default"].createElement("li", {
+        className: (0, _classnames["default"])({
+          "active": page === currentPage
+        }),
+        key: key
+      }, /*#__PURE__*/_react["default"].createElement("a", {
+        onClick: this.onPageChange.bind(this, page)
+      }, page + 1));
     }
   }, {
     key: "render",
     value: function render() {
-      var _this2 = this;
+      var _this = this;
 
-      var _props = this.props,
-          bootstrapCss = _props.bootstrapCss,
-          query = _props.query,
-          results = _props.results;
+      var _this$props = this.props,
+          bootstrapCss = _this$props.bootstrapCss,
+          query = _this$props.query,
+          results = _this$props.results;
       var start = query.start,
           rows = query.rows;
       var numFound = results.numFound;
-
       var pageAmt = Math.ceil(numFound / rows);
       var currentPage = start / rows;
-
       var rangeStart = currentPage - 2 < 0 ? 0 : currentPage - 2;
       var rangeEnd = rangeStart + 5 > pageAmt ? pageAmt : rangeStart + 5;
 
       if (rangeEnd - rangeStart < 5 && rangeStart > 0) {
         rangeStart = rangeEnd - 5;
+
         if (rangeStart < 0) {
           rangeStart = 0;
         }
       }
 
       var pages = [];
+
       for (var page = rangeStart; page < rangeEnd; page++) {
         if (pages.indexOf(page) < 0) {
           pages.push(page);
         }
       }
 
-      return _react2.default.createElement(
-        "div",
-        { className: (0, _classnames2.default)({ "panel-body": bootstrapCss, "text-center": bootstrapCss }) },
-        _react2.default.createElement(
-          "ul",
-          { className: (0, _classnames2.default)("pagination", { "pagination-sm": bootstrapCss }) },
-          _react2.default.createElement(
-            "li",
-            { className: (0, _classnames2.default)({ "disabled": currentPage === 0 }), key: "start" },
-            _react2.default.createElement(
-              "a",
-              { onClick: this.onPageChange.bind(this, 0) },
-              "<<"
-            )
-          ),
-          _react2.default.createElement(
-            "li",
-            { className: (0, _classnames2.default)({ "disabled": currentPage - 1 < 0 }), key: "prev" },
-            _react2.default.createElement(
-              "a",
-              { onClick: this.onPageChange.bind(this, currentPage - 1) },
-              "<"
-            )
-          ),
-          pages.map(function (page, idx) {
-            return _this2.renderPage(page, currentPage, idx);
-          }),
-          _react2.default.createElement(
-            "li",
-            { className: (0, _classnames2.default)({ "disabled": currentPage + 1 >= pageAmt }), key: "next" },
-            _react2.default.createElement(
-              "a",
-              { onClick: this.onPageChange.bind(this, currentPage + 1, pageAmt) },
-              ">"
-            )
-          ),
-          _react2.default.createElement(
-            "li",
-            { className: (0, _classnames2.default)({ "disabled": currentPage === pageAmt - 1 }), key: "end" },
-            _react2.default.createElement(
-              "a",
-              { onClick: this.onPageChange.bind(this, pageAmt - 1) },
-              ">>"
-            )
-          )
-        )
-      );
+      return /*#__PURE__*/_react["default"].createElement("div", {
+        className: (0, _classnames["default"])({
+          "panel-body": bootstrapCss,
+          "text-center": bootstrapCss
+        })
+      }, /*#__PURE__*/_react["default"].createElement("ul", {
+        className: (0, _classnames["default"])("pagination", {
+          "pagination-sm": bootstrapCss
+        })
+      }, /*#__PURE__*/_react["default"].createElement("li", {
+        className: (0, _classnames["default"])({
+          "disabled": currentPage === 0
+        }),
+        key: "start"
+      }, /*#__PURE__*/_react["default"].createElement("a", {
+        onClick: this.onPageChange.bind(this, 0)
+      }, "<<")), /*#__PURE__*/_react["default"].createElement("li", {
+        className: (0, _classnames["default"])({
+          "disabled": currentPage - 1 < 0
+        }),
+        key: "prev"
+      }, /*#__PURE__*/_react["default"].createElement("a", {
+        onClick: this.onPageChange.bind(this, currentPage - 1)
+      }, "<")), pages.map(function (page, idx) {
+        return _this.renderPage(page, currentPage, idx);
+      }), /*#__PURE__*/_react["default"].createElement("li", {
+        className: (0, _classnames["default"])({
+          "disabled": currentPage + 1 >= pageAmt
+        }),
+        key: "next"
+      }, /*#__PURE__*/_react["default"].createElement("a", {
+        onClick: this.onPageChange.bind(this, currentPage + 1, pageAmt)
+      }, ">")), /*#__PURE__*/_react["default"].createElement("li", {
+        className: (0, _classnames["default"])({
+          "disabled": currentPage === pageAmt - 1
+        }),
+        key: "end"
+      }, /*#__PURE__*/_react["default"].createElement("a", {
+        onClick: this.onPageChange.bind(this, pageAmt - 1)
+      }, ">>"))));
     }
   }]);
 
   return Pagination;
-}(_react2.default.Component);
+}(_react["default"].Component);
 
 Pagination.propTypes = {
-  bootstrapCss: _propTypes2.default.bool,
-  onChange: _propTypes2.default.func,
-  query: _propTypes2.default.object,
-  results: _propTypes2.default.object
+  bootstrapCss: _propTypes["default"].bool,
+  onChange: _propTypes["default"].func,
+  query: _propTypes["default"].object,
+  results: _propTypes["default"].object
 };
+var _default = Pagination;
+exports["default"] = _default;
 
-exports.default = Pagination;
-
-},{"classnames":1,"prop-types":13,"react":"react"}],36:[function(_dereq_,module,exports){
+},{"classnames":1,"prop-types":10,"react":"react"}],35:[function(_dereq_,module,exports){
 "use strict";
+
+function _typeof(obj) { "@babel/helpers - typeof"; return _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (obj) { return typeof obj; } : function (obj) { return obj && "function" == typeof Symbol && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }, _typeof(obj); }
 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
+exports["default"] = void 0;
 
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+var _propTypes = _interopRequireDefault(_dereq_("prop-types"));
 
-var _propTypes = _dereq_("prop-types");
+var _react = _interopRequireDefault(_dereq_("react"));
 
-var _propTypes2 = _interopRequireDefault(_propTypes);
-
-var _react = _dereq_("react");
-
-var _react2 = _interopRequireDefault(_react);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
-function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
 
-function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); Object.defineProperty(Constructor, "prototype", { writable: false }); return Constructor; }
 
-var Pending = function (_React$Component) {
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function"); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, writable: true, configurable: true } }); Object.defineProperty(subClass, "prototype", { writable: false }); if (superClass) _setPrototypeOf(subClass, superClass); }
+
+function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf(o, p) { o.__proto__ = p; return o; }; return _setPrototypeOf(o, p); }
+
+function _createSuper(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct(); return function _createSuperInternal() { var Super = _getPrototypeOf(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = _getPrototypeOf(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return _possibleConstructorReturn(this, result); }; }
+
+function _possibleConstructorReturn(self, call) { if (call && (_typeof(call) === "object" || typeof call === "function")) { return call; } else if (call !== void 0) { throw new TypeError("Derived constructors may only return object or undefined"); } return _assertThisInitialized(self); }
+
+function _assertThisInitialized(self) { if (self === void 0) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return self; }
+
+function _isNativeReflectConstruct() { if (typeof Reflect === "undefined" || !Reflect.construct) return false; if (Reflect.construct.sham) return false; if (typeof Proxy === "function") return true; try { Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function () {})); return true; } catch (e) { return false; } }
+
+function _getPrototypeOf(o) { _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf(o) { return o.__proto__ || Object.getPrototypeOf(o); }; return _getPrototypeOf(o); }
+
+var Pending = /*#__PURE__*/function (_React$Component) {
   _inherits(Pending, _React$Component);
+
+  var _super = _createSuper(Pending);
 
   function Pending() {
     _classCallCheck(this, Pending);
 
-    return _possibleConstructorReturn(this, (Pending.__proto__ || Object.getPrototypeOf(Pending)).apply(this, arguments));
+    return _super.apply(this, arguments);
   }
 
   _createClass(Pending, [{
     key: "render",
     value: function render() {
-      return _react2.default.createElement(
-        "span",
-        null,
-        "Waiting for results"
-      );
+      return /*#__PURE__*/_react["default"].createElement("span", null, "Waiting for results");
     }
   }]);
 
   return Pending;
-}(_react2.default.Component);
+}(_react["default"].Component);
 
 Pending.propTypes = {
-  bootstrapCss: _propTypes2.default.bool
+  bootstrapCss: _propTypes["default"].bool
 };
+var _default = Pending;
+exports["default"] = _default;
 
-exports.default = Pending;
-
-},{"prop-types":13,"react":"react"}],37:[function(_dereq_,module,exports){
+},{"prop-types":10,"react":"react"}],36:[function(_dereq_,module,exports){
 "use strict";
+
+function _typeof(obj) { "@babel/helpers - typeof"; return _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (obj) { return typeof obj; } : function (obj) { return obj && "function" == typeof Symbol && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }, _typeof(obj); }
 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
+exports["default"] = void 0;
 
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+var _propTypes = _interopRequireDefault(_dereq_("prop-types"));
 
-var _propTypes = _dereq_("prop-types");
+var _react = _interopRequireDefault(_dereq_("react"));
 
-var _propTypes2 = _interopRequireDefault(_propTypes);
+var _reactDom = _interopRequireDefault(_dereq_("react-dom"));
 
-var _react = _dereq_("react");
+var _classnames = _interopRequireDefault(_dereq_("classnames"));
 
-var _react2 = _interopRequireDefault(_react);
-
-var _reactDom = _dereq_("react-dom");
-
-var _reactDom2 = _interopRequireDefault(_reactDom);
-
-var _classnames = _dereq_("classnames");
-
-var _classnames2 = _interopRequireDefault(_classnames);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
-function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
 
-function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); Object.defineProperty(Constructor, "prototype", { writable: false }); return Constructor; }
 
-var PreloadIndicator = function (_React$Component) {
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function"); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, writable: true, configurable: true } }); Object.defineProperty(subClass, "prototype", { writable: false }); if (superClass) _setPrototypeOf(subClass, superClass); }
+
+function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf(o, p) { o.__proto__ = p; return o; }; return _setPrototypeOf(o, p); }
+
+function _createSuper(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct(); return function _createSuperInternal() { var Super = _getPrototypeOf(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = _getPrototypeOf(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return _possibleConstructorReturn(this, result); }; }
+
+function _possibleConstructorReturn(self, call) { if (call && (_typeof(call) === "object" || typeof call === "function")) { return call; } else if (call !== void 0) { throw new TypeError("Derived constructors may only return object or undefined"); } return _assertThisInitialized(self); }
+
+function _assertThisInitialized(self) { if (self === void 0) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return self; }
+
+function _isNativeReflectConstruct() { if (typeof Reflect === "undefined" || !Reflect.construct) return false; if (Reflect.construct.sham) return false; if (typeof Proxy === "function") return true; try { Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function () {})); return true; } catch (e) { return false; } }
+
+function _getPrototypeOf(o) { _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf(o) { return o.__proto__ || Object.getPrototypeOf(o); }; return _getPrototypeOf(o); }
+
+var PreloadIndicator = /*#__PURE__*/function (_React$Component) {
   _inherits(PreloadIndicator, _React$Component);
 
+  var _super = _createSuper(PreloadIndicator);
+
   function PreloadIndicator(props) {
+    var _this;
+
     _classCallCheck(this, PreloadIndicator);
 
-    var _this = _possibleConstructorReturn(this, (PreloadIndicator.__proto__ || Object.getPrototypeOf(PreloadIndicator)).call(this, props));
-
-    _this.scrollListener = _this.onWindowScroll.bind(_this);
+    _this = _super.call(this, props);
+    _this.scrollListener = _this.onWindowScroll.bind(_assertThisInitialized(_this));
     return _this;
   }
 
@@ -3984,12 +4223,12 @@ var PreloadIndicator = function (_React$Component) {
       var pageStrategy = this.props.query.pageStrategy;
       var pending = this.props.results.pending;
 
-
       if (pageStrategy !== "cursor" || pending) {
         return;
       }
 
-      var domNode = _reactDom2.default.findDOMNode(this);
+      var domNode = _reactDom["default"].findDOMNode(this);
+
       if (!domNode) {
         return;
       }
@@ -4005,63 +4244,73 @@ var PreloadIndicator = function (_React$Component) {
     key: "render",
     value: function render() {
       var bootstrapCss = this.props.bootstrapCss;
-
-      return _react2.default.createElement(
-        "li",
-        { className: (0, _classnames2.default)("fetch-by-cursor", { "list-group-item": bootstrapCss }) },
-        "Loading more..."
-      );
+      return /*#__PURE__*/_react["default"].createElement("li", {
+        className: (0, _classnames["default"])("fetch-by-cursor", {
+          "list-group-item": bootstrapCss
+        })
+      }, "Loading more...");
     }
   }]);
 
   return PreloadIndicator;
-}(_react2.default.Component);
+}(_react["default"].Component);
 
 PreloadIndicator.propTypes = {
-  bootstrapCss: _propTypes2.default.bool,
-  onNextCursorQuery: _propTypes2.default.func,
-  query: _propTypes2.default.object,
-  results: _propTypes2.default.object
+  bootstrapCss: _propTypes["default"].bool,
+  onNextCursorQuery: _propTypes["default"].func,
+  query: _propTypes["default"].object,
+  results: _propTypes["default"].object
 };
+var _default = PreloadIndicator;
+exports["default"] = _default;
 
-exports.default = PreloadIndicator;
-
-},{"classnames":1,"prop-types":13,"react":"react","react-dom":"react-dom"}],38:[function(_dereq_,module,exports){
+},{"classnames":1,"prop-types":10,"react":"react","react-dom":"react-dom"}],37:[function(_dereq_,module,exports){
 "use strict";
+
+function _typeof(obj) { "@babel/helpers - typeof"; return _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (obj) { return typeof obj; } : function (obj) { return obj && "function" == typeof Symbol && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }, _typeof(obj); }
 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
+exports["default"] = void 0;
 
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+var _propTypes = _interopRequireDefault(_dereq_("prop-types"));
 
-var _propTypes = _dereq_("prop-types");
+var _react = _interopRequireDefault(_dereq_("react"));
 
-var _propTypes2 = _interopRequireDefault(_propTypes);
+var _classnames = _interopRequireDefault(_dereq_("classnames"));
 
-var _react = _dereq_("react");
-
-var _react2 = _interopRequireDefault(_react);
-
-var _classnames = _dereq_("classnames");
-
-var _classnames2 = _interopRequireDefault(_classnames);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
-function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
 
-function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); Object.defineProperty(Constructor, "prototype", { writable: false }); return Constructor; }
 
-var Result = function (_React$Component) {
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function"); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, writable: true, configurable: true } }); Object.defineProperty(subClass, "prototype", { writable: false }); if (superClass) _setPrototypeOf(subClass, superClass); }
+
+function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf(o, p) { o.__proto__ = p; return o; }; return _setPrototypeOf(o, p); }
+
+function _createSuper(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct(); return function _createSuperInternal() { var Super = _getPrototypeOf(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = _getPrototypeOf(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return _possibleConstructorReturn(this, result); }; }
+
+function _possibleConstructorReturn(self, call) { if (call && (_typeof(call) === "object" || typeof call === "function")) { return call; } else if (call !== void 0) { throw new TypeError("Derived constructors may only return object or undefined"); } return _assertThisInitialized(self); }
+
+function _assertThisInitialized(self) { if (self === void 0) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return self; }
+
+function _isNativeReflectConstruct() { if (typeof Reflect === "undefined" || !Reflect.construct) return false; if (Reflect.construct.sham) return false; if (typeof Proxy === "function") return true; try { Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function () {})); return true; } catch (e) { return false; } }
+
+function _getPrototypeOf(o) { _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf(o) { return o.__proto__ || Object.getPrototypeOf(o); }; return _getPrototypeOf(o); }
+
+var Result = /*#__PURE__*/function (_React$Component) {
   _inherits(Result, _React$Component);
+
+  var _super = _createSuper(Result);
 
   function Result() {
     _classCallCheck(this, Result);
 
-    return _possibleConstructorReturn(this, (Result.__proto__ || Object.getPrototypeOf(Result)).apply(this, arguments));
+    return _super.apply(this, arguments);
   }
 
   _createClass(Result, [{
@@ -4070,224 +4319,220 @@ var Result = function (_React$Component) {
       var value = [].concat(doc[field] || null).filter(function (v) {
         return v !== null;
       });
-
       return value.join(", ");
     }
   }, {
     key: "render",
     value: function render() {
-      var _this2 = this;
+      var _this = this;
 
-      var _props = this.props,
-          bootstrapCss = _props.bootstrapCss,
-          doc = _props.doc,
-          fields = _props.fields;
-
-
-      return _react2.default.createElement(
-        "li",
-        { className: (0, _classnames2.default)({ "list-group-item": bootstrapCss }), onClick: function onClick() {
-            return _this2.props.onSelect(doc);
-          } },
-        _react2.default.createElement(
-          "ul",
-          null,
-          fields.filter(function (field) {
-            return field.field !== "*";
-          }).map(function (field, i) {
-            return _react2.default.createElement(
-              "li",
-              { key: i },
-              _react2.default.createElement(
-                "label",
-                null,
-                field.label || field.field
-              ),
-              _this2.renderValue(field.field, doc)
-            );
-          })
-        )
-      );
+      var _this$props = this.props,
+          bootstrapCss = _this$props.bootstrapCss,
+          doc = _this$props.doc,
+          fields = _this$props.fields;
+      return /*#__PURE__*/_react["default"].createElement("li", {
+        className: (0, _classnames["default"])({
+          "list-group-item": bootstrapCss
+        }),
+        onClick: function onClick() {
+          return _this.props.onSelect(doc);
+        }
+      }, /*#__PURE__*/_react["default"].createElement("ul", null, fields.filter(function (field) {
+        return field.field !== "*";
+      }).map(function (field, i) {
+        return /*#__PURE__*/_react["default"].createElement("li", {
+          key: i
+        }, /*#__PURE__*/_react["default"].createElement("label", null, field.label || field.field), _this.renderValue(field.field, doc));
+      })));
     }
   }]);
 
   return Result;
-}(_react2.default.Component);
+}(_react["default"].Component);
 
 Result.propTypes = {
-  bootstrapCss: _propTypes2.default.bool,
-  doc: _propTypes2.default.object,
-  fields: _propTypes2.default.array,
-  onSelect: _propTypes2.default.func.isRequired
+  bootstrapCss: _propTypes["default"].bool,
+  doc: _propTypes["default"].object,
+  fields: _propTypes["default"].array,
+  onSelect: _propTypes["default"].func.isRequired
 };
+var _default = Result;
+exports["default"] = _default;
 
-exports.default = Result;
-
-},{"classnames":1,"prop-types":13,"react":"react"}],39:[function(_dereq_,module,exports){
+},{"classnames":1,"prop-types":10,"react":"react"}],38:[function(_dereq_,module,exports){
 "use strict";
+
+function _typeof(obj) { "@babel/helpers - typeof"; return _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (obj) { return typeof obj; } : function (obj) { return obj && "function" == typeof Symbol && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }, _typeof(obj); }
 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
+exports["default"] = void 0;
 
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+var _propTypes = _interopRequireDefault(_dereq_("prop-types"));
 
-var _propTypes = _dereq_("prop-types");
+var _react = _interopRequireDefault(_dereq_("react"));
 
-var _propTypes2 = _interopRequireDefault(_propTypes);
+var _classnames = _interopRequireDefault(_dereq_("classnames"));
 
-var _react = _dereq_("react");
-
-var _react2 = _interopRequireDefault(_react);
-
-var _classnames = _dereq_("classnames");
-
-var _classnames2 = _interopRequireDefault(_classnames);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
-function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
 
-function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); Object.defineProperty(Constructor, "prototype", { writable: false }); return Constructor; }
 
-var SearchFieldContainer = function (_React$Component) {
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function"); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, writable: true, configurable: true } }); Object.defineProperty(subClass, "prototype", { writable: false }); if (superClass) _setPrototypeOf(subClass, superClass); }
+
+function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf(o, p) { o.__proto__ = p; return o; }; return _setPrototypeOf(o, p); }
+
+function _createSuper(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct(); return function _createSuperInternal() { var Super = _getPrototypeOf(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = _getPrototypeOf(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return _possibleConstructorReturn(this, result); }; }
+
+function _possibleConstructorReturn(self, call) { if (call && (_typeof(call) === "object" || typeof call === "function")) { return call; } else if (call !== void 0) { throw new TypeError("Derived constructors may only return object or undefined"); } return _assertThisInitialized(self); }
+
+function _assertThisInitialized(self) { if (self === void 0) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return self; }
+
+function _isNativeReflectConstruct() { if (typeof Reflect === "undefined" || !Reflect.construct) return false; if (Reflect.construct.sham) return false; if (typeof Proxy === "function") return true; try { Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function () {})); return true; } catch (e) { return false; } }
+
+function _getPrototypeOf(o) { _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf(o) { return o.__proto__ || Object.getPrototypeOf(o); }; return _getPrototypeOf(o); }
+
+var SearchFieldContainer = /*#__PURE__*/function (_React$Component) {
   _inherits(SearchFieldContainer, _React$Component);
+
+  var _super = _createSuper(SearchFieldContainer);
 
   function SearchFieldContainer() {
     _classCallCheck(this, SearchFieldContainer);
 
-    return _possibleConstructorReturn(this, (SearchFieldContainer.__proto__ || Object.getPrototypeOf(SearchFieldContainer)).apply(this, arguments));
+    return _super.apply(this, arguments);
   }
 
   _createClass(SearchFieldContainer, [{
     key: "render",
     value: function render() {
-      var _props = this.props,
-          bootstrapCss = _props.bootstrapCss,
-          onNewSearch = _props.onNewSearch;
-
-      return _react2.default.createElement(
-        "div",
-        { className: (0, _classnames2.default)({ "col-md-3": bootstrapCss }) },
-        _react2.default.createElement(
-          "div",
-          { className: (0, _classnames2.default)({ "panel": bootstrapCss, "panel-default": bootstrapCss }) },
-          _react2.default.createElement(
-            "header",
-            { className: (0, _classnames2.default)({ "panel-heading": bootstrapCss }) },
-            _react2.default.createElement(
-              "button",
-              { className: (0, _classnames2.default)({
-                  "btn": bootstrapCss,
-                  "btn-default": bootstrapCss,
-                  "btn-xs": bootstrapCss,
-                  "pull-right": bootstrapCss
-                }),
-                onClick: onNewSearch },
-              "New search"
-            ),
-            _react2.default.createElement(
-              "label",
-              null,
-              "Search"
-            )
-          ),
-          _react2.default.createElement(
-            "ul",
-            { className: (0, _classnames2.default)("solr-search-fields", { "list-group": bootstrapCss }) },
-            this.props.children
-          )
-        )
-      );
+      var _this$props = this.props,
+          bootstrapCss = _this$props.bootstrapCss,
+          onNewSearch = _this$props.onNewSearch;
+      return /*#__PURE__*/_react["default"].createElement("div", {
+        className: (0, _classnames["default"])({
+          "col-md-3": bootstrapCss
+        })
+      }, /*#__PURE__*/_react["default"].createElement("div", {
+        className: (0, _classnames["default"])({
+          "panel": bootstrapCss,
+          "panel-default": bootstrapCss
+        })
+      }, /*#__PURE__*/_react["default"].createElement("header", {
+        className: (0, _classnames["default"])({
+          "panel-heading": bootstrapCss
+        })
+      }, /*#__PURE__*/_react["default"].createElement("button", {
+        className: (0, _classnames["default"])({
+          "btn": bootstrapCss,
+          "btn-default": bootstrapCss,
+          "btn-xs": bootstrapCss,
+          "pull-right": bootstrapCss
+        }),
+        onClick: onNewSearch
+      }, "New search"), /*#__PURE__*/_react["default"].createElement("label", null, "Search")), /*#__PURE__*/_react["default"].createElement("ul", {
+        className: (0, _classnames["default"])("solr-search-fields", {
+          "list-group": bootstrapCss
+        })
+      }, this.props.children)));
     }
   }]);
 
   return SearchFieldContainer;
-}(_react2.default.Component);
+}(_react["default"].Component);
 
 SearchFieldContainer.propTypes = {
-  bootstrapCss: _propTypes2.default.bool,
-  children: _propTypes2.default.array,
-  onNewSearch: _propTypes2.default.func
+  bootstrapCss: _propTypes["default"].bool,
+  children: _propTypes["default"].array,
+  onNewSearch: _propTypes["default"].func
 };
+var _default = SearchFieldContainer;
+exports["default"] = _default;
 
-exports.default = SearchFieldContainer;
-
-},{"classnames":1,"prop-types":13,"react":"react"}],40:[function(_dereq_,module,exports){
+},{"classnames":1,"prop-types":10,"react":"react"}],39:[function(_dereq_,module,exports){
 "use strict";
+
+function _typeof(obj) { "@babel/helpers - typeof"; return _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (obj) { return typeof obj; } : function (obj) { return obj && "function" == typeof Symbol && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }, _typeof(obj); }
 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
+exports["default"] = void 0;
 
-var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
+var _propTypes = _interopRequireDefault(_dereq_("prop-types"));
 
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+var _react = _interopRequireDefault(_dereq_("react"));
 
-var _propTypes = _dereq_("prop-types");
+var _classnames = _interopRequireDefault(_dereq_("classnames"));
 
-var _propTypes2 = _interopRequireDefault(_propTypes);
+var _componentPack = _interopRequireDefault(_dereq_("./component-pack"));
 
-var _react = _dereq_("react");
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
 
-var _react2 = _interopRequireDefault(_react);
-
-var _classnames = _dereq_("classnames");
-
-var _classnames2 = _interopRequireDefault(_classnames);
-
-var _componentPack = _dereq_("./component-pack");
-
-var _componentPack2 = _interopRequireDefault(_componentPack);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+function _extends() { _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; }; return _extends.apply(this, arguments); }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
-function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
 
-function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); Object.defineProperty(Constructor, "prototype", { writable: false }); return Constructor; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function"); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, writable: true, configurable: true } }); Object.defineProperty(subClass, "prototype", { writable: false }); if (superClass) _setPrototypeOf(subClass, superClass); }
+
+function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf(o, p) { o.__proto__ = p; return o; }; return _setPrototypeOf(o, p); }
+
+function _createSuper(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct(); return function _createSuperInternal() { var Super = _getPrototypeOf(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = _getPrototypeOf(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return _possibleConstructorReturn(this, result); }; }
+
+function _possibleConstructorReturn(self, call) { if (call && (_typeof(call) === "object" || typeof call === "function")) { return call; } else if (call !== void 0) { throw new TypeError("Derived constructors may only return object or undefined"); } return _assertThisInitialized(self); }
+
+function _assertThisInitialized(self) { if (self === void 0) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return self; }
+
+function _isNativeReflectConstruct() { if (typeof Reflect === "undefined" || !Reflect.construct) return false; if (Reflect.construct.sham) return false; if (typeof Proxy === "function") return true; try { Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function () {})); return true; } catch (e) { return false; } }
+
+function _getPrototypeOf(o) { _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf(o) { return o.__proto__ || Object.getPrototypeOf(o); }; return _getPrototypeOf(o); }
 
 var getFacetValues = function getFacetValues(type, results, field, lowerBound, upperBound) {
   return type === "period-range-facet" ? (results.facets[lowerBound] || []).concat(results.facets[upperBound] || []) : type === "list-facet" || type === "range-facet" ? results.facets[field] || [] : null;
 };
 
-var SolrFacetedSearch = function (_React$Component) {
+var SolrFacetedSearch = /*#__PURE__*/function (_React$Component) {
   _inherits(SolrFacetedSearch, _React$Component);
+
+  var _super = _createSuper(SolrFacetedSearch);
 
   function SolrFacetedSearch() {
     _classCallCheck(this, SolrFacetedSearch);
 
-    return _possibleConstructorReturn(this, (SolrFacetedSearch.__proto__ || Object.getPrototypeOf(SolrFacetedSearch)).apply(this, arguments));
+    return _super.apply(this, arguments);
   }
 
   _createClass(SolrFacetedSearch, [{
     key: "render",
     value: function render() {
-      var _this2 = this;
+      var _this = this;
 
-      var _props = this.props,
-          customComponents = _props.customComponents,
-          bootstrapCss = _props.bootstrapCss,
-          query = _props.query,
-          results = _props.results,
-          truncateFacetListsAt = _props.truncateFacetListsAt;
-      var _props2 = this.props,
-          onSearchFieldChange = _props2.onSearchFieldChange,
-          onSortFieldChange = _props2.onSortFieldChange,
-          onPageChange = _props2.onPageChange,
-          onCsvExport = _props2.onCsvExport;
+      var _this$props = this.props,
+          customComponents = _this$props.customComponents,
+          bootstrapCss = _this$props.bootstrapCss,
+          query = _this$props.query,
+          results = _this$props.results,
+          truncateFacetListsAt = _this$props.truncateFacetListsAt;
+      var _this$props2 = this.props,
+          onSearchFieldChange = _this$props2.onSearchFieldChange,
+          onSortFieldChange = _this$props2.onSortFieldChange,
+          onPageChange = _this$props2.onPageChange,
+          onCsvExport = _this$props2.onCsvExport;
       var searchFields = query.searchFields,
           sortFields = query.sortFields,
           start = query.start,
           rows = query.rows;
-
-
       var SearchFieldContainerComponent = customComponents.searchFields.container;
       var ResultContainerComponent = customComponents.results.container;
-
       var ResultComponent = customComponents.results.result;
       var ResultCount = customComponents.results.resultCount;
       var ResultHeaderComponent = customComponents.results.header;
@@ -4298,146 +4543,158 @@ var SolrFacetedSearch = function (_React$Component) {
       var CsvExportComponent = customComponents.results.csvExport;
       var CurrentQueryComponent = customComponents.searchFields.currentQuery;
       var SortComponent = customComponents.sortFields.menu;
-      var resultPending = results.pending ? _react2.default.createElement(ResultPendingComponent, { bootstrapCss: bootstrapCss }) : null;
-
-      var pagination = query.pageStrategy === "paginate" ? _react2.default.createElement(PaginateComponent, _extends({}, this.props, { bootstrapCss: bootstrapCss, onChange: onPageChange })) : null;
-
-      var preloadListItem = query.pageStrategy === "cursor" && results.docs.length < results.numFound ? _react2.default.createElement(PreloadComponent, this.props) : null;
-
-      return _react2.default.createElement(
-        "div",
-        { className: (0, _classnames2.default)("solr-faceted-search", { "container": bootstrapCss, "col-md-12": bootstrapCss }) },
-        _react2.default.createElement(
-          SearchFieldContainerComponent,
-          { bootstrapCss: bootstrapCss, onNewSearch: this.props.onNewSearch },
-          searchFields.map(function (searchField, i) {
-            var type = searchField.type,
-                field = searchField.field,
-                lowerBound = searchField.lowerBound,
-                upperBound = searchField.upperBound;
-
-            var SearchComponent = customComponents.searchFields[type];
-            var facets = getFacetValues(type, results, field, lowerBound, upperBound);
-
-            return _react2.default.createElement(SearchComponent, _extends({
-              key: i }, _this2.props, searchField, {
-              bootstrapCss: bootstrapCss,
-              facets: facets,
-              truncateFacetListsAt: truncateFacetListsAt,
-              onChange: onSearchFieldChange }));
-          })
-        ),
-        _react2.default.createElement(
-          ResultContainerComponent,
-          { bootstrapCss: bootstrapCss },
-          _react2.default.createElement(
-            ResultHeaderComponent,
-            { bootstrapCss: bootstrapCss },
-            _react2.default.createElement(ResultCount, { bootstrapCss: bootstrapCss, numFound: results.numFound }),
-            resultPending,
-            _react2.default.createElement(SortComponent, { bootstrapCss: bootstrapCss, onChange: onSortFieldChange, sortFields: sortFields }),
-            this.props.showCsvExport ? _react2.default.createElement(CsvExportComponent, { bootstrapCss: bootstrapCss, onClick: onCsvExport }) : null
-          ),
-          _react2.default.createElement(CurrentQueryComponent, _extends({}, this.props, { onChange: onSearchFieldChange })),
-          pagination,
-          _react2.default.createElement(
-            ResultListComponent,
-            { bootstrapCss: bootstrapCss },
-            results.docs.map(function (doc, i) {
-              return _react2.default.createElement(ResultComponent, { bootstrapCss: bootstrapCss,
-                doc: doc,
-                fields: searchFields,
-                key: doc.id || i,
-                onSelect: _this2.props.onSelectDoc,
-                resultIndex: i,
-                rows: rows,
-                start: start
-              });
-            }),
-            preloadListItem
-          ),
-          pagination
-        )
-      );
+      var resultPending = results.pending ? /*#__PURE__*/_react["default"].createElement(ResultPendingComponent, {
+        bootstrapCss: bootstrapCss
+      }) : null;
+      var pagination = query.pageStrategy === "paginate" ? /*#__PURE__*/_react["default"].createElement(PaginateComponent, _extends({}, this.props, {
+        bootstrapCss: bootstrapCss,
+        onChange: onPageChange
+      })) : null;
+      var preloadListItem = query.pageStrategy === "cursor" && results.docs.length < results.numFound ? /*#__PURE__*/_react["default"].createElement(PreloadComponent, this.props) : null;
+      return /*#__PURE__*/_react["default"].createElement("div", {
+        className: (0, _classnames["default"])("solr-faceted-search", {
+          "container": bootstrapCss,
+          "col-md-12": bootstrapCss
+        })
+      }, /*#__PURE__*/_react["default"].createElement(SearchFieldContainerComponent, {
+        bootstrapCss: bootstrapCss,
+        onNewSearch: this.props.onNewSearch
+      }, searchFields.map(function (searchField, i) {
+        var type = searchField.type,
+            field = searchField.field,
+            lowerBound = searchField.lowerBound,
+            upperBound = searchField.upperBound;
+        var SearchComponent = customComponents.searchFields[type];
+        var facets = getFacetValues(type, results, field, lowerBound, upperBound);
+        return /*#__PURE__*/_react["default"].createElement(SearchComponent, _extends({
+          key: i
+        }, _this.props, searchField, {
+          bootstrapCss: bootstrapCss,
+          facets: facets,
+          truncateFacetListsAt: truncateFacetListsAt,
+          onChange: onSearchFieldChange
+        }));
+      })), /*#__PURE__*/_react["default"].createElement(ResultContainerComponent, {
+        bootstrapCss: bootstrapCss
+      }, /*#__PURE__*/_react["default"].createElement(ResultHeaderComponent, {
+        bootstrapCss: bootstrapCss
+      }, /*#__PURE__*/_react["default"].createElement(ResultCount, {
+        bootstrapCss: bootstrapCss,
+        numFound: results.numFound
+      }), resultPending, /*#__PURE__*/_react["default"].createElement(SortComponent, {
+        bootstrapCss: bootstrapCss,
+        onChange: onSortFieldChange,
+        sortFields: sortFields
+      }), this.props.showCsvExport ? /*#__PURE__*/_react["default"].createElement(CsvExportComponent, {
+        bootstrapCss: bootstrapCss,
+        onClick: onCsvExport
+      }) : null), /*#__PURE__*/_react["default"].createElement(CurrentQueryComponent, _extends({}, this.props, {
+        onChange: onSearchFieldChange
+      })), pagination, /*#__PURE__*/_react["default"].createElement(ResultListComponent, {
+        bootstrapCss: bootstrapCss
+      }, results.docs.map(function (doc, i) {
+        return /*#__PURE__*/_react["default"].createElement(ResultComponent, {
+          bootstrapCss: bootstrapCss,
+          doc: doc,
+          fields: searchFields,
+          key: doc.id || i,
+          onSelect: _this.props.onSelectDoc,
+          resultIndex: i,
+          rows: rows,
+          start: start
+        });
+      }), preloadListItem), pagination));
     }
   }]);
 
   return SolrFacetedSearch;
-}(_react2.default.Component);
+}(_react["default"].Component);
 
 SolrFacetedSearch.defaultProps = {
   bootstrapCss: true,
-  customComponents: _componentPack2.default,
+  customComponents: _componentPack["default"],
   pageStrategy: "paginate",
   rows: 20,
-  searchFields: [{ type: "text", field: "*" }],
+  searchFields: [{
+    type: "text",
+    field: "*"
+  }],
   sortFields: [],
   truncateFacetListsAt: -1,
   showCsvExport: false
 };
-
 SolrFacetedSearch.propTypes = {
-  bootstrapCss: _propTypes2.default.bool,
-  customComponents: _propTypes2.default.object,
-  onCsvExport: _propTypes2.default.func,
-  onNewSearch: _propTypes2.default.func,
-  onPageChange: _propTypes2.default.func,
-  onSearchFieldChange: _propTypes2.default.func.isRequired,
-  onSelectDoc: _propTypes2.default.func,
-  onSortFieldChange: _propTypes2.default.func.isRequired,
-  query: _propTypes2.default.object,
-  results: _propTypes2.default.object,
-  showCsvExport: _propTypes2.default.bool,
-  truncateFacetListsAt: _propTypes2.default.number
+  bootstrapCss: _propTypes["default"].bool,
+  customComponents: _propTypes["default"].object,
+  onCsvExport: _propTypes["default"].func,
+  onNewSearch: _propTypes["default"].func,
+  onPageChange: _propTypes["default"].func,
+  onSearchFieldChange: _propTypes["default"].func.isRequired,
+  onSelectDoc: _propTypes["default"].func,
+  onSortFieldChange: _propTypes["default"].func.isRequired,
+  query: _propTypes["default"].object,
+  results: _propTypes["default"].object,
+  showCsvExport: _propTypes["default"].bool,
+  truncateFacetListsAt: _propTypes["default"].number
 };
+var _default = SolrFacetedSearch;
+exports["default"] = _default;
 
-exports.default = SolrFacetedSearch;
-
-},{"./component-pack":22,"classnames":1,"prop-types":13,"react":"react"}],41:[function(_dereq_,module,exports){
+},{"./component-pack":21,"classnames":1,"prop-types":10,"react":"react"}],40:[function(_dereq_,module,exports){
 "use strict";
+
+function _typeof(obj) { "@babel/helpers - typeof"; return _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (obj) { return typeof obj; } : function (obj) { return obj && "function" == typeof Symbol && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }, _typeof(obj); }
 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
+exports["default"] = void 0;
 
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+var _propTypes = _interopRequireDefault(_dereq_("prop-types"));
 
-var _propTypes = _dereq_("prop-types");
+var _react = _interopRequireDefault(_dereq_("react"));
 
-var _propTypes2 = _interopRequireDefault(_propTypes);
+var _reactDom = _interopRequireDefault(_dereq_("react-dom"));
 
-var _react = _dereq_("react");
+var _classnames = _interopRequireDefault(_dereq_("classnames"));
 
-var _react2 = _interopRequireDefault(_react);
-
-var _reactDom = _dereq_("react-dom");
-
-var _reactDom2 = _interopRequireDefault(_reactDom);
-
-var _classnames = _dereq_("classnames");
-
-var _classnames2 = _interopRequireDefault(_classnames);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
-function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
 
-function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); Object.defineProperty(Constructor, "prototype", { writable: false }); return Constructor; }
 
-var SortMenu = function (_React$Component) {
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function"); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, writable: true, configurable: true } }); Object.defineProperty(subClass, "prototype", { writable: false }); if (superClass) _setPrototypeOf(subClass, superClass); }
+
+function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf(o, p) { o.__proto__ = p; return o; }; return _setPrototypeOf(o, p); }
+
+function _createSuper(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct(); return function _createSuperInternal() { var Super = _getPrototypeOf(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = _getPrototypeOf(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return _possibleConstructorReturn(this, result); }; }
+
+function _possibleConstructorReturn(self, call) { if (call && (_typeof(call) === "object" || typeof call === "function")) { return call; } else if (call !== void 0) { throw new TypeError("Derived constructors may only return object or undefined"); } return _assertThisInitialized(self); }
+
+function _assertThisInitialized(self) { if (self === void 0) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return self; }
+
+function _isNativeReflectConstruct() { if (typeof Reflect === "undefined" || !Reflect.construct) return false; if (Reflect.construct.sham) return false; if (typeof Proxy === "function") return true; try { Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function () {})); return true; } catch (e) { return false; } }
+
+function _getPrototypeOf(o) { _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf(o) { return o.__proto__ || Object.getPrototypeOf(o); }; return _getPrototypeOf(o); }
+
+var SortMenu = /*#__PURE__*/function (_React$Component) {
   _inherits(SortMenu, _React$Component);
 
+  var _super = _createSuper(SortMenu);
+
   function SortMenu(props) {
+    var _this;
+
     _classCallCheck(this, SortMenu);
 
-    var _this = _possibleConstructorReturn(this, (SortMenu.__proto__ || Object.getPrototypeOf(SortMenu)).call(this, props));
-
+    _this = _super.call(this, props);
     _this.state = {
       isOpen: false
     };
-    _this.documentClickListener = _this.handleDocumentClick.bind(_this);
+    _this.documentClickListener = _this.handleDocumentClick.bind(_assertThisInitialized(_this));
     return _this;
   }
 
@@ -4455,15 +4712,20 @@ var SortMenu = function (_React$Component) {
     key: "toggleSelect",
     value: function toggleSelect() {
       if (this.state.isOpen) {
-        this.setState({ isOpen: false });
+        this.setState({
+          isOpen: false
+        });
       } else {
-        this.setState({ isOpen: true });
+        this.setState({
+          isOpen: true
+        });
       }
     }
   }, {
     key: "onSelect",
     value: function onSelect(sortField) {
       var foundIdx = this.props.sortFields.indexOf(sortField);
+
       if (foundIdx < 0) {
         this.props.onChange(sortField, "asc");
       } else {
@@ -4475,7 +4737,7 @@ var SortMenu = function (_React$Component) {
     value: function handleDocumentClick(ev) {
       var isOpen = this.state.isOpen;
 
-      if (isOpen && !_reactDom2.default.findDOMNode(this).contains(ev.target)) {
+      if (isOpen && !_reactDom["default"].findDOMNode(this).contains(ev.target)) {
         this.setState({
           isOpen: false
         });
@@ -4486,9 +4748,9 @@ var SortMenu = function (_React$Component) {
     value: function render() {
       var _this2 = this;
 
-      var _props = this.props,
-          bootstrapCss = _props.bootstrapCss,
-          sortFields = _props.sortFields;
+      var _this$props = this.props,
+          bootstrapCss = _this$props.bootstrapCss,
+          sortFields = _this$props.sortFields;
 
       if (sortFields.length === 0) {
         return null;
@@ -4497,143 +4759,133 @@ var SortMenu = function (_React$Component) {
       var value = sortFields.find(function (sf) {
         return sf.value;
       });
+      return /*#__PURE__*/_react["default"].createElement("span", {
+        className: (0, _classnames["default"])({
+          "pull-right": bootstrapCss
+        })
+      }, /*#__PURE__*/_react["default"].createElement("span", {
+        className: (0, _classnames["default"])({
+          "dropdown": bootstrapCss,
+          "open": this.state.isOpen
+        })
+      }, /*#__PURE__*/_react["default"].createElement("button", {
+        className: (0, _classnames["default"])({
+          "btn": bootstrapCss,
+          "btn-default": bootstrapCss,
+          "btn-xs": bootstrapCss,
+          "dropdown-toggle": bootstrapCss
+        }),
+        onClick: this.toggleSelect.bind(this)
+      }, value ? value.label : "- select sort -", " ", /*#__PURE__*/_react["default"].createElement("span", {
+        className: "caret"
+      })), /*#__PURE__*/_react["default"].createElement("ul", {
+        className: "dropdown-menu"
+      }, sortFields.map(function (sortField, i) {
+        return /*#__PURE__*/_react["default"].createElement("li", {
+          key: i
+        }, /*#__PURE__*/_react["default"].createElement("a", {
+          onClick: function onClick() {
+            _this2.onSelect(sortField.field);
 
-      return _react2.default.createElement(
-        "span",
-        { className: (0, _classnames2.default)({ "pull-right": bootstrapCss }) },
-        _react2.default.createElement(
-          "span",
-          { className: (0, _classnames2.default)({ "dropdown": bootstrapCss, "open": this.state.isOpen }) },
-          _react2.default.createElement(
-            "button",
-            { className: (0, _classnames2.default)({
-                "btn": bootstrapCss,
-                "btn-default": bootstrapCss,
-                "btn-xs": bootstrapCss,
-                "dropdown-toggle": bootstrapCss
-              }),
-              onClick: this.toggleSelect.bind(this) },
-            value ? value.label : "- select sort -",
-            " ",
-            _react2.default.createElement("span", { className: "caret" })
-          ),
-          _react2.default.createElement(
-            "ul",
-            { className: "dropdown-menu" },
-            sortFields.map(function (sortField, i) {
-              return _react2.default.createElement(
-                "li",
-                { key: i },
-                _react2.default.createElement(
-                  "a",
-                  { onClick: function onClick() {
-                      _this2.onSelect(sortField.field);
-                      _this2.toggleSelect();
-                    } },
-                  sortField.label
-                )
-              );
-            }),
-            value ? _react2.default.createElement(
-              "li",
-              null,
-              _react2.default.createElement(
-                "a",
-                { onClick: function onClick() {
-                    _this2.props.onChange(value.field, null);
-                    _this2.toggleSelect();
-                  } },
-                "- clear -"
-              )
-            ) : null
-          )
-        ),
-        value ? _react2.default.createElement(
-          "span",
-          { className: (0, _classnames2.default)({ "btn-group": bootstrapCss }) },
-          _react2.default.createElement(
-            "button",
-            { className: (0, _classnames2.default)({
-                "btn": bootstrapCss,
-                "btn-default": bootstrapCss,
-                "btn-xs": bootstrapCss,
-                active: value.value === "asc"
-              }),
-              onClick: function onClick() {
-                return _this2.props.onChange(value.field, "asc");
-              } },
-            "asc"
-          ),
-          _react2.default.createElement(
-            "button",
-            { className: (0, _classnames2.default)({
-                "btn": bootstrapCss,
-                "btn-default": bootstrapCss,
-                "btn-xs": bootstrapCss,
-                active: value.value === "desc"
-              }),
-              onClick: function onClick() {
-                return _this2.props.onChange(value.field, "desc");
-              } },
-            "desc"
-          )
-        ) : null
-      );
+            _this2.toggleSelect();
+          }
+        }, sortField.label));
+      }), value ? /*#__PURE__*/_react["default"].createElement("li", null, /*#__PURE__*/_react["default"].createElement("a", {
+        onClick: function onClick() {
+          _this2.props.onChange(value.field, null);
+
+          _this2.toggleSelect();
+        }
+      }, "- clear -")) : null)), value ? /*#__PURE__*/_react["default"].createElement("span", {
+        className: (0, _classnames["default"])({
+          "btn-group": bootstrapCss
+        })
+      }, /*#__PURE__*/_react["default"].createElement("button", {
+        className: (0, _classnames["default"])({
+          "btn": bootstrapCss,
+          "btn-default": bootstrapCss,
+          "btn-xs": bootstrapCss,
+          active: value.value === "asc"
+        }),
+        onClick: function onClick() {
+          return _this2.props.onChange(value.field, "asc");
+        }
+      }, "asc"), /*#__PURE__*/_react["default"].createElement("button", {
+        className: (0, _classnames["default"])({
+          "btn": bootstrapCss,
+          "btn-default": bootstrapCss,
+          "btn-xs": bootstrapCss,
+          active: value.value === "desc"
+        }),
+        onClick: function onClick() {
+          return _this2.props.onChange(value.field, "desc");
+        }
+      }, "desc")) : null);
     }
   }]);
 
   return SortMenu;
-}(_react2.default.Component);
+}(_react["default"].Component);
 
 SortMenu.propTypes = {
-  bootstrapCss: _propTypes2.default.bool,
-  onChange: _propTypes2.default.func,
-  sortFields: _propTypes2.default.array
+  bootstrapCss: _propTypes["default"].bool,
+  onChange: _propTypes["default"].func,
+  sortFields: _propTypes["default"].array
 };
+var _default = SortMenu;
+exports["default"] = _default;
 
-exports.default = SortMenu;
-
-},{"classnames":1,"prop-types":13,"react":"react","react-dom":"react-dom"}],42:[function(_dereq_,module,exports){
+},{"classnames":1,"prop-types":10,"react":"react","react-dom":"react-dom"}],41:[function(_dereq_,module,exports){
 "use strict";
+
+function _typeof(obj) { "@babel/helpers - typeof"; return _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (obj) { return typeof obj; } : function (obj) { return obj && "function" == typeof Symbol && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }, _typeof(obj); }
 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
+exports["default"] = void 0;
 
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+var _propTypes = _interopRequireDefault(_dereq_("prop-types"));
 
-var _propTypes = _dereq_("prop-types");
+var _react = _interopRequireDefault(_dereq_("react"));
 
-var _propTypes2 = _interopRequireDefault(_propTypes);
+var _classnames = _interopRequireDefault(_dereq_("classnames"));
 
-var _react = _dereq_("react");
+var _search = _interopRequireDefault(_dereq_("../icons/search"));
 
-var _react2 = _interopRequireDefault(_react);
-
-var _classnames = _dereq_("classnames");
-
-var _classnames2 = _interopRequireDefault(_classnames);
-
-var _search = _dereq_("../icons/search");
-
-var _search2 = _interopRequireDefault(_search);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
-function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
 
-function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); Object.defineProperty(Constructor, "prototype", { writable: false }); return Constructor; }
 
-var TextSearch = function (_React$Component) {
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function"); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, writable: true, configurable: true } }); Object.defineProperty(subClass, "prototype", { writable: false }); if (superClass) _setPrototypeOf(subClass, superClass); }
+
+function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf(o, p) { o.__proto__ = p; return o; }; return _setPrototypeOf(o, p); }
+
+function _createSuper(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct(); return function _createSuperInternal() { var Super = _getPrototypeOf(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = _getPrototypeOf(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return _possibleConstructorReturn(this, result); }; }
+
+function _possibleConstructorReturn(self, call) { if (call && (_typeof(call) === "object" || typeof call === "function")) { return call; } else if (call !== void 0) { throw new TypeError("Derived constructors may only return object or undefined"); } return _assertThisInitialized(self); }
+
+function _assertThisInitialized(self) { if (self === void 0) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return self; }
+
+function _isNativeReflectConstruct() { if (typeof Reflect === "undefined" || !Reflect.construct) return false; if (Reflect.construct.sham) return false; if (typeof Proxy === "function") return true; try { Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function () {})); return true; } catch (e) { return false; } }
+
+function _getPrototypeOf(o) { _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf(o) { return o.__proto__ || Object.getPrototypeOf(o); }; return _getPrototypeOf(o); }
+
+var TextSearch = /*#__PURE__*/function (_React$Component) {
   _inherits(TextSearch, _React$Component);
 
+  var _super = _createSuper(TextSearch);
+
   function TextSearch(props) {
+    var _this;
+
     _classCallCheck(this, TextSearch);
 
-    var _this = _possibleConstructorReturn(this, (TextSearch.__proto__ || Object.getPrototypeOf(TextSearch)).call(this, props));
-
+    _this = _super.call(this, props);
     _this.state = {
       value: ""
     };
@@ -4674,127 +4926,107 @@ var TextSearch = function (_React$Component) {
   }, {
     key: "render",
     value: function render() {
-      var _props = this.props,
-          label = _props.label,
-          bootstrapCss = _props.bootstrapCss,
-          collapse = _props.collapse;
-
-
-      return _react2.default.createElement(
-        "li",
-        { className: (0, _classnames2.default)({ "list-group-item": bootstrapCss }) },
-        _react2.default.createElement(
-          "header",
-          { onClick: this.toggleExpand.bind(this) },
-          _react2.default.createElement(
-            "h5",
-            null,
-            bootstrapCss ? _react2.default.createElement(
-              "span",
-              null,
-              _react2.default.createElement("span", { className: (0, _classnames2.default)("glyphicon", {
-                  "glyphicon-collapse-down": !collapse,
-                  "glyphicon-collapse-up": collapse
-                }) }),
-              " "
-            ) : null,
-            label
-          )
-        ),
-        _react2.default.createElement(
-          "div",
-          { style: { display: collapse ? "none" : "block" } },
-          _react2.default.createElement("input", {
-            onChange: this.handleInputChange.bind(this),
-            onKeyDown: this.handleInputKeyDown.bind(this),
-            value: this.state.value || "" }),
-          "\xA0",
-          _react2.default.createElement(
-            "button",
-            { className: (0, _classnames2.default)({ "btn": bootstrapCss, "btn-default": bootstrapCss, "btn-sm": bootstrapCss }),
-              onClick: this.handleSubmit.bind(this) },
-            _react2.default.createElement(_search2.default, null)
-          )
-        )
-      );
+      var _this$props = this.props,
+          label = _this$props.label,
+          bootstrapCss = _this$props.bootstrapCss,
+          collapse = _this$props.collapse;
+      return /*#__PURE__*/_react["default"].createElement("li", {
+        className: (0, _classnames["default"])({
+          "list-group-item": bootstrapCss
+        })
+      }, /*#__PURE__*/_react["default"].createElement("header", {
+        onClick: this.toggleExpand.bind(this)
+      }, /*#__PURE__*/_react["default"].createElement("h5", null, bootstrapCss ? /*#__PURE__*/_react["default"].createElement("span", null, /*#__PURE__*/_react["default"].createElement("span", {
+        className: (0, _classnames["default"])("glyphicon", {
+          "glyphicon-collapse-down": !collapse,
+          "glyphicon-collapse-up": collapse
+        })
+      }), " ") : null, label)), /*#__PURE__*/_react["default"].createElement("div", {
+        style: {
+          display: collapse ? "none" : "block"
+        }
+      }, /*#__PURE__*/_react["default"].createElement("input", {
+        onChange: this.handleInputChange.bind(this),
+        onKeyDown: this.handleInputKeyDown.bind(this),
+        value: this.state.value || ""
+      }), "\xA0", /*#__PURE__*/_react["default"].createElement("button", {
+        className: (0, _classnames["default"])({
+          "btn": bootstrapCss,
+          "btn-default": bootstrapCss,
+          "btn-sm": bootstrapCss
+        }),
+        onClick: this.handleSubmit.bind(this)
+      }, /*#__PURE__*/_react["default"].createElement(_search["default"], null))));
     }
   }]);
 
   return TextSearch;
-}(_react2.default.Component);
+}(_react["default"].Component);
 
 TextSearch.defaultProps = {
   field: null
 };
-
 TextSearch.propTypes = {
-  bootstrapCss: _propTypes2.default.bool,
-  collapse: _propTypes2.default.bool,
-  field: _propTypes2.default.string.isRequired,
-  label: _propTypes2.default.string,
-  onChange: _propTypes2.default.func,
-  onSetCollapse: _propTypes2.default.func
+  bootstrapCss: _propTypes["default"].bool,
+  collapse: _propTypes["default"].bool,
+  field: _propTypes["default"].string.isRequired,
+  label: _propTypes["default"].string,
+  onChange: _propTypes["default"].func,
+  onSetCollapse: _propTypes["default"].func
 };
+var _default = TextSearch;
+exports["default"] = _default;
 
-exports.default = TextSearch;
-
-},{"../icons/search":25,"classnames":1,"prop-types":13,"react":"react"}],43:[function(_dereq_,module,exports){
+},{"../icons/search":24,"classnames":1,"prop-types":10,"react":"react"}],42:[function(_dereq_,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.SolrClient = exports.defaultComponentPack = exports.SolrFacetedSearch = undefined;
+Object.defineProperty(exports, "SolrClient", {
+  enumerable: true,
+  get: function get() {
+    return _solrClient.SolrClient;
+  }
+});
+Object.defineProperty(exports, "SolrFacetedSearch", {
+  enumerable: true,
+  get: function get() {
+    return _solrFacetedSearch["default"];
+  }
+});
+exports["default"] = void 0;
+Object.defineProperty(exports, "defaultComponentPack", {
+  enumerable: true,
+  get: function get() {
+    return _componentPack["default"];
+  }
+});
 
-var _solrFacetedSearch = _dereq_("./components/solr-faceted-search");
+var _solrFacetedSearch = _interopRequireDefault(_dereq_("./components/solr-faceted-search"));
 
-var _solrFacetedSearch2 = _interopRequireDefault(_solrFacetedSearch);
-
-var _componentPack = _dereq_("./components/component-pack");
-
-var _componentPack2 = _interopRequireDefault(_componentPack);
+var _componentPack = _interopRequireDefault(_dereq_("./components/component-pack"));
 
 var _solrClient = _dereq_("./api/solr-client");
 
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
 
-exports.default = _solrFacetedSearch2.default;
-exports.SolrFacetedSearch = _solrFacetedSearch2.default;
-exports.defaultComponentPack = _componentPack2.default;
-exports.SolrClient = _solrClient.SolrClient;
+var _default = _solrFacetedSearch["default"];
+exports["default"] = _default;
 
-},{"./api/solr-client":20,"./components/component-pack":22,"./components/solr-faceted-search":40}],44:[function(_dereq_,module,exports){
+},{"./api/solr-client":19,"./components/component-pack":21,"./components/solr-faceted-search":39}],43:[function(_dereq_,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
+exports["default"] = _default;
 
-var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
+function ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); enumerableOnly && (symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; })), keys.push.apply(keys, symbols); } return keys; }
 
-exports.default = function () {
-  var state = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : initialState;
-  var action = arguments[1];
+function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = null != arguments[i] ? arguments[i] : {}; i % 2 ? ownKeys(Object(source), !0).forEach(function (key) { _defineProperty(target, key, source[key]); }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)) : ownKeys(Object(source)).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } return target; }
 
-  switch (action.type) {
-    case "SET_QUERY_FIELDS":
-      return setQueryFields(state, action);
-    case "SET_SEARCH_FIELDS":
-      return _extends({}, state, { searchFields: action.newFields, start: state.pageStrategy === "paginate" ? 0 : null });
-    case "SET_SORT_FIELDS":
-      return _extends({}, state, { sortFields: action.newSortFields, start: state.pageStrategy === "paginate" ? 0 : null });
-    case "SET_FILTERS":
-      return _extends({}, state, { filters: action.newFilters, start: state.pageStrategy === "paginate" ? 0 : null });
-    case "SET_START":
-      return _extends({}, state, { start: action.newStart });
-    case "SET_RESULTS":
-      return action.data.nextCursorMark ? _extends({}, state, { cursorMark: action.data.nextCursorMark }) : state;
-    case "SET_GROUP":
-      return _extends({}, state, { group: action.group });
-  }
-
-  return state;
-};
+function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
 
 var initialState = {
   searchFields: [],
@@ -4808,7 +5040,7 @@ var initialState = {
 };
 
 var setQueryFields = function setQueryFields(state, action) {
-  return _extends({}, state, {
+  return _objectSpread(_objectSpread({}, state), {}, {
     searchFields: action.searchFields,
     sortFields: action.sortFields,
     url: action.url,
@@ -4820,43 +5052,64 @@ var setQueryFields = function setQueryFields(state, action) {
   });
 };
 
-},{}],45:[function(_dereq_,module,exports){
+function _default() {
+  var state = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : initialState;
+  var action = arguments.length > 1 ? arguments[1] : undefined;
+
+  switch (action.type) {
+    case "SET_QUERY_FIELDS":
+      return setQueryFields(state, action);
+
+    case "SET_SEARCH_FIELDS":
+      return _objectSpread(_objectSpread({}, state), {}, {
+        searchFields: action.newFields,
+        start: state.pageStrategy === "paginate" ? 0 : null
+      });
+
+    case "SET_SORT_FIELDS":
+      return _objectSpread(_objectSpread({}, state), {}, {
+        sortFields: action.newSortFields,
+        start: state.pageStrategy === "paginate" ? 0 : null
+      });
+
+    case "SET_FILTERS":
+      return _objectSpread(_objectSpread({}, state), {}, {
+        filters: action.newFilters,
+        start: state.pageStrategy === "paginate" ? 0 : null
+      });
+
+    case "SET_START":
+      return _objectSpread(_objectSpread({}, state), {}, {
+        start: action.newStart
+      });
+
+    case "SET_RESULTS":
+      return action.data.nextCursorMark ? _objectSpread(_objectSpread({}, state), {}, {
+        cursorMark: action.data.nextCursorMark
+      }) : state;
+
+    case "SET_GROUP":
+      return _objectSpread(_objectSpread({}, state), {}, {
+        group: action.group
+      });
+  }
+
+  return state;
+}
+
+},{}],44:[function(_dereq_,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
+exports["default"] = _default;
 
-var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
+function ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); enumerableOnly && (symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; })), keys.push.apply(keys, symbols); } return keys; }
 
-exports.default = function () {
-  var state = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : initialState;
-  var action = arguments[1];
+function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = null != arguments[i] ? arguments[i] : {}; i % 2 ? ownKeys(Object(source), !0).forEach(function (key) { _defineProperty(target, key, source[key]); }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)) : ownKeys(Object(source)).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } return target; }
 
-  switch (action.type) {
-    case "SET_RESULTS":
-      return _extends({}, state, {
-        docs: action.data.response ? action.data.response.docs : [],
-        grouped: action.data.grouped || {},
-        numFound: action.data.response ? action.data.response.numFound : tryGroupedResultCount(action.data),
-        facets: action.data.facet_counts.facet_fields,
-        highlighting: action.data.highlighting ? action.data.highlighting : [],
-        pending: false
-      });
-
-    case "SET_NEXT_RESULTS":
-      return _extends({}, state, {
-        docs: state.docs.concat(action.data.response.docs),
-        pending: false
-      });
-
-    case "SET_RESULTS_PENDING":
-      return _extends({}, state, { pending: true
-      });
-  }
-
-  return state;
-};
+function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
 
 var initialState = {
   facets: {},
@@ -4874,38 +5127,72 @@ var tryGroupedResultCount = function tryGroupedResultCount(data) {
       }
     }
   }
+
   return 0;
 };
 
-},{}],46:[function(_dereq_,module,exports){
+function _default() {
+  var state = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : initialState;
+  var action = arguments.length > 1 ? arguments[1] : undefined;
+
+  switch (action.type) {
+    case "SET_RESULTS":
+      return _objectSpread(_objectSpread({}, state), {}, {
+        docs: action.data.response ? action.data.response.docs : [],
+        grouped: action.data.grouped || {},
+        numFound: action.data.response ? action.data.response.numFound : tryGroupedResultCount(action.data),
+        facets: action.data.facet_counts.facet_fields,
+        highlighting: action.data.highlighting ? action.data.highlighting : [],
+        pending: false
+      });
+
+    case "SET_NEXT_RESULTS":
+      return _objectSpread(_objectSpread({}, state), {}, {
+        docs: state.docs.concat(action.data.response.docs),
+        pending: false
+      });
+
+    case "SET_RESULTS_PENDING":
+      return _objectSpread(_objectSpread({}, state), {}, {
+        pending: true
+      });
+  }
+
+  return state;
+}
+
+},{}],45:[function(_dereq_,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
+exports["default"] = _default;
 
-var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
+function _toConsumableArray(arr) { return _arrayWithoutHoles(arr) || _iterableToArray(arr) || _unsupportedIterableToArray(arr) || _nonIterableSpread(); }
 
-exports.default = function () {
-  var state = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : initialState;
-  var action = arguments[1];
+function _nonIterableSpread() { throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
 
-  switch (action.type) {
-    case "SET_SUGGEST_QUERY":
-      return setSuggestQuery(state, action);
-    case "SET_SEARCH_FIELDS":
-      return setSuggestQueryField(state, action);
-  }
+function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen); }
 
-  return state;
-};
+function _iterableToArray(iter) { if (typeof Symbol !== "undefined" && iter[Symbol.iterator] != null || iter["@@iterator"] != null) return Array.from(iter); }
 
-function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } else { return Array.from(arr); } }
+function _arrayWithoutHoles(arr) { if (Array.isArray(arr)) return _arrayLikeToArray(arr); }
+
+function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
+
+function _extends() { _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; }; return _extends.apply(this, arguments); }
+
+function ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); enumerableOnly && (symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; })), keys.push.apply(keys, symbols); } return keys; }
+
+function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = null != arguments[i] ? arguments[i] : {}; i % 2 ? ownKeys(Object(source), !0).forEach(function (key) { _defineProperty(target, key, source[key]); }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)) : ownKeys(Object(source)).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } return target; }
+
+function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
 
 var initialState = {};
 
 var setSuggestQuery = function setSuggestQuery(state, action) {
-  return _extends({}, action.suggestQuery);
+  return _objectSpread({}, action.suggestQuery);
 };
 
 var setSuggestQueryField = function setSuggestQueryField(state, action) {
@@ -4913,47 +5200,69 @@ var setSuggestQueryField = function setSuggestQueryField(state, action) {
   if (action.newFields.filter(function (field) {
     return field.field === "tm_rendered_item" && field.value === "";
   }).length) {
-    return _extends.apply(undefined, [{}].concat(_toConsumableArray(state), [{
+    return _extends.apply(void 0, [{}].concat(_toConsumableArray(state), [{
       suggestQuery: {
         value: ""
       }
     }]));
   }
-  return _extends({}, state);
+
+  return _objectSpread({}, state);
 };
 
-},{}],47:[function(_dereq_,module,exports){
+function _default() {
+  var state = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : initialState;
+  var action = arguments.length > 1 ? arguments[1] : undefined;
+
+  switch (action.type) {
+    case "SET_SUGGEST_QUERY":
+      return setSuggestQuery(state, action);
+
+    case "SET_SEARCH_FIELDS":
+      return setSuggestQueryField(state, action);
+  }
+
+  return state;
+}
+
+},{}],46:[function(_dereq_,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
+exports["default"] = _default;
 
-var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
+function ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); enumerableOnly && (symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; })), keys.push.apply(keys, symbols); } return keys; }
 
-exports.default = function () {
-  var state = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : initialState;
-  var action = arguments[1];
+function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = null != arguments[i] ? arguments[i] : {}; i % 2 ? ownKeys(Object(source), !0).forEach(function (key) { _defineProperty(target, key, source[key]); }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)) : ownKeys(Object(source)).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } return target; }
 
-  switch (action.type) {
-    case "SET_SUGGESTIONS":
-      return _extends({}, state, {
-        docs: action.data.response ? action.data.response.docs : [],
-        suggestionsPending: false
-      });
-
-    case "SET_SUGGESTIONS_PENDING":
-      return _extends({}, state, { suggestionsPending: true
-      });
-  }
-
-  return state;
-};
+function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
 
 var initialState = {
   suggestionsPending: false,
   docs: []
 };
 
-},{}]},{},[43])(43)
+function _default() {
+  var state = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : initialState;
+  var action = arguments.length > 1 ? arguments[1] : undefined;
+
+  switch (action.type) {
+    case "SET_SUGGESTIONS":
+      return _objectSpread(_objectSpread({}, state), {}, {
+        docs: action.data.response ? action.data.response.docs : [],
+        suggestionsPending: false
+      });
+
+    case "SET_SUGGESTIONS_PENDING":
+      return _objectSpread(_objectSpread({}, state), {}, {
+        suggestionsPending: true
+      });
+  }
+
+  return state;
+}
+
+},{}]},{},[42])(42)
 });
