@@ -12,6 +12,7 @@
     "url": "https://github.com/HuygensING/solr-faceted-search-react.git"
   },
   "scripts": {
+    "build": "webpack --mode production",
     "start": "scripts/watch.sh",
     "test": "mocha --compilers js:@babel/register --recursive test",
     "test:watch": "nodemon -x \"mocha --compilers js:@babel/register --recursive --watch test\" -w test -w build"
@@ -35,6 +36,7 @@
     "@babel/preset-env": "^7.0.0",
     "@babel/preset-react": "^7.0.0",
     "@types/react": "^17.0.38",
+    "babel-loader": "^8.2.3",
     "babelify": "^10.0.0",
     "browserify": "^17.0.0",
     "css-loader": "^6.5.1",
@@ -47,6 +49,7 @@
     "mocha": "^9.2.0",
     "nodemon": "^2.0.15",
     "sinon": "^12.0.1",
-    "watchify": "^4.0.0"
+    "watchify": "^4.0.0",
+    "webpack-cli": "^4.9.2"
   }
 }
