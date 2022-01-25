@@ -4,56 +4,53 @@ Solr faceted search client and react component pack
 
 [![Build Status](https://travis-ci.org/HuygensING/solr-faceted-search-react.svg?branch=master)](https://travis-ci.org/HuygensING/solr-faceted-search-react)
 
-## Table of Contents
+## webpack way
+The original module is built by browerify which cannot used by create-my-app.
+This version is build by webpack and could be use by create-my-app.
 
-1. [Quick start](#quick-start)
-2. [Redux integration](#redux-integration)
-3. [Dynamically loaded result lists](#dynamically-loaded-result-lists)
-4. [Using preset filters](#using-preset-filters)
-5. [Injecting custom components](#injecting-custom-components)
-6. [Bootstrap CSS class names](#bootstrap-css-class-names)
-7. [Using the SolrClient class](#using-the-solrclient-class)
-8. [Component Lego](#component-lego)
-
-Appendix A: [Setting up Solr](#setting-up-solr)
-
-Appendix B: [Building the example webapp](#building-the-example-webapp)
-
-## Screenshot
-
-![Screenshot](https://raw.githubusercontent.com/HuygensING/solr-faceted-search-react/master/screen.png "Screenshot")
-
-
-## Quick Start
-
-This quick start assumes a solr installation as documented in the section on [setting up solr](#setting-up-solr).
-
-Instructions on building a tiny web project from this example can be found [here](#building-the-example-webapp).
-
-Installing this module:
-
-```bash
-	$ npm i solr-faceted-search-react --save
+## Build simple create-my-app
+```
+npx create-react-app@latest my-app --use-npm
 ```
 
-The source below assumes succesfully [setting up solr](#setting-up-solr).
+Clone this version solr-faceted-search-react and link it to my-app
+```
+cd my-app
 
-```javascript
-// index.js
-import React from "react";
-import ReactDOM from "react-dom";
+# if my-app and solr-faceted-search-react is under same folder, or if not, use the path to solr-faceted-search-react
+npm link ../solr-faceted-search-react
+```
+
+Install required module
+```
+npm install redux
+```
+
+Modify index.js under src and url to your solr select API.
+```
+import React from 'react';
+import ReactDOM from 'react-dom';
+import reportWebVitals from './reportWebVitals';
+
 import {
 	SolrFacetedSearch,
 	SolrClient
 } from "solr-faceted-search-react";
 
+import solrReducer from "./solr-reducer";
+import { createStore } from "redux"
+
+// Create a store for the reducer.
+const store = createStore(solrReducer);
+
 // The search fields and filterable facets you want
 const fields = [
 	{label: "All text fields", field: "*", type: "text"},
-	{label: "Name", field: "name_t", type: "text"},
-	{label: "Characteristics", field: "characteristics_ss", type: "list-facet"},
-	{label: "Date of birth", field: "birthDate_i", type: "range-facet"},
-	{label: "Date of death", field: "deathDate_i", type: "range-facet"}
+	{label: "Source", field: "source", type: "list-facet", facetSort:"index"},
+	{label: "Context", field: "hasContextCategory", type: "list-facet", facetSort:"count"},
+	{label: "Material", field: "hasMaterialCategory", type: "list-facet", facetSort:"count"},
+	{label: "Specimen", field: "hasSpecimenCategory", type: "list-facet", facetSort:"count"},
+	{label: "Registrant", field: "registrant", type: "list-facet", facetSort:"count"},
 ];
 
 // The sortable fields you want
@@ -63,47 +60,45 @@ const sortFields = [
 	{label: "Date of death", field: "deathDate_i"}
 ];
 
-document.addEventListener("DOMContentLoaded", () => {
-	// The client class
-	new SolrClient({
-		// The solr index url to be queried by the client
-		url: "http://localhost:8983/solr/gettingstarted/select",
-		searchFields: fields,
-		sortFields: sortFields,
 
-		// The change handler passes the current query- and result state for render
-		// as well as the default handlers for interaction with the search component
-		onChange: (state, handlers) =>
-			// Render the faceted search component
-			ReactDOM.render(
-				<SolrFacetedSearch 
-					{...state}
-					{...handlers}
-					bootstrapCss={true}
-					onSelectDoc={(doc) => console.log(doc)}
-				/>,
-				document.getElementById("app")
-			)
-	}).initialize(); // this will send an initial search, fetching all results from solr
+// Construct the solr client api class
+const solrClient = 	new SolrClient({
+	url: "http://localhost:8984/solr/isb_core_records/select",
+	searchFields: fields,
+	sortFields: sortFields,
+
+	// Delegate change callback to redux dispatcher
+	onChange: (state) => store.dispatch({type: "SET_SOLR_STATE", state: state})
 });
+
+// Register your app with the store
+store.subscribe(() =>
+	// In stead of using the handlers passed along in the onChange callback of SolrClient
+	// use the .getHandlers() method to get the default click / change handlers
+	ReactDOM.render(
+
+		<SolrFacetedSearch
+			{...store.getState()}
+			{...solrClient.getHandlers()}
+			bootstrapCss={true}
+			onSelectDoc={(doc) => console.log(doc)}
+		/>,
+		document.getElementById("app")
+	)
+);
+
+document.addEventListener("DOMContentLoaded", () => {
+	// this will send an initial search initializing the app
+	
+	solrClient.initialize();
+});
+reportWebVitals();
+
 ```
 
-Instructions on building this example can be found [here](#building-the-example-webapp).
-
-
-
-## Redux integration
-
-In the quick start example, the SolrClient state is tightly coupled to the rendering of the SolrFacetedSearch component.
-
-In many cases however, you might want to manage state yourself at application scope. 
-The example below illustrates how you can delegate state management to your own reducer/store using redux.
-
-(To rebuild the webapp with redux follow the [building the redux example](#building-the-redux-example).)
-
-Given this reducer:
-```javascript
-// solr-reducer.js
+Create a new file named "solr-reducer.js" under src
+```
+// src/solr-reducer.js
 const initialState = {
 	query: {},
 	result: {}
@@ -118,419 +113,23 @@ export default function(state=initialState, action) {
 }
 ```
 
-The quick start example can be modified to look like this:
-```javascript
-// (...)
-import solrReducer from "./solr-reducer";
-import { createStore } from "redux"
-
-// Create a store for the reducer.
-const store = createStore(solrReducer);
-
-// (...)
-
-// Construct the solr client api class
-const solrClient = 	new SolrClient({
-	url: "http://localhost:8983/solr/gettingstarted/select",
-	searchFields: fields,
-	sortFields: sortFields,
-
-	// Delegate change callback to redux dispatcher
-	onChange: (state) => store.dispatch({type: "SET_SOLR_STATE", state: state})
-});
-
-// Register your app with the store
-store.subscribe(() =>
-	// In stead of using the handlers passed along in the onChange callback of SolrClient
-	// use the .getHandlers() method to get the default click / change handlers
-	ReactDOM.render(
-		<SolrFacetedSearch
-			{...store.getState()}
-			{...solrClient.getHandlers()}
-			bootstrapCss={true}
-			onSelectDoc={(doc) => console.log(doc)}
-		/>,
-		document.getElementById("app")
-	)
-);
-
-document.addEventListener("DOMContentLoaded", () => {
-	// this will send an initial search initializing the app
-	solrClient.initialize();
-});
-
+Modify index.html under public
 ```
-To rebuild the webapp with redux follow the [building the redux example](#building-the-redux-example).
-
-## Dynamically loaded result lists
-
-If you want to change the way to paginate through the result list initialize the SolrClient with pageStrategy set to "cursor".
-
-In this case you must also provide a unique idField, which is explained [here](https://cwiki.apache.org/confluence/display/solr/Pagination+of+Results#PaginationofResults-FetchingALargeNumberofSortedResults:Cursors). 
-
-
-```javascript
-const solrClient = new SolrClient({
-	pageStrategy: "cursor", // do not paginate, but dynamically load new results
-	idField: "id" // the field name in the index which is unique per indexed document.
-	// ...
-});
-```
-
-## Using preset filters
-
-If you want to show only a subset of the index, filtered by a specific field, you can via the the filters prop of the SolrClient:
-
-```javascript
-const solrClient = new SolrClient({
-	filters: [
-		{field: "name_t", value "maria"},
-		{field: "birthDate_i", type: "range", value [1880, 1890]}
-	]
-	// ...
-});
-```
-
-
-
-## Injecting custom components
-
-The SolrFacetedSearch component provides the facility of overriding its inner components. 
-
-The default components are exposed through the defaultComponentPack, which has the following structure:
-
-```javascript
-{
-	searchFields: {
-		text: TextSearch, // src/components/text-search/index.js
-		"list-facet": ListFacet, // src/components/list-facet/index.js
-		"range-facet": RangeFacet,  // src/components/range-facet/index.js
-		container: SearchFieldContainer, //  src/components/search-field-container.js
-		currentQuery: CurrentQuery //  src/components/current-query/index.js
-	},
-	results: {
-		result: Result, // src/components/results/result.js
-		resultCount: CountLabel, // src/components/results/count-label.js
-		header: ResultHeader, // src/components/results/header.js
-		list: ResultList, // src/components/results/list.js
-		container: ResultContainer, // src/components/results/container.js
-		pending: ResultPending, // src/components/results/pending.js
-		paginate: ResultPagination // src/components/results/pagination.js
-		preloadIndicator: PreloadIndicator // src/components/results/preload-indicator.js
-	},
-	sortFields: {
-		menu: SortMenu // src/components/sort-menu/index.js
-	}
-}
-```
-
-To override a default component an altered version of the defaultComponentPack can be passed to the SolrFacetedSearch component
-via the customComponents prop:
-```javascript
-import {
-	SolrFacetedSearch,
-	SolrClient,
-	defaultComponentPack
-} from "solr-faceted-search-react";
-
-// Custom class for the result component
-class MyResult extends React.Component {
-	render() {
-		return (<li>
-			<a onClick={() => this.props.onSelect(this.props.doc)}>MyResult: {this.props.doc.name_t}</a>
-		</li>)
-	}
-}
-
-// Create a custom component pack from the default component pack
-const myComponentPack = {
-	...defaultComponentPack,
-	results: {
-		...defaultComponentPack.results,
-		result: MyResult
-	}
-}
-
-// Render with the custom result component
-ReactDOM.render(
-	<SolrFacetedSearch
-		{...state}
-		{...handlers}
-		bootstrapCss={true}
-		customComponents={myComponentPack}
-		onSelectDoc={(doc) => console.log(doc)}
-	/>,
-	document.getElementById("app")
-);
-```
-
-When overriding a component it is worthwhile to look at the prop signature (and usage) in the source of the default component.
-
-## Bootstrap CSS class names
-
-The SolrFacetedSearch component and its default components optionally add bootstrap class names to the rendered dom elements.
-
-To turn this off, render the SolrFacetedSearch component with the property bootstrapCss set to false.
-
-```javascript
-ReactDOM.render(
-	<SolrFacetedSearch
-		{...state}
-		{...handlers}
-		bootstrapCss={false}
-		onSelectDoc={(doc) => console.log(doc)}
-	/>,
-	document.getElementById("app")
-);
-```
-
-## Using the SolrClient class
-
-##### Settings passed to the constructor:
-
-```javascript
-{
-	url: "..." // the search url
-	userpass: "btoa('username:password')" // [optional, the username/password if your Solr server requires basic auth ]
-	// This login should only allow read access and should NOT be considered secure as it will be trivially accessible by the client.
-	searchFields: [{...}] // the search field configuration
-	sortFields: [{...}] // the sort field configuration,
-	onChange: (state, handlers) => {...} // the change handler for query and result state
-	rows: [1-9][0-9]+ // [optional] amount of results per page
-	pageStrategy: "paginate" // [optional, defaults to "paginate", other option is "cursor" - in which case you must provide a unique idField from the index]
-	idField: "id" // [optional, but required when using pageStrategy: "cursor"!]
-	facetLimit: [1-9][0-9]+ // [optional, sets the facet.limit param (defaults to -1 = all) ]
-	facetSort: "index" // [optional, how to sort the list facets by default (defaults to solr default)]
-	filters: [{...}] // [optional: static filters passed to search, not visible in user interface]
-}
-
-```
-
-##### Layout of searchFields:
-```javascript
-	[
-		{
-			label: "All fields", // label of the field
-			field: "*", // field in index (asterisk indicates search in default text field)
-			type: "text" // renders a free input, sends a text filter query
-		},
-		{
-			label: ...
-			field: "name_t" // field in index
-			type: "text",
-			value: "jo*" // [optional: initial text search value]
-		},
-		{
-			label: ...
-			field: "deathDate_i",
-			type: "range-facet", // renders a range slider, sends a range query,
-			value: [1890, 1900] // [optional: initial range value of filter]
-		},
-		{
-			label: ...
-			field: "characteristics_ss",
-			type: "list-facet", // renders a facet list with checkboxes, sends a filter query
-			value: ["Publicist", "Bestuurslid vakvereniging"] // [optional: initial active filters]
-			facetSort: "index" // [optional: how to sort the list facet, options: "index" / "count"]
-		},
-		{
-			label: ...
-			field: "my-local-name",
-			lowerBound: "startDate_i",
-			upperBound: "endDate_i",
-			type: "period-range-facet", // renders a range slider, sends a range query over startDate_i and endDate_i
-			value: [1890, 1900] // [optional: initial range value of filter]
-		},
-	]
-```
-Search fields are presented in order of configuration array.
-
-##### Layout of sortFields:
-```javascript
-[
-	{
-		label: "Name", // Label of the field
-		field: "koppelnaam_s" // field in index
-		value: "asc" // [optional: presorts on this field ascendingly]
-	},
-	{
-		label: "Date of birth",
-		field: "birthDate_i",
-		value: "desc" // [optional: presorts on this field descendingly]
-	}
-]
-```
-
-##### Layout of filters:
-```javascript
-	[
-		{
-			field: "name_t" // field in index
-			value: "jo*" // filter value
-		},
-		{
-			field: "deathDate_i",
-			type: "range",
-			value: [1890, 1900] // [optional: initial range value of filter]
-		}
-	]
-```
-
-
-##### Methods
-
-The SolrClient class exposes a number of methods to manipulate its state directly.
-
-Invoking the methods below will trigger a new solr search (and rerender of the SolrFacetedSearch component).
-
-These methods should be called after .initialize() has been invoked.
-
-
-##### Changing the result page:
-
-```javascript
-	solrClient.setCurrentPage(3); // jump to page 3 (humans: 4) of the results
-```
-
-##### Setting active filters on a searchField
-
-```javascript
-	solrClient.setSearchFieldValue("characteristics_ss", ["Publicist", "Bestuurslid vakvereniging"]); // filter on exacly "Publicist" and "Bestuurslid vakvereniging"
-	solrClient.setSearchFieldValue("deathDate_i", [1890, 1900]); // filter on exactly the range 1890-1900
-	solrClient.setSearchFieldValue("name_t", "jo*"); // find all persons with a name starting with "jo"
-```
-
-#### Setting sortations
-```javascript
-	solrClient.setSortFieldValue("name_t", "asc"); // sort by name ascendingly
-	solrClient.setSortFieldValue("birthDate_i", "desc"); // sort by birth date descendingly
-```
-
-## Component Lego
-
-The SolrFacetedSearch component is not actually needed as a wrapper around the components.
-
-If the container classes in the defaultComponentPack do not provide enough flexibility for moving around components, 
-they can be used in a standalone manner.
-
-Note, however, that prop management based on state.query and state.results is then up to the app developer.
-
-Minor example:
-```javascript
-
-	// ...
-
-	const TextSearch = defaultComponentPack.searchFields.text;
-
-	// ...
-
-	ReactDOM.render(
-		<div>
-			<TextSearch 
-				bootstrapCss={false}
-				field="name_t"
-				label="Standalone name field"
-				onChange={solrClient.getHandlers().onSearchFieldChange}
-				value={state.query.searchFields.find((sf) => sf.field === "name_t").value }
-			/>
-			{state.results.docs.map((doc, i) => <div key={i}>{doc.name_t}</div>)}
-		</div>,
-		document.getElementById("app")
-	)
-```
-
-
-
-## Setting up solr
-
-### Install solr
-
-Download solr from the [download page](http://lucene.apache.org/solr/mirrors-solr-latest-redir.html) and extract the .tgz or .zip file.
-
-### Start solr with CORS
-
-Navigate to the solr dir (assuming solr-6.1.0).
-
-```bash
-	$ cd solr-6.1.0
-```
-
-Edit the file server/etc/webdefault.xml and add these lines just above the last closing tag
-
-```xml
-	<!-- enable CORS filters (only suitable for local testing, use a proxy for real world application) -->
-	<filter>
-		<filter-name>cross-origin</filter-name>
-		<filter-class>org.eclipse.jetty.servlets.CrossOriginFilter</filter-class>
-	</filter>
-	<filter-mapping>
-		<filter-name>cross-origin</filter-name>
-		<url-pattern>/*</url-pattern>
-	</filter-mapping>
-	<!--- /enable CORS filters -->
-</web-app>
-```
-
-Start the solr server
-
-```bash
-	$ bin/solr start -e cloud -noprompt
-```
-
-### Load sample data
-
-Get sample data from this project
-
-```bash
-	$ wget https://raw.githubusercontent.com/HuygensING/solr-faceted-search-react/master/solr-sample-data.json
-```
-
-Load the sample data into the gettingstarted index of solr
-
-```bash
-	$ bin/post -c gettingstarted solr-sample-data.json
-```
-
-Check whether the data was succesfully indexed by navigation to [http://localhost:8983/solr/gettingstarted/select?q=*:*&wt=json](http://localhost:8983/solr/gettingstarted/select?q=*:*&wt=json)
-
-### Done
-This completes the solr instruction. Back to [quick start](#quick-start)
-
-## Building the example webapp
-
-These are just some minimal steps for building a webapp from the quick start with browserify.
-
-Install react
-
-```bash
-	$ npm i react react-dom --save
-```
-
-For this example install
-
-```
-	$ npm i browserify babelify babel-preset-react babel-preset-react babel-preset-es2015 babel-preset-stage-2 --save-dev
-```
-
-Run browserify
-```bash
-	$ ./node_modules/.bin/browserify index.js \
-		--require react \
-		--require react-dom \
-		--transform [ babelify --presets [ react es2015 stage-2 ] ] \
-		--standalone FacetedSearch \
-		-o web.js
-```
-
-Load this index.html in a browser
-
-```html
 <!DOCTYPE html>
-<html>
-<head>
-	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-	<script src="web.js"></script>
-	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" />
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <link rel="icon" href="%PUBLIC_URL%/favicon.ico" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#000000" />
+    <meta
+      name="description"
+      content="Web site created using create-react-app"
+    />
+    <link rel="apple-touch-icon" href="%PUBLIC_URL%/logo192.png" />
+    <link rel="manifest" href="%PUBLIC_URL%/manifest.json" />
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" />
+    <title>React App</title>
 	<style type="text/css">
 		a {
 			cursor: pointer;
@@ -639,25 +238,27 @@ Load this index.html in a browser
 			width: calc(100% - 125px)
 		}
 	</style>
-</head>
-<body>
-	<div id="app"></div>
-</body>
+  </head>
+  <body>
+    <noscript>You need to enable JavaScript to run this app.</noscript>
+    <div id="app"></div>
+    <!--
+      This HTML file is a template.
+      If you open it directly in the browser, you will see an empty page.
+
+      You can add webfonts, meta tags, or analytics to this file.
+      The build step will place the bundled scripts into the <body> tag.
+
+      To begin the development, run `npm start` or `yarn start`.
+      To create a production bundle, use `npm run build` or `yarn build`.
+    -->
+  </body>
 </html>
+
 ```
 
-This is enough for the [quick start](#quick-start).
-
-### Building the redux example
-
-To run the redux integration example install redux:
-```bash
-	$ npm i redux --save
+# Start 
+After you setup create-my-app, run it.
 ```
-
-And rebuild like this:
-```bash
-	$
+npm start
 ```
-
-Back to the [redux example](#redux-integration)
