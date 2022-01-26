@@ -13,17 +13,17 @@ This version is build by webpack and could be use by create-my-app.
 npx create-react-app@latest my-app --use-npm
 ```
 
+Install required module
+```
+npm install redux
+```
+
 Clone this version solr-faceted-search-react and link it to my-app
 ```
 cd my-app
 
 # if my-app and solr-faceted-search-react is under same folder, or if not, use the path to solr-faceted-search-react
 npm link ../solr-faceted-search-react
-```
-
-Install required module
-```
-npm install redux
 ```
 
 Modify index.js under src and url to your solr select API.
