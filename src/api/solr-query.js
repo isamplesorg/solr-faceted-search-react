@@ -59,6 +59,11 @@ const buildQuery = (fields, mainQueryField) => fields
   .map((queryFilter) => `fq=${queryFilter}`)
   .join("&");
 
+const requestField = (fields) => fields
+  .filter((field) => field.type === "list-facet" || field.type === "range-facet")
+  .map((field) => `${encodeURIComponent(field.field)}`)
+  .join(" ")
+
 const facetFields = (fields) => fields
   .filter((field) => field.type === "list-facet" || field.type === "range-facet")
   .map((field) => `facet.field=${encodeURIComponent(field.field)}`)
@@ -148,6 +153,7 @@ const solrQuery = (query, format = {wt: "json"}) => {
   const mainQuery = buildMainQuery(searchFields.concat(filters), mainQueryField, isD7, proxyIsDisabled);
   const queryParams = buildQuery(searchFields.concat(filters), mainQueryField);
 
+  const facetedReturnParam = requestField(searchFields);
   const facetFieldParam = facetFields(searchFields);
   const facetSortParams = facetSorts(searchFields);
   const facetLimitParam = `facet.limit=${facetLimit || -1}`;
@@ -161,6 +167,7 @@ const solrQuery = (query, format = {wt: "json"}) => {
   const highlightParam = buildHighlight(hl);
 
   return mainQuery +
+    `${facetedReturnParam.length > 0 ? `&fl=${facetedReturnParam}` : ""}` +
     `${queryParams.length > 0 ? `&${queryParams}` : ""}` +
     `${sortParam.length > 0 ? `&sort=${sortParam}` : ""}` +
     `${facetFieldParam.length > 0 ? `&${facetFieldParam}` : ""}` +
@@ -234,8 +241,10 @@ const solrSuggestQuery = (suggestQuery, format = {wt: "json"}) => {
   const mainQuery = buildSuggestQuery(searchFields.concat(queryFilters), mainQueryField, appendWildcard, proxyIsDisabled, isD7);
   const queryParams = buildQuery(searchFields.concat(queryFilters), mainQueryField);
   const facetFieldParam = facetFields(searchFields);
+  const facetedReturnParam = requestField(searchFields);
 
   return mainQuery +
+    `${facetedReturnParam.length > 0 ? `&fl=${facetedReturnParam}` : ""}` +
     `${queryParams.length > 0 ? `&${queryParams}` : ""}` +
     `${facetFieldParam.length > 0 ? `&${facetFieldParam}` : ""}` +
     `&rows=${rows}` +
