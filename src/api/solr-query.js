@@ -35,11 +35,11 @@ const textFieldToQueryFilter = (field) => {
     return null;
   }
 
-  return encodeURIComponent(field.field === "*" ? field.value : `${field.field}:${field.value}`);
+  return encodeURIComponent(`${field.field}:${field.value}`);
 };
 
 const fieldToQueryFilter = (field) => {
-  if (field.type === "text") {
+  if (field.type === "text" && field.field !== "*") {
     return textFieldToQueryFilter(field);
   } else if (field.type === "list-facet") {
     return listFacetFieldToQueryFilter(field);
@@ -51,7 +51,8 @@ const fieldToQueryFilter = (field) => {
   return null;
 };
 
-const buildQuery = (fields, mainQueryField) => fields
+const buildQuery = (fields, mainQueryField) => {
+  var query = fields
 // Do not include main query field in filter field query param.
   .filter((searchField) => (!Object.hasOwnProperty.call(searchField, "field") || (Object.hasOwnProperty.call(searchField, "field") && searchField.field !== mainQueryField)))
   .map(fieldToQueryFilter)
@@ -59,8 +60,23 @@ const buildQuery = (fields, mainQueryField) => fields
   .map((queryFilter) => `fq=${queryFilter}`)
   .join("&");
 
+  // find the value for all text search
+  var all_text_value = fields
+  .filter((searchField) => searchField.field === '*')
+  .map((all) => all.value);
+
+  // search all text type fields
+  var all_text = fields
+  .filter((searchField) => (!Object.hasOwnProperty.call(searchField, "field") || (Object.hasOwnProperty.call(searchField, "field") && searchField.field !== mainQueryField)))
+  .filter((searchField) => searchField.type === 'text' && searchField.field !== "*")
+  .map((Queryfields) => encodeURIComponent(all_text_value != "" ? `${Queryfields.field}:${all_text_value}` : ""))
+  .join(" OR ");
+
+  // enable all text field seach cross multiple text type
+  query = all_text_value == "" ? query : query == "" ? `fq=${all_text}` : query + "&" + `fq=${all_text}`;
+  return query;}
+
 const requestField = (fields) => fields
-  .filter((field) => field.type === "list-facet" || field.type === "range-facet")
   .map((field) => `${encodeURIComponent(field.field)}`)
   .join(" ")
 
