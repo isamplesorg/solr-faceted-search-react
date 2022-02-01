@@ -5,8 +5,17 @@ Solr faceted search client and react component pack
 [![Build Status](https://travis-ci.org/HuygensING/solr-faceted-search-react.svg?branch=master)](https://travis-ci.org/HuygensING/solr-faceted-search-react)
 
 ## webpack way
-The original module is built by browerify which cannot used by create-my-app.
+The original module is built by browserify which cannot used by create-my-app.
 This version is build by webpack and could be use by create-my-app.
+
+## Use this component in local development
+As this is just a React component, you'll need to use another project to run it.  In that app's top-level you'll want to run this:
+
+`npm link </path/to/solr-faceted-search-react>`
+
+After you've done that, you should start the watch command in *this* project's directory, which will cause the host app to reload when there are changes to this project:
+
+`npm run watch`
 
 ## Build simple create-my-app
 ```
