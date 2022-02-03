@@ -31,7 +31,7 @@ class Result extends React.Component {
       </li>
     );
   }
-}``
+}
 
 Result.propTypes = {
   bootstrapCss: PropTypes.bool,
