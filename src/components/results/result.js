@@ -13,11 +13,6 @@ class Result extends React.Component {
 
   render() {
     const {bootstrapCss, doc, fields} = this.props;
-    const Withlink = ({field, link, children})=> (
-        field.field === "id"?
-        <a href={link}>{children}</a> :
-        children
-    );
 
     return (
       <li className={cx({"list-group-item": bootstrapCss})} onClick={() => this.props.onSelect(doc)}>
@@ -25,16 +20,18 @@ class Result extends React.Component {
           {fields.filter((field) => field.field !== "*").map((field, i) =>
             <li key={i}>
               <label>{field.label || field.field}</label>
-              <Withlink field={field} link={"https://n2t.net/" + this.renderValue(field.field, doc)}>
-                {this.renderValue(field.field, doc)}
-              </Withlink>
+              {field.field === "id"?
+                <a href={"https://n2t.net/" + this.renderValue(field.field, doc)}>{this.renderValue(field.field, doc)}</a>
+                :
+                this.renderValue(field.field, doc)
+              }
             </li>
           )}
         </ul>
       </li>
     );
   }
-}
+}``
 
 Result.propTypes = {
   bootstrapCss: PropTypes.bool,
