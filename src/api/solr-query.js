@@ -35,11 +35,11 @@ const textFieldToQueryFilter = (field) => {
     return null;
   }
 
-  return encodeURIComponent(field.field === "*" ? field.value : `${field.field}:${field.value}`);
+  return encodeURIComponent(`${field.field}:${field.value}`);
 };
 
 const fieldToQueryFilter = (field) => {
-  if (field.type === "text") {
+  if (field.type === "text" && field.field !== "*") {
     return textFieldToQueryFilter(field);
   } else if (field.type === "list-facet") {
     return listFacetFieldToQueryFilter(field);
@@ -51,13 +51,34 @@ const fieldToQueryFilter = (field) => {
   return null;
 };
 
-const buildQuery = (fields, mainQueryField) => fields
+const buildQuery = (fields, mainQueryField) => {
+  var query = fields
 // Do not include main query field in filter field query param.
   .filter((searchField) => (!Object.hasOwnProperty.call(searchField, "field") || (Object.hasOwnProperty.call(searchField, "field") && searchField.field !== mainQueryField)))
   .map(fieldToQueryFilter)
   .filter((queryFilter) => queryFilter !== null)
   .map((queryFilter) => `fq=${queryFilter}`)
   .join("&");
+
+  // find the value for all text search
+  var all_text_value = fields
+  .filter((searchField) => searchField.field === '*')
+  .map((all) => all.value);
+
+  // search all text type fields
+  var all_text = fields
+  .filter((searchField) => (!Object.hasOwnProperty.call(searchField, "field") || (Object.hasOwnProperty.call(searchField, "field") && searchField.field !== mainQueryField)))
+  .filter((searchField) => searchField.type === 'text' && searchField.field !== "*")
+  .map((Queryfields) => encodeURIComponent(all_text_value != "" ? `${Queryfields.field}:${all_text_value}` : ""))
+  .join(" OR ");
+
+  // enable all text field seach cross multiple text type
+  query = all_text_value == "" ? query : query == "" ? `fq=${all_text}` : query + "&" + `fq=${all_text}`;
+  return query;}
+
+const requestField = (fields) => fields
+  .map((field) => `${encodeURIComponent(field.field)}`)
+  .join(" ")
 
 const facetFields = (fields) => fields
   .filter((field) => field.type === "list-facet" || field.type === "range-facet")
@@ -148,6 +169,7 @@ const solrQuery = (query, format = {wt: "json"}) => {
   const mainQuery = buildMainQuery(searchFields.concat(filters), mainQueryField, isD7, proxyIsDisabled);
   const queryParams = buildQuery(searchFields.concat(filters), mainQueryField);
 
+  const facetedReturnParam = requestField(searchFields);
   const facetFieldParam = facetFields(searchFields);
   const facetSortParams = facetSorts(searchFields);
   const facetLimitParam = `facet.limit=${facetLimit || -1}`;
@@ -161,6 +183,7 @@ const solrQuery = (query, format = {wt: "json"}) => {
   const highlightParam = buildHighlight(hl);
 
   return mainQuery +
+    `${facetedReturnParam.length > 0 ? `&fl=${facetedReturnParam}` : ""}` +
     `${queryParams.length > 0 ? `&${queryParams}` : ""}` +
     `${sortParam.length > 0 ? `&sort=${sortParam}` : ""}` +
     `${facetFieldParam.length > 0 ? `&${facetFieldParam}` : ""}` +
@@ -234,8 +257,10 @@ const solrSuggestQuery = (suggestQuery, format = {wt: "json"}) => {
   const mainQuery = buildSuggestQuery(searchFields.concat(queryFilters), mainQueryField, appendWildcard, proxyIsDisabled, isD7);
   const queryParams = buildQuery(searchFields.concat(queryFilters), mainQueryField);
   const facetFieldParam = facetFields(searchFields);
+  const facetedReturnParam = requestField(searchFields);
 
   return mainQuery +
+    `${facetedReturnParam.length > 0 ? `&fl=${facetedReturnParam}` : ""}` +
     `${queryParams.length > 0 ? `&${queryParams}` : ""}` +
     `${facetFieldParam.length > 0 ? `&${facetFieldParam}` : ""}` +
     `&rows=${rows}` +
