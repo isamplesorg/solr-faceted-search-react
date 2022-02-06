@@ -39,6 +39,9 @@ export default function (state = initialState, action) {
       return action.data.nextCursorMark ? {...state, cursorMark: action.data.nextCursorMark} : state;
     case "SET_GROUP":
       return {...state, group: action.group};
+    // new redux type that to set up new start and new searchFields
+    case "SET_INIT_STATE":
+        return {...state, searchFields: action.newFields, start: state.pageStrategy === "paginate" ? action.newStart: null};
   }
 
   return state;
