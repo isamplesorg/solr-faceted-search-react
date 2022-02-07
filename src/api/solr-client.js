@@ -67,8 +67,8 @@ class SolrClient {
 
   // Function to set up new start and new Fields, when the page is loaded at the first time
   // this is another initialize function with searchFields and start paramters
-  setInitPage(start, newFields) {
-    const payload = {type: "SET_INIT_STATE", newFields: newFields, newStart: start};
+  setInitPage(start, newFields, newSortFields) {
+    const payload = {type: "SET_INIT_STATE", newFields: newFields, newSortFields: newSortFields, newStart: start};
     this.sendQuery(queryReducer(this.state.query, payload));
   }
 
