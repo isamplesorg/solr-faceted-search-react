@@ -41,12 +41,7 @@ class Result extends React.Component {
           {fields.filter((field) => field.field !== "*").map((field, i) =>
             <li key={i}>
               <label>{field.label || field.field}</label>
-              {field.field === "id"?
-                <a href={"https://n2t.net/" + this.renderValue(field.field, doc)}>{this.HighlightWords(field, this.renderValue(field.field, doc))}</a>
-                :
-                this.HighlightWords(field, this.renderValue(field.field, doc))
-                
-              }
+              {this.renderValue(field.field, doc)}
             </li>
           )}
         </ul>
