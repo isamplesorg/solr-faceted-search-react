@@ -80,7 +80,7 @@ class SolrClient {
       ...this.settings, start: pageStrategy === "paginate" ? 0 : null
     };
     this.sendQuery(queryReducer(this.state.query, payload));
-    onsole.log('setset')
+
   }
 
   sendQuery(query = this.state.query) {
