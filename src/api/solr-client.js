@@ -38,7 +38,7 @@ class SolrClient {
 
 
   setInitialQuery(queryToMerge) {
-    
+
     const searchFieldsToMerge = queryToMerge.searchFields || [];
     const sortFieldsToMerge = queryToMerge.sortFields || [];
 
@@ -62,14 +62,8 @@ class SolrClient {
     };
 
     this.sendQuery(queryReducer(this.state.query, payload));
-    return this;
-  }
 
-  // Function to set up new start and new Fields, when the page is loaded at the first time
-  // this is another initialize function with searchFields and start paramters
-  setInitPage(start, newFields, newSortFields) {
-    const payload = {type: "SET_INIT_STATE", newFields: newFields, newSortFields: newSortFields, newStart: start};
-    this.sendQuery(queryReducer(this.state.query, payload));
+    return this;
   }
 
   resetSearchFields() {
@@ -80,7 +74,6 @@ class SolrClient {
       ...this.settings, start: pageStrategy === "paginate" ? 0 : null
     };
     this.sendQuery(queryReducer(this.state.query, payload));
-
   }
 
   sendQuery(query = this.state.query) {
@@ -91,7 +84,6 @@ class SolrClient {
       this.state.query = queryReducer(this.state.query, action);
       this.onChange(this.state, this.getHandlers());
     });
-    
   }
 
   setSuggestQuery(query, autocomplete, value) {
@@ -116,11 +108,8 @@ class SolrClient {
         appendWildcard: autocomplete.appendWildcard || false,
         value
       }
-
     };
-    
     this.sendSuggestQuery(suggestQueryReducer(this.state.suggestQuery, payload));
-
   }
 
   sendSuggestQuery(suggestQuery = this.state.suggestQuery) {
@@ -130,7 +119,6 @@ class SolrClient {
       this.state.suggestQuery = suggestQueryReducer(this.state.suggestQuery, action);
       this.onChange(this.state, this.getHandlers());
     });
-
   }
 
   sendNextCursorQuery() {
@@ -142,7 +130,6 @@ class SolrClient {
       this.state.query = queryReducer(this.state.query, action);
       this.onChange(this.state, this.getHandlers());
     });
-
   }
 
   fetchCsv() {
@@ -158,7 +145,6 @@ class SolrClient {
 
       document.body.removeChild(element);
     });
-
   }
 
   setCurrentPage(page) {
@@ -168,11 +154,9 @@ class SolrClient {
     this.sendQuery(queryReducer(this.state.query, payload));
   }
 
-
   setGroup(group) {
     const payload = {type: "SET_GROUP", group: group};
     this.sendQuery(queryReducer(this.state.query, payload));
-
   }
 
 
@@ -190,7 +174,6 @@ class SolrClient {
     if (Object.hasOwnProperty.call(this.state, "suggestQuery")) {
       this.state.suggestQuery = suggestQueryReducer(this.state.suggestQuery, payload);
     }
-
   }
 
   setFacetSort(field, value) {
@@ -202,7 +185,6 @@ class SolrClient {
     const payload = {type: "SET_SEARCH_FIELDS", newFields: newFields};
 
     this.sendQuery(queryReducer(this.state.query, payload));
-
   }
 
   setSortFieldValue(field, value) {
@@ -213,13 +195,11 @@ class SolrClient {
 
     const payload = {type: "SET_SORT_FIELDS", newSortFields: newSortFields};
     this.sendQuery(queryReducer(this.state.query, payload));
-
   }
 
   setFilters(filters) {
     const payload = {type: "SET_FILTERS", newFilters: filters};
     this.sendQuery(queryReducer(this.state.query, payload));
-
   }
 
   setCollapse(field, value) {
@@ -230,7 +210,6 @@ class SolrClient {
     const payload = {type: "SET_SEARCH_FIELDS", newFields: newFields};
     this.state.query = queryReducer(this.state.query, payload);
     this.onChange(this.state, this.getHandlers());
-
   }
 
   getHandlers() {
@@ -244,7 +223,7 @@ class SolrClient {
       onSetCollapse: this.setCollapse.bind(this),
       onNewSearch: this.resetSearchFields.bind(this),
       onCsvExport: this.fetchCsv.bind(this),
-      onGroupChange: this.setGroup.bind(this),
+      onGroupChange: this.setGroup.bind(this)
     };
   }
 }
