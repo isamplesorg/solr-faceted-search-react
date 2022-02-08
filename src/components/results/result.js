@@ -22,7 +22,7 @@ class Result extends React.Component {
       // g is for regex global and i is for insensitive.
       values.map((value) => {
         let regex = new RegExp(value, "gi");
-        text = text.split(regex).join("<span class='bg-danger'>" + value + "</span>");
+        text = text.split(regex).join("<span style='background-color:yellow;'>" + value + "</span>");
       })
 
     }
