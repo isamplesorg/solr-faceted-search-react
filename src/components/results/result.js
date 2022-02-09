@@ -11,6 +11,7 @@ class Result extends React.Component {
     return value.join(", ");
   }
 
+
   render() {
     const {bootstrapCss, doc, fields} = this.props;
 
@@ -20,11 +21,7 @@ class Result extends React.Component {
           {fields.filter((field) => field.field !== "*").map((field, i) =>
             <li key={i}>
               <label>{field.label || field.field}</label>
-              {field.field === "id"?
-                <a href={"https://n2t.net/" + this.renderValue(field.field, doc)}>{this.renderValue(field.field, doc)}</a>
-                :
-                this.renderValue(field.field, doc)
-              }
+              {this.renderValue(field.field, doc)}
             </li>
           )}
         </ul>
