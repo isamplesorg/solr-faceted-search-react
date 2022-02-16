@@ -18,6 +18,18 @@ const tryGroupedResultCount = (data) => {
   return 0;
 };
 
+const tryFacetRanges = (data) => {
+  var newDict = {};
+  if (data.facet_counts.facet_ranges) {
+    let facet_ranges = data.facet_counts.facet_ranges;
+    for (let key in facet_ranges) {
+      newDict[key] = facet_ranges[key]["counts"];
+    }
+    return newDict;
+  }
+  return [];
+};
+
 export default function (state = initialState, action) {
   switch (action.type) {
     case "SET_RESULTS":
@@ -26,7 +38,7 @@ export default function (state = initialState, action) {
         docs: action.data.response ? action.data.response.docs : [],
         grouped: action.data.grouped || {},
         numFound: action.data.response ? action.data.response.numFound : tryGroupedResultCount(action.data),
-        facets: action.data.facet_counts.facet_fields,
+        facets: {...action.data.facet_counts.facet_fields, ...tryFacetRanges(action.data)},
         highlighting: action.data.highlighting ? action.data.highlighting : [],
         pending: false
       };

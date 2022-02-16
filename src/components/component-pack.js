@@ -21,6 +21,7 @@ export default {
     "list-facet": ListFacet,
     "range-facet": RangeFacet,
     "period-range-facet": RangeFacet,
+    "date-range-facet": RangeFacet,
     container: SearchFieldContainer,
     currentQuery: CurrentQuery
   },
