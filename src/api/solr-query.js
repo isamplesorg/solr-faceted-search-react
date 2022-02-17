@@ -65,9 +65,9 @@ const requestField = (fields) => fields
   .join(" ")
 
 const dateRangeFacetFieldValue = (dateRangeFacetField) => {
-  const filters = dateRangeFacetField.value || [];
+  var filters = dateRangeFacetField.value;
   if (filters.length < 2) {
-    return null;
+    filters = [0, 3000];
   }
   const dateSuffix = "-01-01T00:00:00Z";
   // startRange will be year-only, format in the way that makes solr happy
