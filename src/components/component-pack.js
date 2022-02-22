@@ -9,7 +9,7 @@ import ResultPagination from "./results/pagination";
 import PreloadIndicator from "./results/preload-indicator";
 import CsvExport from "./results/csv-export";
 import SearchFieldContainer from "./search-field-container";
-import RangeFacet from "./range-facet";
+import { RangeFacet, RangeSlider } from "./range-facet";
 
 import CountLabel from "./results/count-label";
 import SortMenu from "./sort-menu";
@@ -23,7 +23,8 @@ export default {
     "period-range-facet": RangeFacet,
     "date-range-facet": RangeFacet,
     container: SearchFieldContainer,
-    currentQuery: CurrentQuery
+    currentQuery: CurrentQuery,
+    rangeSlider: RangeSlider
   },
   results: {
     result: Result,
