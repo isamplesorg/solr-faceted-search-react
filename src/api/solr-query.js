@@ -43,7 +43,7 @@ const fieldToQueryFilter = (field) => {
     return textFieldToQueryFilter(field);
   } else if (field.type === "list-facet") {
     return listFacetFieldToQueryFilter(field);
-  } else if (field.type === "range-facet" || field.type === "range") {
+  } else if (field.type === "range-facet" || field.type === "range" || field.type === "date-range-facet") {
     return rangeFacetToQueryFilter(field);
   } else if (field.type === "period-range-facet" || field.type === "period-range") {
     return periodRangeFacetToQueryFilter(field);
@@ -59,10 +59,22 @@ const buildQuery = (fields, mainQueryField) => fields
   .map((queryFilter) => `fq=${queryFilter}`)
   .join("&");
 
-// Concates all request fields for solr fl parameters 
+// Concates all request fields for solr fl parameters
 const requestField = (fields) => fields
   .map((field) => `${encodeURIComponent(field.field)}`)
   .join(" ")
+
+const dateRangeFacetFieldValue = (dateRangeFacetField) => {
+  var filters = dateRangeFacetField.value;
+  if (filters == null || filters.length == 0) {
+    return "";
+  }
+  const dateSuffix = "-01-01T00:00:00Z";
+  // startRange will be year-only, format in the way that makes solr happy
+  let startRangeValue = filters[0] + dateSuffix;
+  let endRangeValue = filters[1] + dateSuffix;
+  return `facet.range=${encodeURIComponent(dateRangeFacetField.field)}&facet.range.gap=${encodeURIComponent("+1YEARS")}&facet.range.start=${startRangeValue}&facet.range.end=${endRangeValue}`;
+};
 
 const facetFields = (fields) => fields
   .filter((field) => field.type === "list-facet" || field.type === "range-facet")
@@ -71,6 +83,12 @@ const facetFields = (fields) => fields
     fields
       .filter((field) => field.type === "period-range-facet")
       .map((field) => `facet.field=${encodeURIComponent(field.lowerBound)}&facet.field=${encodeURIComponent(field.upperBound)}`)
+  )
+  .concat(
+    fields
+      .filter((field) => field.type === "date-range-facet")
+      .map((field) =>
+      dateRangeFacetFieldValue(field))
   )
   .join("&");
 

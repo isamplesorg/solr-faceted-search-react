@@ -130,4 +130,7 @@ RangeFacet.propTypes = {
   value: PropTypes.array
 };
 
-export default RangeFacet;
+export {
+  RangeFacet,
+  RangeSlider
+};

@@ -35,6 +35,7 @@ class CurrentQuery extends React.Component {
         ));
 
       case "range-facet":
+      case "date-range-facet":
         return (
           <span className={cx({"label": bootstrapCss, "label-default": bootstrapCss})}
                 onClick={() => this.removeRangeFacetValue(searchField.field)}>
