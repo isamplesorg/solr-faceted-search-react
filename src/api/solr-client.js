@@ -207,7 +207,7 @@ class SolrClient {
     const {searchFields} = query;
     const newFields = searchFields
       .map((searchField) => searchField.field === field ? {...searchField, collapse: value} : searchField);
-    const payload = {type: "SET_SEARCH_FIELDS", newFields: newFields};
+    const payload = {type: "SET_COLLAPSE", newFields: newFields};
     this.state.query = queryReducer(this.state.query, payload);
     this.onChange(this.state, this.getHandlers());
   }
