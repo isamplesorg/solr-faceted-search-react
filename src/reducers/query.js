@@ -39,6 +39,9 @@ export default function (state = initialState, action) {
       return action.data.nextCursorMark ? {...state, cursorMark: action.data.nextCursorMark} : state;
     case "SET_GROUP":
       return {...state, group: action.group};
+    // new redux type for collapse
+    case "SET_COLLAPSE":
+      return {...state, searchFields: action.newFields};
   }
 
   return state;
