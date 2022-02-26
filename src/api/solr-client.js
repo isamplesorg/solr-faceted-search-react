@@ -8,7 +8,7 @@ import server from "./server";
 
 class SolrClient {
   constructor(settings) {
-    const {onChange} = settings;
+    const { onChange } = settings;
 
     this.onChange = onChange;
     delete settings.onChange;
@@ -22,7 +22,7 @@ class SolrClient {
         numFound: 0
       }
     };
-    this.settings = {...settings};
+    this.settings = { ...settings };
 
     if (!this.state.query.pageStrategy) {
       this.state.query.pageStrategy = "paginate";
@@ -42,20 +42,18 @@ class SolrClient {
     const searchFieldsToMerge = queryToMerge.searchFields || [];
     const sortFieldsToMerge = queryToMerge.sortFields || [];
 
-    this.state.query.searchFields = this.state.query.searchFields
-      .map((sf) => searchFieldsToMerge.map((sfm) => sfm.field).indexOf(sf.field) > -1
-        ? {...sf, value: searchFieldsToMerge.find((sfm) => sfm.field === sf.field).value}
-        : sf);
+    // update all searchFields parameters
+    this.state.query.searchFields = searchFieldsToMerge
 
     this.state.query.sortFields = this.state.query.sortFields
       .map((sf) => sortFieldsToMerge.map((sfm) => sfm.field).indexOf(sf.field) > -1
-        ? {...sf, value: sortFieldsToMerge.find((sfm) => sfm.field === sf.field).value}
+        ? { ...sf, value: sortFieldsToMerge.find((sfm) => sfm.field === sf.field).value }
         : sf);
   }
 
   initialize() {
-    const {query} = this.state;
-    const {pageStrategy} = query;
+    const { query } = this.state;
+    const { pageStrategy } = query;
     const payload = {
       type: "SET_QUERY_FIELDS",
       ...query, start: pageStrategy === "paginate" ? 0 : null
@@ -67,8 +65,8 @@ class SolrClient {
   }
 
   resetSearchFields() {
-    const {query} = this.state;
-    const {pageStrategy} = query;
+    const { query } = this.state;
+    const { pageStrategy } = query;
     const payload = {
       type: "SET_QUERY_FIELDS",
       ...this.settings, start: pageStrategy === "paginate" ? 0 : null
@@ -87,10 +85,10 @@ class SolrClient {
   }
 
   setSuggestQuery(query, autocomplete, value) {
-    const {searchFields} = query;
+    const { searchFields } = query;
     // Add the current text field value to the searchFields array.
     const newFields = searchFields
-      .map((searchField) => searchField.field === query.mainQueryField ? {...searchField, value: value} : searchField);
+      .map((searchField) => searchField.field === query.mainQueryField ? { ...searchField, value: value } : searchField);
     const payload = {
       type: "SET_SUGGEST_QUERY",
       suggestQuery: {
@@ -148,25 +146,25 @@ class SolrClient {
   }
 
   setCurrentPage(page) {
-    const {query} = this.state;
-    const {rows} = query;
-    const payload = {type: "SET_START", newStart: page * rows};
+    const { query } = this.state;
+    const { rows } = query;
+    const payload = { type: "SET_START", newStart: page * rows };
     this.sendQuery(queryReducer(this.state.query, payload));
   }
 
   setGroup(group) {
-    const payload = {type: "SET_GROUP", group: group};
+    const payload = { type: "SET_GROUP", group: group };
     this.sendQuery(queryReducer(this.state.query, payload));
   }
 
 
   setSearchFieldValue(field, value) {
-    const {query} = this.state;
-    const {searchFields} = query;
+    const { query } = this.state;
+    const { searchFields } = query;
     const newFields = searchFields
-      .map((searchField) => searchField.field === field ? {...searchField, value: value} : searchField);
+      .map((searchField) => searchField.field === field ? { ...searchField, value: value } : searchField);
 
-    const payload = {type: "SET_SEARCH_FIELDS", newFields: newFields};
+    const payload = { type: "SET_SEARCH_FIELDS", newFields: newFields };
 
     this.sendQuery(queryReducer(this.state.query, payload));
     // Enable the the autosuggest input to be cleared cleared
@@ -177,39 +175,45 @@ class SolrClient {
   }
 
   setFacetSort(field, value) {
-    const {query} = this.state;
-    const {searchFields} = query;
+    const { query } = this.state;
+    const { searchFields } = query;
     const newFields = searchFields
-      .map((searchField) => searchField.field === field ? {...searchField, facetSort: value} : searchField);
+      .map((searchField) => searchField.field === field ? { ...searchField, facetSort: value } : searchField);
 
-    const payload = {type: "SET_SEARCH_FIELDS", newFields: newFields};
+    const payload = { type: "SET_SEARCH_FIELDS", newFields: newFields };
 
     this.sendQuery(queryReducer(this.state.query, payload));
   }
 
   setSortFieldValue(field, value) {
-    const {query} = this.state;
-    const {sortFields} = query;
+    const { query } = this.state;
+    const { sortFields } = query;
     const newSortFields = sortFields
-      .map((sortField) => sortField.field === field ? {...sortField, value: value} : {...sortField, value: null});
+      .map((sortField) => sortField.field === field ? { ...sortField, value: value } : { ...sortField, value: null });
 
-    const payload = {type: "SET_SORT_FIELDS", newSortFields: newSortFields};
+    const payload = { type: "SET_SORT_FIELDS", newSortFields: newSortFields };
     this.sendQuery(queryReducer(this.state.query, payload));
   }
 
   setFilters(filters) {
-    const payload = {type: "SET_FILTERS", newFilters: filters};
+    const payload = { type: "SET_FILTERS", newFilters: filters };
     this.sendQuery(queryReducer(this.state.query, payload));
   }
 
   setCollapse(field, value) {
-    const {query} = this.state;
-    const {searchFields} = query;
+    const { query } = this.state;
+    const { searchFields } = query;
     const newFields = searchFields
-      .map((searchField) => searchField.field === field ? {...searchField, collapse: value} : searchField);
-    const payload = {type: "SET_COLLAPSE", newFields: newFields};
+      .map((searchField) => searchField.field === field ? { ...searchField, collapse: value } : searchField);
+    const payload = { type: "SET_COLLAPSE", newFields: newFields };
     this.state.query = queryReducer(this.state.query, payload);
     this.onChange(this.state, this.getHandlers());
+  }
+
+  // set new fields
+  setFields(fields) {
+    const payload = { type: "SET_SEARCH_FIELDS", newFields: fields };
+    this.sendQuery(queryReducer(this.state.query, payload))
   }
 
   getHandlers() {
@@ -223,7 +227,8 @@ class SolrClient {
       onSetCollapse: this.setCollapse.bind(this),
       onNewSearch: this.resetSearchFields.bind(this),
       onCsvExport: this.fetchCsv.bind(this),
-      onGroupChange: this.setGroup.bind(this)
+      onGroupChange: this.setGroup.bind(this),
+      onSetFields: this.setFields.bind(this)
     };
   }
 }
