@@ -12,10 +12,10 @@ const getFacetValues = (type, results, field, lowerBound, upperBound) =>
 class SolrFacetedSearch extends React.Component {
 
   render() {
-    const { customComponents, bootstrapCss, query, results, truncateFacetListsAt } = this.props;
-    const { onSearchFieldChange, onSortFieldChange, onPageChange, onCsvExport } = this.props;
+    const {customComponents, bootstrapCss, query, results, truncateFacetListsAt} = this.props;
+    const {onSearchFieldChange, onSortFieldChange, onPageChange, onCsvExport} = this.props;
 
-    const { searchFields, sortFields, start, rows } = query;
+    const {searchFields, sortFields, start, rows} = query;
 
 
     const SearchFieldContainerComponent = customComponents.searchFields.container;
@@ -31,24 +31,24 @@ class SolrFacetedSearch extends React.Component {
     const CsvExportComponent = customComponents.results.csvExport;
     const CurrentQueryComponent = customComponents.searchFields.currentQuery;
     const SortComponent = customComponents.sortFields.menu;
-    const resultPending = results.pending ? (<ResultPendingComponent bootstrapCss={bootstrapCss} />) : null;
+    const resultPending = results.pending ? (<ResultPendingComponent bootstrapCss={bootstrapCss}/>) : null;
 
     const pagination = query.pageStrategy === "paginate" ?
-      <PaginateComponent {...this.props} bootstrapCss={bootstrapCss} onChange={onPageChange} /> :
+      <PaginateComponent {...this.props} bootstrapCss={bootstrapCss} onChange={onPageChange}/> :
       null;
 
     const preloadListItem = query.pageStrategy === "cursor" && results.docs.length < results.numFound ?
       <PreloadComponent {...this.props} /> : null;
 
     return (
-      <div className={cx("solr-faceted-search", { "container": bootstrapCss, "col-md-12": bootstrapCss })}>
+      <div className={cx("solr-faceted-search", {"container": bootstrapCss, "col-md-12": bootstrapCss})}>
         <SearchFieldContainerComponent
           bootstrapCss={bootstrapCss}
           onNewSearch={this.props.onNewSearch}
           onSetFields={this.props.onSetFields}
           searchFields={searchFields}>
           {searchFields.map((searchField, i) => {
-            const { type, field, lowerBound, upperBound } = searchField;
+            const {type, field, lowerBound, upperBound} = searchField;
             const SearchComponent = customComponents.searchFields[type];
             const facets = getFacetValues(type, results, field, lowerBound, upperBound);
 
@@ -66,25 +66,25 @@ class SolrFacetedSearch extends React.Component {
 
         <ResultContainerComponent bootstrapCss={bootstrapCss}>
           <ResultHeaderComponent bootstrapCss={bootstrapCss}>
-            <ResultCount bootstrapCss={bootstrapCss} numFound={results.numFound} />
+            <ResultCount bootstrapCss={bootstrapCss} numFound={results.numFound}/>
             {resultPending}
-            <SortComponent bootstrapCss={bootstrapCss} onChange={onSortFieldChange} sortFields={sortFields} />
+            <SortComponent bootstrapCss={bootstrapCss} onChange={onSortFieldChange} sortFields={sortFields}/>
             {this.props.showCsvExport
-              ? <CsvExportComponent bootstrapCss={bootstrapCss} onClick={onCsvExport} />
+              ? <CsvExportComponent bootstrapCss={bootstrapCss} onClick={onCsvExport}/>
               : null}
           </ResultHeaderComponent>
-          <CurrentQueryComponent {...this.props} onChange={onSearchFieldChange} />
+          <CurrentQueryComponent {...this.props} onChange={onSearchFieldChange}/>
           {pagination}
           <ResultListComponent bootstrapCss={bootstrapCss}>
             {results.docs.map((doc, i) => (
               <ResultComponent bootstrapCss={bootstrapCss}
-                doc={doc}
-                fields={searchFields}
-                key={doc.id || i}
-                onSelect={this.props.onSelectDoc}
-                resultIndex={i}
-                rows={rows}
-                start={start}
+                               doc={doc}
+                               fields={searchFields}
+                               key={doc.id || i}
+                               onSelect={this.props.onSelectDoc}
+                               resultIndex={i}
+                               rows={rows}
+                               start={start}
               />
             ))}
             {preloadListItem}
@@ -102,7 +102,7 @@ SolrFacetedSearch.defaultProps = {
   pageStrategy: "paginate",
   rows: 20,
   searchFields: [
-    { type: "text", field: "*" }
+    {type: "text", field: "*"}
   ],
   sortFields: [],
   truncateFacetListsAt: -1,
