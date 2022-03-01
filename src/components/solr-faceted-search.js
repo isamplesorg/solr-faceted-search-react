@@ -52,12 +52,14 @@ class SolrFacetedSearch extends React.Component {
             const SearchComponent = customComponents.searchFields[type];
             const facets = getFacetValues(type, results, field, lowerBound, upperBound);
 
-            return (<SearchComponent
+            return (!(searchField.hidden || false)? <SearchComponent
               key={i} {...this.props} {...searchField}
               bootstrapCss={bootstrapCss}
               facets={facets}
               truncateFacetListsAt={truncateFacetListsAt}
               onChange={onSearchFieldChange} />
+              :
+              null
             );
           })}
         </SearchFieldContainerComponent>
