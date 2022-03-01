@@ -212,7 +212,7 @@ class SolrClient {
 
   // set new fields
   setFields(fields) {
-    const payload = { type: "SET_SEARCH_FIELDS", newFields: fields };
+    const payload = { type: "SET_COLLAPSE", newFields: fields };
     this.state.query = queryReducer(this.state.query, payload);
     this.onChange(this.state, this.getHandlers());
   }
