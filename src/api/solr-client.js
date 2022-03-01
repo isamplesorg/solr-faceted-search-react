@@ -148,7 +148,7 @@ class SolrClient {
   setCurrentPage(page) {
     const {query} = this.state;
     const {rows} = query;
-    const payload = { type: "SET_START", newStart: page * rows };
+    const payload = {type: "SET_START", newStart: page * rows};
     this.sendQuery(queryReducer(this.state.query, payload));
   }
 
@@ -164,7 +164,7 @@ class SolrClient {
     const newFields = searchFields
       .map((searchField) => searchField.field === field ? {...searchField, value: value} : searchField);
 
-    const payload = { type: "SET_SEARCH_FIELDS", newFields: newFields };
+    const payload = {type: "SET_SEARCH_FIELDS", newFields: newFields};
 
     this.sendQuery(queryReducer(this.state.query, payload));
     // Enable the the autosuggest input to be cleared cleared
