@@ -43,7 +43,13 @@ class SolrClient {
     const sortFieldsToMerge = queryToMerge.sortFields || [];
 
     // update all searchFields parameters
-    this.state.query.searchFields = searchFieldsToMerge
+    this.state.query.searchFields = this.state.query.searchFields
+      .map((sf) => searchFieldsToMerge.map((sfm) => sfm.field).indexOf(sf.field) > -1
+        ? {...sf,
+          value: searchFieldsToMerge.find((sfm) => sfm.field === sf.field).value,
+          hidden: searchFieldsToMerge.find((sfm) => sfm.field === sf.field).hidden ,
+          collapse: searchFieldsToMerge.find((sfm) => sfm.field === sf.field).collapse}
+        : sf);
 
     this.state.query.sortFields = this.state.query.sortFields
       .map((sf) => sortFieldsToMerge.map((sfm) => sfm.field).indexOf(sf.field) > -1
