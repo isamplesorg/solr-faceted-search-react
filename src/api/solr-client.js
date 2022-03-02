@@ -42,9 +42,13 @@ class SolrClient {
     const searchFieldsToMerge = queryToMerge.searchFields || [];
     const sortFieldsToMerge = queryToMerge.sortFields || [];
 
+    // update all searchFields parameters
     this.state.query.searchFields = this.state.query.searchFields
       .map((sf) => searchFieldsToMerge.map((sfm) => sfm.field).indexOf(sf.field) > -1
-        ? {...sf, value: searchFieldsToMerge.find((sfm) => sfm.field === sf.field).value}
+        ? {...sf,
+          value: searchFieldsToMerge.find((sfm) => sfm.field === sf.field).value,
+          hidden: searchFieldsToMerge.find((sfm) => sfm.field === sf.field).hidden ,
+          collapse: searchFieldsToMerge.find((sfm) => sfm.field === sf.field).collapse}
         : sf);
 
     this.state.query.sortFields = this.state.query.sortFields
@@ -212,6 +216,13 @@ class SolrClient {
     this.onChange(this.state, this.getHandlers());
   }
 
+  // set new fields
+  setFields(fields) {
+    const payload = {type: "SET_COLLAPSE", newFields: fields};
+    this.state.query = queryReducer(this.state.query, payload);
+    this.onChange(this.state, this.getHandlers());
+  }
+
   getHandlers() {
     return {
       onTextInputChange: this.setSuggestQuery.bind(this),
@@ -223,7 +234,8 @@ class SolrClient {
       onSetCollapse: this.setCollapse.bind(this),
       onNewSearch: this.resetSearchFields.bind(this),
       onCsvExport: this.fetchCsv.bind(this),
-      onGroupChange: this.setGroup.bind(this)
+      onGroupChange: this.setGroup.bind(this),
+      onSetFields: this.setFields.bind(this)
     };
   }
 }
