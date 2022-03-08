@@ -39,7 +39,7 @@ const textFieldToQueryFilter = (field) => {
 };
 
 const fieldToQueryFilter = (field) => {
-  if (field.type === "text" && field.field !== "*") {
+  if ((field.type === "text" || field.type === "non-search" )&& field.field !== "*") {
     return textFieldToQueryFilter(field);
   } else if (field.type === "list-facet") {
     return listFacetFieldToQueryFilter(field);

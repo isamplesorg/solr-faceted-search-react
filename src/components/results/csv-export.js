@@ -10,7 +10,7 @@ export default function (props) {
       "pull-right": bootstrapCss,
       "btn-xs": bootstrapCss
     })}>
-      Export excel
+      Export csv
     </button>
   );
 }

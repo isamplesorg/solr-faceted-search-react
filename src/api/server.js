@@ -70,19 +70,11 @@ server.submitSuggestQuery = (suggestQuery, callback) => {
 };
 
 server.fetchCsv = (query, callback) => {
-  server.performXhr({
-    url: query.url,
-    data: solrQuery({...query, rows: MAX_INT}, {
-      wt: "csv",
-      "csv.mv.separator": "|",
-      "csv.separator": ";"
-    }),
-    method: "POST",
-    headers: {
-      "Content-type": "application/x-www-form-urlencoded",
-      ...(query.userpass ? {"Authorization": "Basic " + query.userpass} : {}),
-    }
-  }, (err, resp) => {
+
+  const queryString = solrQuery({...query, rows: MAX_INT}, {wt: "csv"});
+  const options = getXHROptions(query, queryString);
+
+  server.performXhr(options, (err, resp) => {
     if (resp.statusCode >= 200 && resp.statusCode < 300) {
       callback(resp.body);
     } else {
