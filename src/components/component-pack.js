@@ -22,7 +22,7 @@ export default {
     "range-facet": RangeFacet,
     "period-range-facet": RangeFacet,
     "date-range-facet": RangeFacet,
-    "non-facet": TextSearch,
+    "non-search": TextSearch,
     container: SearchFieldContainer,
     currentQuery: CurrentQuery,
     rangeSlider: RangeSlider
