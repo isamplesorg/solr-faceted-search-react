@@ -66,7 +66,7 @@ const requestField = (fields) => fields
 
 const dateRangeFacetFieldValue = (dateRangeFacetField) => {
   var filters = dateRangeFacetField.value;
-  if (filters == null || filters.length == 0) {
+  if (!filters || filters.length === 0) {
     return "";
   }
   const dateSuffix = "-01-01T00:00:00Z";
