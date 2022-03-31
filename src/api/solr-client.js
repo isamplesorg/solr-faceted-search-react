@@ -223,13 +223,6 @@ class SolrClient {
     this.onChange(this.state, this.getHandlers());
   }
 
-  // set new view
-  setView(view) {
-    const payload = {type: "SET_VIEW", newView: view};
-    this.state.query = queryReducer(this.state.query, payload);
-    this.onChange(this.state, this.getHandlers());
-  }
-
   getHandlers() {
     return {
       onTextInputChange: this.setSuggestQuery.bind(this),
@@ -242,8 +235,7 @@ class SolrClient {
       onNewSearch: this.resetSearchFields.bind(this),
       onCsvExport: this.fetchCsv.bind(this),
       onGroupChange: this.setGroup.bind(this),
-      onSetFields: this.setFields.bind(this),
-      onSetView: this.setView.bind(this),
+      onSetFields: this.setFields.bind(this)
     };
   }
 }

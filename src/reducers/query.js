@@ -42,9 +42,6 @@ export default function (state = initialState, action) {
     // new redux type for collapse
     case "SET_COLLAPSE":
       return {...state, searchFields: action.newFields};
-    // new reduc type for views
-    case "SET_VIEW":
-      return {...state, view: action.newView};
   }
 
   return state;
