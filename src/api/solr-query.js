@@ -62,7 +62,7 @@ const buildQuery = (fields, mainQueryField) => fields
 // Concates all request fields for solr fl parameters
 const requestField = (fields) => fields
   .map((field) => `${encodeURIComponent(field.field)}`)
-  .join(" ")
+  .join(" ");
 
 const dateRangeFacetFieldValue = (dateRangeFacetField) => {
   var filters = dateRangeFacetField.value;
@@ -279,8 +279,10 @@ export {
   buildMainQuery,
   buildSuggestQuery,
   buildHighlight,
+  buildFormat,
   facetFields,
   facetSorts,
+  requestField,
   buildSort,
   solrQuery,
   solrSuggestQuery
