@@ -10,6 +10,8 @@ import PreloadIndicator from "./results/preload-indicator";
 import CsvExport from "./results/csv-export";
 import SearchFieldContainer from "./search-field-container";
 import { RangeFacet, RangeSlider } from "./range-facet";
+// iSamples Spatial Query
+import SpatialQuery from "./spatial-query";
 
 import CountLabel from "./results/count-label";
 import SortMenu from "./sort-menu";
@@ -25,7 +27,8 @@ export default {
     "non-search": TextSearch,
     container: SearchFieldContainer,
     currentQuery: CurrentQuery,
-    rangeSlider: RangeSlider
+    rangeSlider: RangeSlider,
+    spatialquery: SpatialQuery,
   },
   results: {
     result: Result,
