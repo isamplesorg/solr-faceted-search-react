@@ -75,7 +75,9 @@ class SolrFacetedSearch extends React.Component {
           </ResultHeaderComponent>
           <CurrentQueryComponent {...this.props} onChange={onSearchFieldChange}/>
           {pagination}
-          <ResultListComponent bootstrapCss={bootstrapCss}>
+          <ResultListComponent
+            bootstrapCss={bootstrapCss}
+            onChange={onSearchFieldChange}>
             {results.docs.map((doc, i) => (
               <ResultComponent bootstrapCss={bootstrapCss}
                                doc={doc}

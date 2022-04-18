@@ -19,17 +19,17 @@ class SpatialQuery extends React.Component {
 
   // update the state before rendering
   componentWillReceiveProps(nextProps) {
-    if (Array.isArray(nextProps.value)) {
+    if(Array.isArray(nextProps.value) || !nextProps || !nextProps.hasOwnProperty('value')){
       this.setState({
         min_lat: "",
         min_lon: "",
         max_lat: "",
         max_lon: "",
-        error: ""
+        error: "",
       })
-    } else {
-      this.setState(nextProps.value);
+      return
     }
+    this.setState(nextProps.value);
   }
 
   handleSubmit(event) {

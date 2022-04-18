@@ -40,7 +40,8 @@ class CurrentQuery extends React.Component {
         return (
           <span className={cx({"label": bootstrapCss, "label-default": bootstrapCss})}
                 onClick={() => this.removeRangeFacetValue(searchField.field)}>
-            {`[${searchField.value.min_lat},${searchField.value.min_lon} TO ${searchField.value.max_lat},${searchField.value.max_lon}]`}
+            {`[${searchField.value.min_lat},${searchField.value.min_lon} TO `}<br/>
+            {`${searchField.value.max_lat},${searchField.value.max_lon}]`}
             <a>{bootstrapCss ? <span className="glyphicon glyphicon-remove-sign"></span> : "❌"}</a>
           </span>
         );
