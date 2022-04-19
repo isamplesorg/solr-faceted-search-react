@@ -6,6 +6,9 @@ class SpatialQuery extends React.Component {
   constructor(props) {
     super(props);
 
+    // We use empty string as the placeholders for each fields.
+    // In deed, each field store number value.
+    // The handleChange methood will check if the enter is legel.
     this.state = {
       min_lat: "",
       min_lon: "",
@@ -35,8 +38,9 @@ class SpatialQuery extends React.Component {
   handleSubmit(event) {
     // make sure the users enter all fields
     for (const [key, value] of Object.entries(this.state)) {
-      if (key !== 'error' && !value) {
-        this.setState({ ...this.state, error: "Please Enter All" });
+      // check all values are legel
+      if (key !== 'error' && (!value || value === "-")) {
+        this.setState({ ...this.state, error: "Please Enter All Correct Values" });
         event.preventDefault()
         return
       }
@@ -48,7 +52,8 @@ class SpatialQuery extends React.Component {
 
   handleChange(event) {
     // check if the enter is number
-    if (isNaN(event.target.value)) {
+    // enable the negative sign input
+    if ("-" !== event.target.value && isNaN(event.target.value)) {
       this.setState({ ...this.state, error: "Please Enter Number" })
       return
     }
