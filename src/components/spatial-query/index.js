@@ -7,6 +7,8 @@ class SpatialQuery extends React.Component {
     super(props);
 
     // We use empty string as the placeholders for each fields.
+    // we should not use 0 or other numbers as the default/empty values
+    // because numbers always mean location.
     // In deed, each field store number value.
     // The handleChange methood will check if the enter is legel.
     this.state = {
