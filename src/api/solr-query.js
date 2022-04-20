@@ -38,6 +38,14 @@ const textFieldToQueryFilter = (field) => {
   return encodeURIComponent(`${field.field}:${field.value}`);
 };
 
+// new function to generate spatial query
+const spatialToQueryFilter = (field) => {
+  if (!field.value || field.value.length === 0) {
+    return null;
+  }
+  return encodeURIComponent(`${field.field}:[${field.value.min_lat},${field.value.min_lon} TO ${field.value.max_lat},${field.value.max_lon}]`)
+}
+
 const fieldToQueryFilter = (field) => {
   if ((field.type === "text" || field.type === "non-search" )&& field.field !== "*") {
     return textFieldToQueryFilter(field);
@@ -47,6 +55,8 @@ const fieldToQueryFilter = (field) => {
     return rangeFacetToQueryFilter(field);
   } else if (field.type === "period-range-facet" || field.type === "period-range") {
     return periodRangeFacetToQueryFilter(field);
+  } else if (field.type === "spatialquery"){
+    return spatialToQueryFilter(field);
   }
   return null;
 };
