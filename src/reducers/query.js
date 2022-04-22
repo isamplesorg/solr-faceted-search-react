@@ -44,7 +44,7 @@ export default function (state = initialState, action) {
       return {...state, searchFields: action.newFields};
     // new redux type for view
     case "SET_VIEW":
-      return {...state, searchFields: action.newView};
+      return {...state, view: action.newView};
   }
 
   return state;
