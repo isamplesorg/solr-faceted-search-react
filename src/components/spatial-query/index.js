@@ -24,7 +24,7 @@ class SpatialQuery extends React.Component {
 
   // update the state before rendering
   componentWillReceiveProps(nextProps) {
-    if(Array.isArray(nextProps.value) || !nextProps || !nextProps.hasOwnProperty('value')){
+    if (Array.isArray(nextProps.value) || !nextProps || !nextProps.hasOwnProperty('value')) {
       this.setState({
         min_lat: "",
         min_lon: "",
@@ -101,13 +101,6 @@ class SpatialQuery extends React.Component {
           {this.state.error && <span style={{ color: "red" }}>{this.state.error}</span>}
           <form onSubmit={this.handleSubmit}>
             <div>
-              <label htmlFor='min_lat'>Min Latitude:</label>
-              <input
-                name="min_lat"
-                value={this.state.min_lat}
-                onChange={this.handleChange}></input>
-            </div>
-            <div>
               <label htmlFor='min_lon'>Min Longtitude:</label>
               <input
                 name="min_lon"
@@ -115,10 +108,10 @@ class SpatialQuery extends React.Component {
                 onChange={this.handleChange}></input>
             </div>
             <div>
-              <label htmlFor='max_lat'>Max Latitude:</label>
+              <label htmlFor='min_lat'>Min Latitude:</label>
               <input
-                name="max_lat"
-                value={this.state.max_lat}
+                name="min_lat"
+                value={this.state.min_lat}
                 onChange={this.handleChange}></input>
             </div>
             <div>
@@ -127,7 +120,13 @@ class SpatialQuery extends React.Component {
                 name="max_lon"
                 value={this.state.max_lon}
                 onChange={this.handleChange}></input>
-
+            </div>
+            <div>
+              <label htmlFor='max_lat'>Max Latitude:</label>
+              <input
+                name="max_lat"
+                value={this.state.max_lat}
+                onChange={this.handleChange}></input>
               <button className={cx({ "btn": bootstrapCss, "btn-default": bootstrapCss, "btn-sm": bootstrapCss })}>
                 <span className={cx("glyphicon glyphicon-search")} />
               </button>
