@@ -104,28 +104,28 @@ class SpatialQuery extends React.Component {
               <label htmlFor='min_lon'>Min Longtitude:</label>
               <input
                 name="min_lon"
-                value={this.state.min_lon}
+                value={this.state.min_lon === "" ? this.state.min_lon : this.state.min_lon.toFixed(5)}
                 onChange={this.handleChange}></input>
             </div>
             <div>
               <label htmlFor='min_lat'>Min Latitude:</label>
               <input
                 name="min_lat"
-                value={this.state.min_lat}
+                value={this.state.min_lat === "" ? this.state.min_lat : this.state.min_lat.toFixed(5)}
                 onChange={this.handleChange}></input>
             </div>
             <div>
               <label htmlFor='max_lon'>Max Longtitude:</label>
               <input
                 name="max_lon"
-                value={this.state.max_lon}
+                value={this.state.max_lon === "" ? this.state.max_lon : this.state.max_lon.toFixed(5)}
                 onChange={this.handleChange}></input>
             </div>
             <div>
               <label htmlFor='max_lat'>Max Latitude:</label>
               <input
                 name="max_lat"
-                value={this.state.max_lat}
+                value={this.state.max_lat === "" ? this.state.max_lon : this.state.max_lon.toFixed(5)}
                 onChange={this.handleChange}></input>
               <button className={cx({ "btn": bootstrapCss, "btn-default": bootstrapCss, "btn-sm": bootstrapCss })}>
                 <span className={cx("glyphicon glyphicon-search")} />
