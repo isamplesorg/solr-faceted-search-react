@@ -18,8 +18,6 @@ class SpatialQuery extends React.Component {
       max_lon: "",
       error: "",
     }
-    this.handleChange = this.handleChange.bind(this)
-    this.handleSubmit = this.handleSubmit.bind(this)
   }
 
   // update the state before rendering
@@ -72,7 +70,7 @@ class SpatialQuery extends React.Component {
     }
     this.setState({
       ...this.state,
-      [event.target.name]: event.target.value,
+      [event.target.name]: parseFloat(event.target.value),
       error: ""
     })
   }
@@ -99,34 +97,34 @@ class SpatialQuery extends React.Component {
         </header>
         <div style={{ display: collapse ? "none" : "block" }}>
           {this.state.error && <span style={{ color: "red" }}>{this.state.error}</span>}
-          <form onSubmit={this.handleSubmit}>
+          <form onSubmit={this.handleSubmit.bind(this)}>
             <div>
               <label htmlFor='min_lon'>Min Longtitude:</label>
               <input
                 name="min_lon"
                 value={this.state.min_lon === "" ? this.state.min_lon : this.state.min_lon.toFixed(5)}
-                onChange={this.handleChange}></input>
+                onChange={this.handleChange.bind(this)}></input>
             </div>
             <div>
               <label htmlFor='min_lat'>Min Latitude:</label>
               <input
                 name="min_lat"
                 value={this.state.min_lat === "" ? this.state.min_lat : this.state.min_lat.toFixed(5)}
-                onChange={this.handleChange}></input>
+                onChange={this.handleChange.bind(this)}></input>
             </div>
             <div>
               <label htmlFor='max_lon'>Max Longtitude:</label>
               <input
                 name="max_lon"
                 value={this.state.max_lon === "" ? this.state.max_lon : this.state.max_lon.toFixed(5)}
-                onChange={this.handleChange}></input>
+                onChange={this.handleChange.bind(this)}></input>
             </div>
             <div>
               <label htmlFor='max_lat'>Max Latitude:</label>
               <input
                 name="max_lat"
-                value={this.state.max_lat === "" ? this.state.max_lon : this.state.max_lon.toFixed(5)}
-                onChange={this.handleChange}></input>
+                value={this.state.max_lat === "" ? this.state.max_lat : this.state.max_lat.toFixed(5)}
+                onChange={this.handleChange.bind(this)}></input>
               <button className={cx({ "btn": bootstrapCss, "btn-default": bootstrapCss, "btn-sm": bootstrapCss })}>
                 <span className={cx("glyphicon glyphicon-search")} />
               </button>
