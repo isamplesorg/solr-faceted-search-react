@@ -13,9 +13,9 @@ class SolrFacetedSearch extends React.Component {
 
   render() {
     const {customComponents, bootstrapCss, query, results, truncateFacetListsAt} = this.props;
-    const {onSearchFieldChange, onSortFieldChange, onPageChange, onCsvExport} = this.props;
+    const {onSearchFieldChange, onSortFieldChange, onPageChange, onCsvExport, onSetView} = this.props;
 
-    const {searchFields, sortFields, start, rows} = query;
+    const {searchFields, sortFields, start, rows, view} = query;
 
 
     const SearchFieldContainerComponent = customComponents.searchFields.container;
@@ -77,7 +77,9 @@ class SolrFacetedSearch extends React.Component {
           {pagination}
           <ResultListComponent
             bootstrapCss={bootstrapCss}
-            onChange={onSearchFieldChange}>
+            onChange={onSearchFieldChange}
+            view={view}
+            setView={onSetView}>
             {results.docs.map((doc, i) => (
               <ResultComponent bootstrapCss={bootstrapCss}
                                doc={doc}
