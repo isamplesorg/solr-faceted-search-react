@@ -2,6 +2,18 @@ import PropTypes from 'prop-types';
 import React from "react";
 import cx from "classnames";
 
+// a function to count number of decimal
+const decimalCount = (num) => {
+  // Convert to String
+  const numStr = String(num);
+  // String Contains Decimal
+  if (numStr.includes('.')) {
+    return numStr.split('.')[1].length;
+  };
+  // String Does Not Contain Decimal
+  return 0;
+}
+
 class SpatialQuery extends React.Component {
   constructor(props) {
     super(props);
@@ -70,13 +82,28 @@ class SpatialQuery extends React.Component {
     }
     this.setState({
       ...this.state,
-      [event.target.name]: parseFloat(event.target.value),
+      [event.target.name]: event.target.value,
       error: ""
     })
   }
 
   toggleExpand() {
     this.props.onSetCollapse(this.props.field, !(this.props.collapse || false));
+  }
+
+  decimalCount(num) {
+    // Convert to String
+    const numStr = String(num);
+    // String Contains Decimal
+    if (numStr.includes('.')) {
+      return numStr.split('.')[1].length;
+    };
+    // String Does Not Contain Decimal
+    return 0;
+  }
+
+  fixSpatialValue(num) {
+    return decimalCount(num) < 5 ? num : parseFloat(num).toFixed(5)
   }
 
   render() {
@@ -102,28 +129,28 @@ class SpatialQuery extends React.Component {
               <label htmlFor='min_lon'>Min Longtitude:</label>
               <input
                 name="min_lon"
-                value={this.state.min_lon === "" ? this.state.min_lon : this.state.min_lon.toFixed(5)}
+                value={this.fixSpatialValue(this.state.min_lon)}
                 onChange={this.handleChange.bind(this)}></input>
             </div>
             <div>
               <label htmlFor='min_lat'>Min Latitude:</label>
               <input
                 name="min_lat"
-                value={this.state.min_lat === "" ? this.state.min_lat : this.state.min_lat.toFixed(5)}
+                value={this.fixSpatialValue(this.state.min_lat)}
                 onChange={this.handleChange.bind(this)}></input>
             </div>
             <div>
               <label htmlFor='max_lon'>Max Longtitude:</label>
               <input
                 name="max_lon"
-                value={this.state.max_lon === "" ? this.state.max_lon : this.state.max_lon.toFixed(5)}
+                value={this.fixSpatialValue(this.state.max_lon)}
                 onChange={this.handleChange.bind(this)}></input>
             </div>
             <div>
               <label htmlFor='max_lat'>Max Latitude:</label>
               <input
                 name="max_lat"
-                value={this.state.max_lat === "" ? this.state.max_lat : this.state.max_lat.toFixed(5)}
+                value={this.fixSpatialValue(this.state.max_lat)}
                 onChange={this.handleChange.bind(this)}></input>
               <button className={cx({ "btn": bootstrapCss, "btn-default": bootstrapCss, "btn-sm": bootstrapCss })}>
                 <span className={cx("glyphicon glyphicon-search")} />
