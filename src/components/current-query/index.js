@@ -26,6 +26,7 @@ class CurrentQuery extends React.Component {
 
     switch (searchField.type) {
       case "list-facet":
+	  case "hierarchy-facet":
         return searchField.value.map((val, i) => (
           <span className={cx({"label": bootstrapCss, "label-default": bootstrapCss})} key={i}
                 onClick={() => this.removeListFacetValue(searchField.field, searchField.value, val)}>

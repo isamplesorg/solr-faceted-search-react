@@ -16,11 +16,13 @@ import SpatialQuery from "./spatial-query";
 import CountLabel from "./results/count-label";
 import SortMenu from "./sort-menu";
 import CurrentQuery from "./current-query";
+import HierarchyFacet from "./hierarchy-facet";
 
 export default {
   searchFields: {
     text: TextSearch,
     "list-facet": ListFacet,
+	"hierarchy-facet": HierarchyFacet,
     "range-facet": RangeFacet,
     "period-range-facet": RangeFacet,
     "date-range-facet": RangeFacet,

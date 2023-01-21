@@ -49,7 +49,7 @@ const spatialToQueryFilter = (field) => {
 const fieldToQueryFilter = (field) => {
   if ((field.type === "text" || field.type === "non-search" )&& field.field !== "*") {
     return textFieldToQueryFilter(field);
-  } else if (field.type === "list-facet") {
+  } else if (field.type === "list-facet" || field.type === "hierarchy-facet") {
     return listFacetFieldToQueryFilter(field);
   } else if (field.type === "range-facet" || field.type === "range" || field.type === "date-range-facet") {
     return rangeFacetToQueryFilter(field);
