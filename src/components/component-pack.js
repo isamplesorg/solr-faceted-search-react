@@ -22,7 +22,7 @@ export default {
   searchFields: {
     text: TextSearch,
     "list-facet": ListFacet,
-	"hierarchy-facet": HierarchyFacet,
+	  "hierarchy-facet": HierarchyFacet,
     "range-facet": RangeFacet,
     "period-range-facet": RangeFacet,
     "date-range-facet": RangeFacet,

@@ -87,7 +87,7 @@ const dateRangeFacetFieldValue = (dateRangeFacetField) => {
 };
 
 const facetFields = (fields) => fields
-  .filter((field) => field.type === "list-facet" || field.type === "range-facet")
+  .filter((field) => field.type === "list-facet" || field.type === "range-facet" || field.type === "hierarchy-facet")
   .map((field) => `facet.field=${encodeURIComponent(field.field)}`)
   .concat(
     fields

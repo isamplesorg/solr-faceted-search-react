@@ -6,20 +6,10 @@ import material from './CVJSON/material_hierarchy.json';
 import sampledFeature from "./CVJSON/sampledFeature_hierarchy.json";
 import specimanType from "./CVJSON/specimenType_hierarchy.json";
 
-
-const CheckedIcon = () => {
-    return <span className='glyphicon glyphicon-check' />
-  }
-  
-  const UncheckedIcon = () => {
-    return <span className='glyphicon glyphicon-unchecked' />
-  }
-
 class HierarchyFacet extends React.Component{
 
     constructor(props) {
         super(props);
-        console.log("props of hierarchy facet" , props.facets)
         this.state = {
           filter: "",
           truncateFacetListsAt: props.truncateFacetListsAt
@@ -78,12 +68,6 @@ class HierarchyFacet extends React.Component{
     }
 
     handleClick = (value, mode) => {
-        const { searchFields } = store.getState()['query'];
-        // const queryFields = searchFields
-        //   .map((field) => field.field === select.field ? { ...field, hidden: !(field.hidden || false) } : field)
-    
-        // this.props.onSetFields(queryFields)
-
         // whenever a new label is clicked select all of the children labels 
         const currSchema = this.hierarchy(this.props.label);
         const expandedLabels = [value]
@@ -110,69 +94,14 @@ class HierarchyFacet extends React.Component{
     }
 
     render(){
-        const { query, label, facets, field, value, bootstrapCss, facetSort, collapse } = this.props;
-        const { truncateFacetListsAt } = this.state;
+        const { label, facets, field, value, bootstrapCss, collapse } = this.props;
         const facetCounts = facets? facets.filter((facet, i) => i % 2 === 1):[];
         const facetValues =  facets? facets.filter((facet, i) => i % 2 === 0):[]
-        const facetSortValue = facetSort ? facetSort :
-          query.facetSort ? query.facetSort :
-            (query.facetLimit && query.facetLimit > -1 ? "count" : "index");
     
         const expanded = !(collapse || false);
     
-        const showMoreLink = truncateFacetListsAt > -1 && truncateFacetListsAt < facetValues.length ?
-          <li className={cx({ "list-group-item": bootstrapCss })} onClick={() => this.setState({ truncateFacetListsAt: -1 })}>
-            Show all ({facetValues.length})
-          </li> : null;
-    
-        const prevNode = <div>
-          <ul className={cx({ "list-group": bootstrapCss, "list-facet__custom--height": true })}>
-            {facetValues.filter((facetValue, i) => truncateFacetListsAt < 0 || i < truncateFacetListsAt).map((facetValue, i) =>
-              this.state.filter.length === 0 || facetValue.toLowerCase().indexOf(this.state.filter.toLowerCase()) > -1 ? (
-                <li className={cx(`facet-item-type-${field}`, { "list-group-item": bootstrapCss })}
-                  key={`${facetValue}_${facetCounts[i]}`} onClick={() => this.handleClick(facetValue)}>
-                  {value.indexOf(facetValue) > -1 ? <CheckedIcon /> : <UncheckedIcon />} {facetValue}
-                  <span className="facet-item-amount">{facetCounts[i]}</span>
-                </li>) : null
-            )}
-            {showMoreLink}
-          </ul>
-          {facetValues.length > 4 ? (
-            <div>
-              <input onChange={(ev) => this.setState({ filter: ev.target.value })} placeholder="Filter... " type="text"
-                value={this.state.filter} />&nbsp;
-              <span className={cx({ "btn-group": bootstrapCss })}>
-                <button className={cx({
-                  "btn": bootstrapCss,
-                  "btn-default": bootstrapCss,
-                  "btn-xs": bootstrapCss,
-                  active: facetSortValue === "index"
-                })}
-                  onClick={() => this.props.onFacetSortChange(field, "index")}>
-                  a-z
-                </button>
-                <button className={cx({
-                  "btn": bootstrapCss,
-                  "btn-default": bootstrapCss,
-                  "btn-xs": bootstrapCss,
-                  active: facetSortValue === "count"
-                })}
-                  onClick={() => this.props.onFacetSortChange(field, "count")}>
-                  0-9
-                </button>
-              </span>
-              <span className={cx({ "btn-group": bootstrapCss, "pull-right": bootstrapCss })}>
-                <button className={cx({ "btn": bootstrapCss, "btn-default": bootstrapCss, "btn-xs": bootstrapCss })}
-                  onClick={() => this.props.onChange(field, [])}>
-                  clear
-                </button>
-              </span>
-            </div>
-          ) : null}
-        </div>
-
         return (
-        <li className={cx("hierarchy-facet", { "list-group-item": bootstrapCss })} id={`solr-list-facet-${field}`}>
+        <li className={cx("hierarchy-facet", { "list-group-item": bootstrapCss })} id={`solr-hierarchy-facet-${field}`}>
             <header onClick={this.toggleExpand.bind(this)}>
             <h5>
                 {bootstrapCss ? (<span>

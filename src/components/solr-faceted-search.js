@@ -8,7 +8,6 @@ const getFacetValues = (type, results, field, lowerBound, upperBound) =>
   type === "period-range-facet" ? (results.facets[lowerBound] || []).concat(results.facets[upperBound] || []) :
     type === "list-facet" || type === "range-facet" || type === "date-range-facet" || type == "hierarchy-facet" ? results.facets[field] || [] : null;
 
-
 class SolrFacetedSearch extends React.Component {
 
   render() {
