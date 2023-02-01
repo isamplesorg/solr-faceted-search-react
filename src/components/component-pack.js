@@ -16,6 +16,7 @@ import SpatialQuery from "./spatial-query";
 import CountLabel from "./results/count-label";
 import SortMenu from "./sort-menu";
 import CurrentQuery from "./current-query";
+import BarChart from "./range-facet";
 
 export default {
   searchFields: {
@@ -28,6 +29,7 @@ export default {
     container: SearchFieldContainer,
     currentQuery: CurrentQuery,
     rangeSlider: RangeSlider,
+    barChart: BarChart,
     spatialquery: SpatialQuery,
   },
   results: {
