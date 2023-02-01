@@ -9,14 +9,13 @@ import ResultPagination from "./results/pagination";
 import PreloadIndicator from "./results/preload-indicator";
 import CsvExport from "./results/csv-export";
 import SearchFieldContainer from "./search-field-container";
-import { RangeFacet, RangeSlider } from "./range-facet";
+import { RangeFacet, RangeSlider,BarChart } from "./range-facet";
 // iSamples Spatial Query
 import SpatialQuery from "./spatial-query";
 
 import CountLabel from "./results/count-label";
 import SortMenu from "./sort-menu";
 import CurrentQuery from "./current-query";
-import BarChart from "./range-facet";
 
 export default {
   searchFields: {
