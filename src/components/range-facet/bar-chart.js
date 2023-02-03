@@ -1,16 +1,11 @@
 import React, { useState, useEffect } from "react";
-import Paper from '@material-ui/core/Paper';
 import {
-  ArgumentAxis,
   ValueAxis,
   Chart,
   BarSeries,
   Tooltip
 } from '@devexpress/dx-react-chart-material-ui';
-import { scaleLog } from 'd3-scale';
-import { ValueScale } from '@devexpress/dx-react-chart';
 import { EventTracker } from '@devexpress/dx-react-chart';
-
 
 const BarChart = (props) => {
 
@@ -40,19 +35,16 @@ const BarChart = (props) => {
       setBarData(newBarData);
     }
       return (
-          <>
+          <div className="barChart" style={{padding: '0px'}}>
                   {barData.length > 0 && 
                       <Chart data={barData} sx = {{maxHeight:'100px'}}>
-                        {/* <ValueScale factory={scale} modifyDomain /> */}
-                          {/* <ArgumentAxis showGrid={false} showLabels={false}/> */}
                           <ValueAxis showGrid={false} showLabels={false}/>
                           <BarSeries valueField="value" argumentField="argument" />
                           <EventTracker />
                         <Tooltip />
                       </Chart>
-            
                 } 
-          </>
+          </div>
       )
   
 }

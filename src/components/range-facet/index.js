@@ -83,12 +83,8 @@ class RangeFacet extends React.Component {
 
     const filterRange = value.length > 0 ? value : range;
 
-    const counts = {}
     const rangeCounts = facets.filter((facet, i) => i % 2 === 1);
     const rangeValues = facets.filter((facet, i) => i % 2 === 0);
-    const dummy_highlight = [1800, 2023] // TODO : change to dynamic value
-    for (let i = 0; i < rangeValues.length; i++)
-      counts[rangeValues[i]] = rangeCounts[i]
 
     return (
       <li className={cx("range-facet", {"list-group-item": bootstrapCss})} id={`solr-range-facet-${field}`}>
@@ -117,7 +113,7 @@ class RangeFacet extends React.Component {
         </header>
 
         <div style={{display: collapse ? "none" : "block"}}>
-        <BarChart data = {this.getCount(rangeValues, rangeCounts)} highlight = {dummy_highlight} barDataValues={rangeCounts} /> 
+        <BarChart data = {this.getCount(rangeValues, rangeCounts)} barDataValues={rangeCounts} /> 
           <RangeSlider lowerLimit={this.getPercentage(range, filterRange[0])} onChange={this.onRangeChange.bind(this)}
                        upperLimit={this.getPercentage(range, filterRange[1])} />
           <label>{filterRange[0]}</label>
