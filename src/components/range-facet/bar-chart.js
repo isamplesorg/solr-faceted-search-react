@@ -1,49 +1,72 @@
-import React, { useState, useEffect } from "react";
+import React from "react";
+import {Bar} from "react-chartjs-2";
 import {
-  ValueAxis,
-  Chart,
-  BarSeries,
+  Chart as ChartJS,
+  CategoryScale,
+  LinearScale,
+  BarElement,
+  Tooltip,
+} from 'chart.js';
+ChartJS.register(
+  CategoryScale,
+  LinearScale,
+  BarElement,
   Tooltip
-} from '@devexpress/dx-react-chart-material-ui';
-import { EventTracker } from '@devexpress/dx-react-chart';
-
+)
 const BarChart = (props) => {
 
-    const {data, barDataValues} = props;
-    const [ barData, setBarData ] = useState([]);
+    const { data , minYear } = props;
 
-    useEffect(()=>{
-        // construct bar chart data 
-        if(barDataValues.length > 0){
-          constructBarChart(data, barDataValues);
+    const chartBarData = {
+      labels: data.map((val, i) => i + minYear ),
+      datasets: [
+        {
+          backgroundColor: data.map((val, i) => "rgba(135, 206, 235, 1)"),
+          hoverBackgroundColor: "rgba(255,99,132,0.4)",
+          data: data
         }
-    }, [data, barDataValues])
+      ]
+    };
 
+    const options = {
+      responsive: true,
+      plugins: {
+        legend: {
+          display : false,
+        }
+      },
+      scales: {
+        x: {
+          ticks: {
+            display: false,
+          },
+          grid: {
+            drawBorder: false,
+            display: false,
+          },
+          border:{
+            display: false
+          }
+        },
+        y: {
+          ticks: {
+            display: false,
+            beginAtZero: true,
+          },
+          grid: {
+            drawBorder: false,
+            display: false,
+          },
+          border: {
+            display: false
+          }
+        },
+      },
+    };
 
-    const scaleCounts = (value) => {
-      // scale the counts of the histogram dynamically 
-      //return (value - Math.min(barDataValues)) / (Math.max(barDataValues) - Math.min(barDataValues)) * 100 + 1;
-      return value;
-    }
-
-    const constructBarChart = (data,  barDataValues) => {
-      const newBarData = [];
-      if (barDataValues.length > 0) {
-          const ranges = Object.keys(data); // year (keys) of objects
-          ranges.forEach((range) => newBarData.push({argument:new Date(range).getFullYear(), value: scaleCounts(data[range])}))
-      }
-      setBarData(newBarData);
-    }
       return (
-          <div className="barChart" style={{padding: '0px'}}>
-                  {barData.length > 0 && 
-                      <Chart data={barData} sx = {{maxHeight:'100px'}}>
-                          <ValueAxis showGrid={false} showLabels={false}/>
-                          <BarSeries valueField="value" argumentField="argument" />
-                          <EventTracker />
-                        <Tooltip />
-                      </Chart>
-                } 
+          <div >
+            <Bar data={chartBarData} options={options} height="150px" />
           </div>
       )
   

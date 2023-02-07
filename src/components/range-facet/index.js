@@ -43,7 +43,6 @@ class RangeFacet extends React.Component {
         Math.ceil(range.upperLimit * realRange) + lowerBound
       ]
     };
-
     if (range.refresh) {
       this.props.onChange(this.props.field, newState.value);
     } else {
@@ -72,6 +71,16 @@ class RangeFacet extends React.Component {
     for (let i = 0; i < rangeValues.length; i++)
       newCounts[rangeValues[i]] = rangeCounts[i];
     return newCounts;
+  }
+
+  getBarData(rangeValues, rangeCounts){
+    const data = this.getCount(rangeValues, rangeCounts);
+    const newBarData = [];
+    if (rangeCounts.length > 0) {
+        const ranges = Object.keys(data); // year (keys) of objects
+        ranges.forEach((range) => newBarData.push(data[range]));
+    }
+    return newBarData;
   }
 
   render() {
@@ -113,7 +122,7 @@ class RangeFacet extends React.Component {
         </header>
 
         <div style={{display: collapse ? "none" : "block"}}>
-        <BarChart data = {this.getCount(rangeValues, rangeCounts)} barDataValues={rangeCounts} /> 
+        <BarChart data = {this.getBarData(rangeValues, rangeCounts)} minYear = {MIN_YEAR} /> 
           <RangeSlider lowerLimit={this.getPercentage(range, filterRange[0])} onChange={this.onRangeChange.bind(this)}
                        upperLimit={this.getPercentage(range, filterRange[1])} />
           <label>{filterRange[0]}</label>
