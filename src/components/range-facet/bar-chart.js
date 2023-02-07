@@ -3,15 +3,15 @@ import {Bar} from "react-chartjs-2";
 import {
   Chart as ChartJS,
   CategoryScale,
-  LinearScale,
   BarElement,
   Tooltip,
+  LogarithmicScale
 } from 'chart.js';
 ChartJS.register(
   CategoryScale,
-  LinearScale,
   BarElement,
-  Tooltip
+  Tooltip,
+  LogarithmicScale
 )
 const BarChart = (props) => {
 
@@ -46,9 +46,10 @@ const BarChart = (props) => {
           },
           border:{
             display: false
-          }
+          },
         },
         y: {
+          type: 'logarithmic',
           ticks: {
             display: false,
             beginAtZero: true,
@@ -59,14 +60,14 @@ const BarChart = (props) => {
           },
           border: {
             display: false
-          }
+          },
         },
       },
     };
 
       return (
           <div >
-            <Bar data={chartBarData} options={options} height="150px" />
+            <Bar data={chartBarData} options={options} height="100px" />
           </div>
       )
   
