@@ -79,7 +79,9 @@ class SolrFacetedSearch extends React.Component {
             bootstrapCss={bootstrapCss}
             onChange={onSearchFieldChange}
             view={view}
-            setView={onSetView}>
+            setView={onSetView}
+            results={results}
+            >
             {results.docs.map((doc, i) => (
               <ResultComponent bootstrapCss={bootstrapCss}
                                doc={doc}
