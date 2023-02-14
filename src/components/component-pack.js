@@ -9,7 +9,7 @@ import ResultPagination from "./results/pagination";
 import PreloadIndicator from "./results/preload-indicator";
 import CsvExport from "./results/csv-export";
 import SearchFieldContainer from "./search-field-container";
-import { RangeFacet, RangeSlider } from "./range-facet";
+import { RangeFacet, RangeSlider,BarChart } from "./range-facet";
 // iSamples Spatial Query
 import SpatialQuery from "./spatial-query";
 
@@ -30,6 +30,7 @@ export default {
     container: SearchFieldContainer,
     currentQuery: CurrentQuery,
     rangeSlider: RangeSlider,
+    barChart: BarChart,
     spatialquery: SpatialQuery,
   },
   results: {

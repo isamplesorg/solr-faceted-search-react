@@ -21,4 +21,10 @@ module.exports = {
   resolve: {
     extensions: ['.js'],
   },
+  externals: {
+    'react': 'react',
+    'react-dom': 'react-dom',
+    'react-router-dom': 'react-router-dom',
+    'react-router': 'react-router'
+  },
 };

@@ -17,6 +17,24 @@ After you've done that, you should start the watch command in *this* project's d
 
 `npm run watch`
 
+### Adding packages that support hooks to this component
+
+After using `npm link` as the above procedure, and when you want to add packages that support hooks to this component, it is necessary to resolve the react versions of this component and the react versions of the project that is using this component. To do this, follow these steps:
+
+From the project(`my-app`) that is using this component, run the below commands
+
+`cd node_modules/react && npm link`
+
+`cd node_modules/react-dom && npm link react`
+
+
+From the linked package(this component), run the below command
+
+`npm link react`
+
+Make sure that whenever you run npm install inside of this component, you will need to relink it to the project(`my-app`)'s react to avoid errors. More information about this issue is [here](https://github.com/facebook/react/issues/13991#issuecomment-473399736). 
+
+
 ## Build simple create-my-app
 ```
 npx create-react-app@latest my-app --use-npm
