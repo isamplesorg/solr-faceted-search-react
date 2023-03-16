@@ -33,7 +33,7 @@ class SolrFacetedSearch extends React.Component {
     const resultPending = results.pending ? (<ResultPendingComponent bootstrapCss={bootstrapCss}/>) : null;
 
     const pagination = query.pageStrategy === "paginate" ?
-      <PaginateComponent {...this.props} bootstrapCss={bootstrapCss} onChange={onPageChange}/> :
+      <PaginateComponent {...this.props} bootstrapCss={bootstrapCss} onChange={onPageChange} setView={onSetView}/> :
       null;
 
     const preloadListItem = query.pageStrategy === "cursor" && results.docs.length < results.numFound ?
