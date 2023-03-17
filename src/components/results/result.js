@@ -16,16 +16,22 @@ class Result extends React.Component {
     const {bootstrapCss, doc, fields} = this.props;
 
     return (
-      <li className={cx({"list-group-item": bootstrapCss})} onClick={() => this.props.onSelect(doc)}>
+      <tr className="list-table">
+      <li className={cx({ "list-group-item": bootstrapCss })} onClick={() => this.props.onSelect(doc)}>
         <ul>
-          {fields.filter((field) => field.field !== "*").map((field, i) =>
+          {fields.filter((field) => field.field !== "*" && field.hidden !== true).map((field, i) =>
             <li key={i}>
+              <td className="list-table">
               <label>{field.label || field.field}</label>
-              {this.renderValue(field.field, doc)}
+              </td>
+              <td className="list-table">
+              <ResultWrapper field={field} value={this.renderValue(field.field, doc)} />
+              </td>
             </li>
           )}
         </ul>
       </li>
+      </tr>
     );
   }
 }
