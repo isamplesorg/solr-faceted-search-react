@@ -67,6 +67,24 @@ class HierarchyFacet extends React.Component{
         }
     }
 
+    /**
+     * Decide whether to expand the labels or not 
+     * @param {*} schema 
+     * @returns boolean 
+     */
+    checkExpand = (schema) => {
+        switch (schema) {
+            case "Material":
+                return this.state.expandMaterial;
+            case "Context":
+                return this.state.expandContext;
+            case "Specimen":
+                return this.state.expandSpecimen;
+            default:
+                return null;
+        }
+    }
+
     handleClick = (value, mode) => {
         // whenever a new label is clicked select all of the children labels 
         const currSchema = this.hierarchy(this.props.label);
@@ -93,6 +111,31 @@ class HierarchyFacet extends React.Component{
         this.props.onSetCollapse(this.props.field, !(this.props.collapse || false));
     }
 
+    handleHierarchyExpand = (field) => {
+        switch(field){
+            case "Material":
+                this.setState(prevState => ({
+                    ...prevState,
+                    expandMaterial : !this.state.expandMaterial
+                }));
+                break;
+            case "Specimen":
+                this.setState(prevState => ({
+                    ...prevState,
+                    expandSpecimen : !this.state.expandSpecimen
+                }));
+                break;
+            case "Context":
+                this.setState(prevState => ({
+                    ...prevState,
+                    expandContext : !this.state.expandContext
+                }));
+                break;
+            default:
+        }
+       
+    }
+
     render(){
         const { label, facets, field, value, bootstrapCss, collapse } = this.props;
         const facetCounts = facets? facets.filter((facet, i) => i % 2 === 1):[];
@@ -102,21 +145,29 @@ class HierarchyFacet extends React.Component{
     
         return (
         <li className={cx("hierarchy-facet", { "list-group-item": bootstrapCss })} id={`solr-hierarchy-facet-${field}`}>
-            <header onClick={this.toggleExpand.bind(this)}>
-            <h5>
-                {bootstrapCss ? (<span>
-                <span className={cx("glyphicon", {
-                    "glyphicon-collapse-down": expanded,
-                    "glyphicon-collapse-up": !expanded
-                })} />{" "}
-                </span>) : null}
-                {label}
-            </h5>
+            <header >
+                <h5 onClick={this.toggleExpand.bind(this)}>
+                    {bootstrapCss ? (<span>
+                    <span className={cx("glyphicon", {
+                        "glyphicon-collapse-down": expanded,
+                        "glyphicon-collapse-up": !expanded
+                    })} />{" "}
+                    </span>) : null}
+                    {label}
+                </h5>
             </header>
-
             {expanded ?
+             (  <>
+                <div className="switch">
+                    <Switch 
+                        checked={this.checkExpand(label)}
+                        onClick={()=>this.handleHierarchyExpand(label)} 
+                    /> <h6>Select Children</h6>
+                </div>
                 <CustomizedTreeView label={label} value={value} facetCounts={facetCounts} facetValues={facetValues} onClick={this.handleClick} hierarchy= {this.hierarchy}/>
-            : null}
+                </>
+             )
+            :  null}
         </li>
         );
     }

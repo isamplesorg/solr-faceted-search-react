@@ -108,7 +108,6 @@ class SpatialQuery extends React.Component {
 
   render() {
     const { label, bootstrapCss, collapse } = this.props;
-
     return (
       <li className={cx({ "list-group-item": bootstrapCss })}>
         <header onClick={this.toggleExpand.bind(this)}>
@@ -152,6 +151,7 @@ class SpatialQuery extends React.Component {
                 name="max_lat"
                 value={this.fixSpatialValue(this.state.max_lat)}
                 onChange={this.handleChange.bind(this)}></input>
+                 &nbsp;
               <button className={cx({ "btn": bootstrapCss, "btn-default": bootstrapCss, "btn-sm": bootstrapCss })}>
                 <span className={cx("glyphicon glyphicon-search")} />
               </button>
