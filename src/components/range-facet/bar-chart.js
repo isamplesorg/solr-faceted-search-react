@@ -13,7 +13,7 @@ ChartJS.register(
   Tooltip,
   LogarithmicScale
 )
-const BarChart = (props) => {
+function BarChart(props) {
 
     const { data , minYear } = props;
 
