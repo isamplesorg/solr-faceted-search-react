@@ -16,7 +16,8 @@
     "start": "scripts/watch.sh",
     "test": "mocha --compilers js:@babel/register --recursive test",
     "test:watch": "nodemon -x \"mocha --compilers js:@babel/register --recursive --watch test\" -w test -w build",
-    "watch": "webpack --watch"
+    "watch": "webpack --watch",
+    "prepare" : "npm run build"
   },
   "license": "MIT",
   "peerDependencies": {
