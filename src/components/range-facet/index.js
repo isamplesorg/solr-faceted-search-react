@@ -4,6 +4,7 @@ import cx from "classnames";
 
 import RangeSlider from "./range-slider";
 import BarChart from './bar-chart';
+const MIN_YEAR = 1800; 
 
 class RangeFacet extends React.Component {
 
@@ -124,7 +125,7 @@ class RangeFacet extends React.Component {
         <div style={{display: collapse ? "none" : "block"}}>
         <BarChart data = {this.getBarData(rangeValues, rangeCounts)} minYear = {MIN_YEAR} /> 
           <RangeSlider lowerLimit={this.getPercentage(range, filterRange[0])} onChange={this.onRangeChange.bind(this)}
-                       upperLimit={this.getPercentage(range, filterRange[1])} />
+                       upperLimit={this.getPercentage(range, filterRange[1])} data-testid="range-slider"/>
           <label>{filterRange[0]}</label>
           <label className={cx({"pull-right": bootstrapCss})}>{filterRange[1]}</label>
         </div>

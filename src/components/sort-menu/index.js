@@ -64,7 +64,9 @@ class SortMenu extends React.Component {
             "btn-xs": bootstrapCss,
             "dropdown-toggle": bootstrapCss
           })}
-                  onClick={this.toggleSelect.bind(this)}>
+                  onClick={this.toggleSelect.bind(this)}
+                  data-testid="toggle-button"
+          >
 						{value ? value.label : "- select sort -"} <span className="caret"></span>
 					</button>
 

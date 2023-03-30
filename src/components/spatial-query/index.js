@@ -110,7 +110,7 @@ class SpatialQuery extends React.Component {
     const { label, bootstrapCss, collapse } = this.props;
     return (
       <li className={cx({ "list-group-item": bootstrapCss })}>
-        <header onClick={this.toggleExpand.bind(this)}>
+        <header onClick={this.toggleExpand.bind(this)} data-testid="header">
           <h5>
             {bootstrapCss ? (<span>
               <span className={cx("glyphicon", {
@@ -123,7 +123,7 @@ class SpatialQuery extends React.Component {
         </header>
         <div style={{ display: collapse ? "none" : "block" }}>
           {this.state.error && <span style={{ color: "red" }}>{this.state.error}</span>}
-          <form onSubmit={this.handleSubmit.bind(this)}>
+          <form onSubmit={this.handleSubmit.bind(this)} data-testid="form">
             <div>
               <label htmlFor='min_lon'>Min Longtitude:</label>
               <input
@@ -131,6 +131,7 @@ class SpatialQuery extends React.Component {
                 value={this.fixSpatialValue(this.state.min_lon)}
                 onChange={this.handleChange.bind(this)}
                 size="10"
+                aria-label="min_lon"
               ></input>
             </div>
             <div>

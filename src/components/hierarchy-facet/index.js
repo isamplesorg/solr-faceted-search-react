@@ -5,7 +5,7 @@ import CustomizedTreeView from './hierarchy';
 import material from './CVJSON/material_hierarchy.json';
 import sampledFeature from "./CVJSON/sampledFeature_hierarchy.json";
 import specimanType from "./CVJSON/specimenType_hierarchy.json";
-
+import { Switch } from '@mui/material';
 class HierarchyFacet extends React.Component{
 
     constructor(props) {
@@ -162,6 +162,7 @@ class HierarchyFacet extends React.Component{
                     <Switch 
                         checked={this.checkExpand(label)}
                         onClick={()=>this.handleHierarchyExpand(label)} 
+                        data-testid="switch"
                     /> <h6>Select Children</h6>
                 </div>
                 <CustomizedTreeView label={label} value={value} facetCounts={facetCounts} facetValues={facetValues} onClick={this.handleClick} hierarchy= {this.hierarchy}/>
