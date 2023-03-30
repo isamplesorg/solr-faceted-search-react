@@ -1,3 +1,9 @@
+/*
+object-assign
+(c) Sindre Sorhus
+@license MIT
+*/
+
 /*!
 	Copyright (c) 2018 Jed Watson.
 	Licensed under the MIT License (MIT), see
@@ -19,19 +25,18 @@
  */
 
 /**
- * @license React
- * react-jsx-runtime.production.min.js
+ * @mui/styled-engine v5.11.11
  *
- * Copyright (c) Facebook, Inc. and its affiliates.
- *
+ * @license MIT
  * This source code is licensed under the MIT license found in the
  * LICENSE file in the root directory of this source tree.
  */
 
-/**
- * @mui/styled-engine v5.11.11
+/** @license React v17.0.2
+ * react-jsx-runtime.production.min.js
  *
- * @license MIT
+ * Copyright (c) Facebook, Inc. and its affiliates.
+ *
  * This source code is licensed under the MIT license found in the
  * LICENSE file in the root directory of this source tree.
  */
