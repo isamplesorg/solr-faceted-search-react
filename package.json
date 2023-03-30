@@ -14,7 +14,7 @@
   "scripts": {
     "build": "webpack --mode production",
     "start": "scripts/watch.sh",
-    "test": "jest --coverage",
+    "test": "jest --coverage --silent",
     "test:watch": "nodemon -x \"mocha --compilers js:@babel/register --recursive --watch test\" -w test -w build",
     "watch": "webpack --watch",
     "prepare": "npm run build"
