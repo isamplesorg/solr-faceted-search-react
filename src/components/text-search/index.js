@@ -44,7 +44,7 @@ class TextSearch extends React.Component {
 
     return (
       <li className={cx({"list-group-item": bootstrapCss})}>
-        <header onClick={this.toggleExpand.bind(this)}>
+        <header onClick={this.toggleExpand.bind(this)} data-testid="header">
           <h5>
             {bootstrapCss ? (<span>
 							<span className={cx("glyphicon", {

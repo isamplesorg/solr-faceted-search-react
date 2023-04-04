@@ -14,7 +14,7 @@
   "scripts": {
     "build": "webpack --mode production",
     "start": "scripts/watch.sh",
-    "test": "jest",
+    "test": "jest --coverage --silent",
     "test:watch": "nodemon -x \"mocha --compilers js:@babel/register --recursive --watch test\" -w test -w build",
     "watch": "webpack --watch",
     "prepare": "npm run build"
@@ -36,6 +36,7 @@
     "@testing-library/react": "^12.1.5",
     "chart.js": "^4.2.0",
     "classnames": "^2.2.5",
+    "html-react-parser": "^3.0.15",
     "npm": "^9.6.2",
     "prop-types": "^15.6.1",
     "react-chartjs-2": "^5.2.0",

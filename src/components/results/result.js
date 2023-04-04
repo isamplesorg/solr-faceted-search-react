@@ -1,6 +1,7 @@
 import PropTypes from 'prop-types';
 import React from "react";
 import cx from "classnames";
+import { ResultWrapper } from './utilities';
 
 class Result extends React.Component {
 

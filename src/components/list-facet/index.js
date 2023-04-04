@@ -49,7 +49,7 @@ class ListFacet extends React.Component {
 
     return (
       <li className={cx("list-facet", {"list-group-item": bootstrapCss})} id={`solr-list-facet-${field}`}>
-        <header onClick={this.toggleExpand.bind(this)}>
+        <header onClick={this.toggleExpand.bind(this)} data-testid="header">
           <h5>
             {bootstrapCss ? (<span>
 							<span className={cx("glyphicon", {

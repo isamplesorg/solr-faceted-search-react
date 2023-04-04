@@ -47,7 +47,7 @@ class Pagination extends React.Component {
       <div className={cx({"panel-body": bootstrapCss, "text-center": bootstrapCss})}>
         <ul className={cx("pagination", {"pagination-sm": bootstrapCss})}>
           <li className={cx({"disabled": currentPage === 0})} key="start">
-            <a onClick={this.onPageChange.bind(this, 0)}>&lt;&lt;</a>
+            <a onClick={this.onPageChange.bind(this, 0)} data-testid="link">&lt;&lt;</a>
           </li>
           <li className={cx({"disabled": currentPage - 1 < 0})} key="prev">
             <a onClick={this.onPageChange.bind(this, currentPage - 1)}>&lt;</a>
