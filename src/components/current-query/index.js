@@ -30,7 +30,7 @@ class CurrentQuery extends React.Component {
         return searchField.value.map((val, i) => (
           <span className={cx({"label": bootstrapCss, "label-default": bootstrapCss})} key={i}
                 onClick={() => this.removeListFacetValue(searchField.field, searchField.value, val)}>
-						{val}
+						{val} 
             <a>{bootstrapCss ? <span className="glyphicon glyphicon-remove-sign"></span> : "❌"}</a>
 					</span>
         ));
@@ -59,7 +59,7 @@ class CurrentQuery extends React.Component {
         return (
           <span className={cx({"label": bootstrapCss, "label-default": bootstrapCss})}
                 onClick={() => this.removeTextValue(searchField.field)}>
-					{searchField.value}
+            {searchField.value.replace("\\","")}
             <a>{bootstrapCss ? <span className="glyphicon glyphicon-remove-sign"></span> : "❌"}</a>
 				</span>
         );
