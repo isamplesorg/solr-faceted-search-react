@@ -56,10 +56,16 @@ class CurrentQuery extends React.Component {
         );
 
       case "text":
+        let value = searchField.value;
+        if (searchField.label === "Identifier") {
+          value = value.replace("\\","");
+        }
         return (
+          
+        
           <span className={cx({"label": bootstrapCss, "label-default": bootstrapCss})}
                 onClick={() => this.removeTextValue(searchField.field)}>
-            {searchField.value.replace("\\","")}
+            {value}
             <a>{bootstrapCss ? <span className="glyphicon glyphicon-remove-sign"></span> : "❌"}</a>
 				</span>
         );
