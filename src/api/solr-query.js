@@ -69,6 +69,12 @@ const buildQuery = (fields, mainQueryField) => fields
   .map((queryFilter) => `fq=${queryFilter}`)
   .join("&");
 
+// return fq solr query param values 
+const getFqQuery = (fields, mainQueryField) => fields
+  .filter((searchField) => (!Object.hasOwnProperty.call(searchField, "field") || (Object.hasOwnProperty.call(searchField, "field") && searchField.field !== mainQueryField)))
+  .map(fieldToQueryFilter)
+  .filter((queryFilter) => queryFilter !== null);
+
 // Concates all request fields for solr fl parameters
 const requestField = (fields) => fields
   .map((field) => `${encodeURIComponent(field.field)}`)
@@ -134,6 +140,26 @@ const buildMainQuery = (fields, mainQueryField, isD7, proxyIsDisabled) => {
   return `${mainParam}=*:*`;
 };
 
+const getqQuery = (fields, mainQueryField, isD7, proxyIsDisabled) => {
+  // return q solr query param values 
+  const mainParam = isD7 && !proxyIsDisabled ? "search" : "q";
+  if (mainParam === "q") {
+    let params = fields.filter(function (searchField) {
+      return searchField.field === mainQueryField;
+    }).map(function (searchField) {
+      return searchField.value;
+    });
+    // Add value of the mainQueryField to the q param, if there is one.
+    if (params[0]) {
+      return `${params[0]}`;
+    }
+  }
+
+  // If query field exists but is null/empty/undefined send the wildcard query.
+  return `*:*`;
+};
+
+
 const buildHighlight = (highlight) => {
   let hlQs = "";
   // If highlight is set, then populate params from keys/values.
@@ -157,6 +183,26 @@ const buildHighlight = (highlight) => {
   }
   return hlQs;
 };
+
+// get the q and fq solr query param values 
+const getQFQSolrQueryParamValues = (query) => {
+  const {
+    searchFields,
+    isD7,
+    proxyIsDisabled
+  } = query;
+  const mainQueryField = Object.hasOwnProperty.call(query, "mainQueryField") ? query.mainQueryField : null;
+
+  const filters = (query.filters || []).map((filter) => ({...filter, type: filter.type || "text"}));
+
+  const fqQueryParams = getFqQuery(searchFields.concat(filters), mainQueryField);
+  const qQueryParams = getqQuery(searchFields.concat(filters), mainQueryField, isD7, proxyIsDisabled);
+
+  return {
+    'q': decodeURIComponent(qQueryParams),
+    'fq' :decodeURIComponent(fqQueryParams)
+  };
+} 
 
 const solrQuery = (query, format = {wt: "json"}) => {
   const {
@@ -295,5 +341,6 @@ export {
   requestField,
   buildSort,
   solrQuery,
-  solrSuggestQuery
+  solrSuggestQuery,
+  getQFQSolrQueryParamValues
 };

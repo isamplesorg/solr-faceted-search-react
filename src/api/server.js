@@ -41,10 +41,8 @@ server.performXhr = function (options, accept, reject = function () {
 
 server.submitQuery = (query, callback) => {
   callback({type: "SET_RESULTS_PENDING"});
-
   const queryString = solrQuery(query);
   const options = getXHROptions(query, queryString);
-
   server.performXhr(options, (err, resp) => {
     if (resp.statusCode >= 200 && resp.statusCode < 300) {
       callback({type: "SET_RESULTS", data: JSON.parse(resp.body)});
@@ -70,7 +68,6 @@ server.submitSuggestQuery = (suggestQuery, callback) => {
 };
 
 server.fetchCsv = (query, callback) => {
-
   const queryString = solrQuery({...query, rows: MAX_INT}, {wt: "csv"});
   const options = getXHROptions(query, queryString);
 
