@@ -21,28 +21,27 @@
   },
   "license": "MIT",
   "peerDependencies": {
-    "@mui/icons-material": "^5.8.4",
-    "@mui/material": "^5.9.0",
     "react": ">= 17.0.2",
     "react-dom": ">= 17.0.2"
   },
   "dependencies": {
-    "@emotion/react": "^11.9.3",
-    "@emotion/styled": "^11.9.3",
+    "@emotion/react": "^11.11.4",
+    "@emotion/styled": "^11.11.5",
     "@mui/icons-material": "^5.15.17",
     "@mui/lab": "^5.0.0-alpha.90",
-    "@mui/material": "^5.9.0",
+    "@mui/material": "^5.15.17",
+    "@mui/styles": "^5.15.17",
     "@mui/x-tree-view": "^7.0.0",
     "@testing-library/jest-dom": "^5.16.5",
     "@testing-library/react": "^12.1.5",
     "chart.js": "^4.2.0",
     "classnames": "^2.3.1",
+    "clsx": "^2.1.0",
     "html-react-parser": "^1.4.8",
     "prop-types": "^15.8.1",
     "react-chartjs-2": "^5.2.0",
     "webpack": "^5.77.0",
-    "xhr": "^2.2.0",
-    "clsx": "^2.1.0"
+    "xhr": "^2.2.0"
   },
   "devDependencies": {
     "@babel/core": "^7.0.0",
