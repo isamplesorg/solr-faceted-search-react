@@ -41,7 +41,8 @@
     "prop-types": "^15.8.1",
     "react-chartjs-2": "^5.2.0",
     "webpack": "^5.77.0",
-    "xhr": "^2.2.0"
+    "xhr": "^2.2.0",
+    "clsx": "^2.1.0"
   },
   "devDependencies": {
     "@babel/core": "^7.0.0",
